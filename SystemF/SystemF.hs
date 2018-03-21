@@ -3,19 +3,26 @@
 import Data.Map.Lazy as M
 import Data.Set as S
 import Control.Monad (guard)
-import Debug.Trace
 
+-- SF Terms, of the form, both term and type variables are ints as it's easy to rename
+-- The Pi type take types a type variable and type T. 
 data T 
   = TVar Int
   | TArr T T
   | Pi Int T
   deriving (Eq, Ord)
 
+-- naive show implementation, uses Unicode for Pi type
+-- TODO implement bracketing convention for types
 instance Show T where
   show (TVar c)    = show c
   show (TArr a b)  = '(':show a ++ "->" ++ show b ++")"
   show (Pi t1 t2)  = "\x3a0" ++ show t1 ++ "." ++ show t2
 
+-- System F Term
+-- variables are numbers as it's easier for renaming
+-- Abstractions carry the type Church style
+-- Second order abstractions carry term variables as ints
 data SFTerm
   = Var Int
   | Typ T
@@ -24,6 +31,7 @@ data SFTerm
   | PiAbs Int SFTerm 
   deriving (Eq, Ord)
 
+-- naive show implementation for System F terms
 instance Show SFTerm where
   show (Var x)      = show x
   show (Typ t)      = show t
@@ -31,8 +39,16 @@ instance Show SFTerm where
   show (Abs x t l1) = '(':"\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1 ++ ")"
   show (PiAbs t l1) = "\x39b" ++ show t ++ "." ++ show l1
 
+--type context of term variables and type variables
+--input term or type variable as an Int
+--if the input is a term variable, return Just its type
+--if the input is a type variable, return Nothing (isomorphic to 'Type')
 type Context = M.Map Int (Maybe T)
 
+-- typing derivation for a term in a given context
+-- Just T denotes successful type derivation 
+-- Nothing denotes failure to type the term (not valid in System F)
+-- see how the context works to make sense of case statements
 typeof :: SFTerm -> Context -> Maybe T
 typeof (Var v) ctx = case M.lookup v ctx of 
   Just ml -> ml
@@ -48,7 +64,7 @@ typeof l@(App l1 l2) ctx = case typeof l1 ctx of
     guard (t1 == t2)
     Just t3
   Just (Pi x t) -> case l2 of
-    Typ a -> Just $ typeSub t (TVar x, a)
+    Typ a -> Just $ typeSub t (TVar x, a) -- type substitution under 2nd-order abstraction
     _ -> Nothing
   _ -> Nothing
 typeof l@(PiAbs t l1) ctx = do 
@@ -56,8 +72,10 @@ typeof l@(PiAbs t l1) ctx = do
     Just t' -> Just (Pi t t')
     _ -> Nothing
 
+-- top-level typing derivation, passing an empty context
 typeof' l = typeof l M.empty
  
+-- similar to type substitution but at the type level
 typeSub :: T -> (T, T) -> T
 typeSub l@(TVar x) (TVar y,z) 
   | x == y = z
@@ -69,9 +87,11 @@ typeSub l@(Pi x t) c@(TVar y, z)
   | otherwise = Pi n $ typeSub (renameT t (x, n)) c
   where n = max (newTLabel t) (newTLabel z)
 
+-- type-level 'bound' function
 notfreeT :: Int -> T -> Bool
 notfreeT x = not . S.member x . freeTVars
 
+-- type level free variables
 freeTVars :: T -> Set Int
 freeTVars (TVar c) = S.singleton c
 freeTVars (TArr t1 t2) = S.union (freeTVars t1) (freeTVars t2) 
@@ -87,7 +107,7 @@ typeVars (Pi x t)     = S.insert x $ typeVars t
 newTLabel :: T -> Int
 newTLabel = (*10) . maximum . typeVars
 
---rename t (x,y): renames free occurences of type-variables x in t to y
+--rename t (x,y): renames free occurences of type variables x in t to y
 renameT :: T -> (Int, Int) -> T
 renameT (TVar a) (x,y) = TVar $ if a == x then y else a
 renameT l@(Pi a t) c@(x,y) = if a == x then l else Pi a $ renameT t c
@@ -158,7 +178,7 @@ substitute (Abs y t l1) c@(Var x, l2)
   | otherwise = Abs z t $ substitute (rename l1 (y,z)) c
   where z = max (newlabel l1) (newlabel l2)
 
---one-step reduction relation 
+--one-step reduction relation, TODO implement other reduction strats
 reduce1 :: SFTerm -> Maybe SFTerm 
 reduce1 l@(Var x) = Nothing
 reduce1 l@(Abs x t s) = do
@@ -167,7 +187,7 @@ reduce1 l@(Abs x t s) = do
 reduce1 l@(App (Abs x t l') l2) = 
   Just $ substitute l' (Var x, l2)  --beta conversion
 reduce1 l@(App (PiAbs x1 t) (Typ x2)) = 
-  Just $ tSubUnder t (TVar x1, x2)
+  Just $ tSubUnder t (TVar x1, x2)  --type-level beta: (Pi X. t) A ~> t[X := A]
 reduce1 l@(App l1 l2) = do
   l' <- reduce1 l1
   Just $ App l' l2
@@ -176,7 +196,7 @@ reduce1 l@(PiAbs x t) = do
   t' <- reduce1 t
   Just $ PiAbs x t'
 
-
+-- function used to do type substitution under a second order abstraction
 tSubUnder :: SFTerm -> (T,T) -> SFTerm
 tSubUnder l@(Var x) c      = l
 tSubUnder l@(Typ t) c      = Typ $ typeSub t c
@@ -186,7 +206,8 @@ tSubUnder l@(PiAbs x t) c@(TVar y, z)
   | x /= y = PiAbs x (tSubUnder t c)  
   | otherwise =  l
 
---multi-step reduction relation - NOT GUARANTEED TO TERMINATE
+-- multi-step reduction relation 
+-- NOT GUARANTEED TO TERMINATE if it doesn't type check
 reduce :: SFTerm -> SFTerm
 reduce t = case reduce1 t of 
     Just t' -> reduce t'
@@ -205,6 +226,8 @@ zero = PiAbs 2 (Abs 4 (TArr (TVar 2) (TVar 2)) (Abs 5 (TVar 2) (Var 5)))
 
 
 {-
+TODO Implement examples 
+
 true t f = Abs 1 t (Abs 2 f (Var 1))
 false t f= Abs 1 t (Abs 2 f (Var 2))
 xx = Abs 1 (TArr TNat TNat) (App (Var 1) (Var 1)) --won't type check as expected
