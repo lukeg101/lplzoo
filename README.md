@@ -8,7 +8,7 @@ The naming of this repo was inspired in part by Andrej Bauer's [plzoo](https://g
 
 One aim of the repo is to implement popular (functional) languages and extensions to portray how the theory translates into practice. 
 
-The languages are written in Haskell and are intentionally simple. That is, they do not use advanced features of Haskell but rather minimal use of type constructors, recursion, and functional programming. 
+The languages are written in Haskell and are intentionally simple. That is, they do not use advanced features of Haskell but rather minimal use of [type constructors](https://en.wikipedia.org/wiki/Algebraic_data_type), [recursion](https://www.google.co.uk/search?ei=MbCyWrPmOeWWgAbLr4TwCg&q=recursion&oq=recursion&gs_l=psy-ab.3..35i39k1l2j0i67k1l8.6142.7685.0.7949.10.7.0.0.0.0.543.543.5-1.1.0....0...1c.1.64.psy-ab..9.1.541.0...0.9MwCQCbDFwA), and [functional programming](https://learnxinyminutes.com/docs/haskell/). 
 
 The intention here is to maximise your understanding of language design whilst minimising the need to understand Haskell. Of course it helps if you know it!
 
