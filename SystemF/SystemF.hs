@@ -10,7 +10,31 @@ data T
   = TVar Int
   | TArr T T
   | Pi Int T
-  deriving (Eq, Ord)
+  deriving Ord
+
+-- does syntactic type equality on types
+instance Eq T where
+  t1 == t2 = typeEquality (t1, t2) (M.empty, M.empty) 0
+
+-- test for syntactic type equality on types
+-- very similar to equality on first-order terms ie STLC equality
+typeEquality :: (T, T) 
+  -> (Map (Either Int Int) Int, Map (Either Int Int) Int) 
+  -> Int 
+  -> Bool
+typeEquality (TVar x, TVar y) (m1, m2) s = case M.lookup (Right x) m1 of
+  Just a -> case M.lookup (Right y) m2 of
+    Just b -> a == b
+    _ -> False
+  _ -> x == y
+typeEquality (TArr a1 b1, TArr a2 b2) c s = 
+  typeEquality (a1, a2) c s && typeEquality (b1, b2) c s
+typeEquality (Pi x1 t1, Pi x2 t2) (m1, m2) s = 
+  typeEquality (t1, t2) (m1', m2') (s+1) 
+  where 
+    m1' = M.insert (Right x1) s m1
+    m2' = M.insert (Right x2) s m2
+typeEquality _ _ _ = False
 
 -- naive show implementation, uses Unicode for Pi type
 -- TODO implement bracketing convention for types
@@ -29,7 +53,47 @@ data SFTerm
   | Abs Int T SFTerm
   | App SFTerm SFTerm
   | PiAbs Int SFTerm 
-  deriving (Eq, Ord)
+  deriving Ord
+
+-- alpha termEqualityalence of terms uses
+instance Eq SFTerm where
+  t1 == t2 = termEquality (t1, t2) (M.empty, M.empty) 0
+
+-- determines syntactic alpha-termEqualityalence of terms
+-- has maps (either term, id) for each term/type variable
+-- each TERM abstraction adds (left var) to the map and increments the id
+-- each TYPE abstraction adds (right var) to the map and increments the id
+-- also checks that each term is identical
+-- variable occurrence checks for ocurrences in t1 and t2 using the logic:
+-- if both bound, check that s is same in both maps
+-- if neither is bound, check literal equality 
+-- if bound t1 XOR bound t2 then False 
+-- application recursively checks both the LHS and RHS
+-- Type equality is called for types
+termEquality :: (SFTerm, SFTerm) 
+  -> (Map (Either Int Int) Int, Map (Either Int Int) Int) 
+  -> Int 
+  -> Bool
+termEquality (Var x, Var y) (m1, m2) s = case M.lookup (Left x) m1 of
+  Just a -> case M.lookup (Left y) m2 of
+    Just b -> a == b
+    _ -> False
+  _ -> x == y
+termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s = 
+  t1 == t2 && termEquality (l1, l2) (m1', m2') (s+1) 
+  where 
+    m1' = M.insert (Left x) s m1
+    m2' = M.insert (Left y) s m2
+termEquality (App a1 b1, App a2 b2) c s = 
+  termEquality (a1, a2) c s && termEquality (b1, b2) c s
+termEquality (Typ t1, Typ t2) c s =  
+  typeEquality (t1, t2) c s --terms can be types now, pass ctx with type mappings
+termEquality (PiAbs x1 t1, PiAbs x2 t2) (m1,m2) s = 
+  termEquality (t1, t2) (m1', m2') s
+  where 
+    m1' = M.insert (Right x1) s m1
+    m2' = M.insert (Right x2) s m2
+termEquality _ _ _ = False
 
 -- naive show implementation for System F terms
 instance Show SFTerm where
