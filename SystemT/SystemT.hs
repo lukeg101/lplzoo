@@ -26,7 +26,7 @@ data STTerm
   | Zero
   | Succ STTerm
   | RecNat STTerm STTerm STTerm
-  deriving (Eq, Ord)
+  deriving Ord
 
 {-
 It's possible to define Succ as a no-arg constructor:
@@ -35,6 +35,36 @@ and then give it type Nat -> Nat which Haskell can infer
 then you can apply NatSucc like a function. However I stick to 
 the inductive approach instead
 -}
+
+-- alpha equivalence of terms, same as STLC
+instance Eq STTerm where
+  t1 == t2 = checker (t1, t2) (M.empty, M.empty) 0
+
+-- checks for equality of terms, has a map (term, id) for each variable
+-- each abstraction adds vars to the map and increments the id
+-- also checks that each term is identical
+-- variable occurrence checks for ocurrences in t1 and t2 using the logic:
+-- if both bound, check that s is same in both maps
+-- if neither is bound, check literal equality 
+-- if bound t1 XOR bound t2 == true then False 
+-- application recursively checks both the LHS and RHS
+checker :: (STTerm, STTerm) 
+  -> (Map Int Int, Map Int Int) 
+  -> Int 
+  -> Bool
+checker (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
+  Just a -> case M.lookup y m2 of
+    Just b -> a == b
+    _ -> False
+  _ -> x == y
+checker (Abs x t1 l1, Abs y t2 l2) (m1, m2) s = 
+  t1 == t2 && checker (l1, l2) (m1', m2') (s+1) 
+  where 
+    m1' = M.insert x s m1
+    m2' = M.insert y s m2
+checker (App a1 b1, App a2 b2) c s = 
+  checker (a1, a2) c s && checker (b1, b2) c s
+checker _ _ _ = False
 
 -- Naive show instance for STTerms, TODO implement Bracketing convention for System T
 instance Show STTerm where
