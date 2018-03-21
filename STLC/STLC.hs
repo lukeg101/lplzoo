@@ -29,9 +29,9 @@ instance Show STTerm where
   show (App t1 t2)  = '(':show t1 ++ ' ':show t2 ++ ")" 
   show (Abs x t l1) = '(':"\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1 ++ ")"
 
--- alpha equivalence of terms uses
+-- alpha equivalence of terms using syntactic term equality
 instance Eq STTerm where
-  t1 == t2 = checker (t1, t2) (M.empty, M.empty) 0
+  t1 == t2 = termEquality (t1, t2) (M.empty, M.empty) 0
 
 -- checks for equality of terms, has a map (term, id) for each variable
 -- each abstraction adds vars to the map and increments the id
@@ -41,23 +41,23 @@ instance Eq STTerm where
 -- if neither is bound, check literal equality 
 -- if bound t1 XOR bound t2 == true then False 
 -- application recursively checks both the LHS and RHS
-checker :: (STTerm, STTerm) 
+termEquality :: (STTerm, STTerm) 
   -> (Map Int Int, Map Int Int) 
   -> Int 
   -> Bool
-checker (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
+termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
   Just a -> case M.lookup y m2 of
     Just b -> a == b
     _ -> False
   _ -> x == y
-checker (Abs x t1 l1, Abs y t2 l2) (m1, m2) s = 
-  t1 == t2 && checker (l1, l2) (m1', m2') (s+1) 
+termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s = 
+  t1 == t2 && termEquality (l1, l2) (m1', m2') (s+1) 
   where 
     m1' = M.insert x s m1
     m2' = M.insert y s m2
-checker (App a1 b1, App a2 b2) c s = 
-  checker (a1, a2) c s && checker (b1, b2) c s
-checker _ _ _ = False
+termEquality (App a1 b1, App a2 b2) c s = 
+  termEquality (a1, a2) c s && termEquality (b1, b2) c s
+termEquality _ _ _ = False
 
 -- Type context for t:T is Map v T where v is a variable name and T is it's supplied Type
 type Context = M.Map Int T
