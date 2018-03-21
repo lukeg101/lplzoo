@@ -3,15 +3,22 @@
 import Data.Map as M
 import Data.Set as S
 
+-- Simple Types for system T, of the form 'Nat' or 'o -> o' or a mix of both
 data T 
   = TNat
   | TArr T T
-  deriving (Eq, Ord)
+  deriving (Eq, Ord) --Type equality is simply equality of the type tree like STLC
 
+-- Naive show instance for types, TODO Bracketing convention for System T Types
 instance Show T where
   show TNat        = "Nat"
   show (TArr a b)  = '(':show a ++ "->" ++ show b ++")"
 
+-- System T Terms
+-- variables are numbers as it's easier for renaming
+-- Abstractions carry the type Church style
+-- Zero is a value in the language
+-- Succ n is an function that takes a term and makes a term
 data STTerm
   = Var Int
   | Abs Int T STTerm
@@ -21,6 +28,15 @@ data STTerm
   | RecNat STTerm STTerm STTerm
   deriving (Eq, Ord)
 
+{-
+It's possible to define Succ as a no-arg constructor:
+data STTerm = ... | NatSucc | ...
+and then give it type Nat -> Nat which Haskell can infer
+then you can apply NatSucc like a function. However I stick to 
+the inductive approach instead
+-}
+
+-- Naive show instance for STTerms, TODO implement Bracketing convention for System T
 instance Show STTerm where
   show Zero         = "Zero"
   show (Succ n)     = "S " ++ show n
@@ -29,8 +45,12 @@ instance Show STTerm where
   show (App t1 t2)  = '(':show t1 ++ ' ':show t2 ++ ")" 
   show (Abs x t l1) = '(':"\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1 ++ ")"
 
+-- type context is a mapping from variable name to type T
 type Context = M.Map Int T
 
+-- typing derivation for a term in a given context
+-- Just T denotes successful type derivation 
+-- Nothing denotes failure to type the term (not in \->+Nat)
 typeof :: STTerm -> Context -> Maybe T
 typeof Zero ctx = Just TNat
 typeof (Succ n) ctx  = do
@@ -57,6 +77,7 @@ typeof l@(App l1 l2) ctx = do
     Just (TArr t2 t3) -> if t1 == t2 then return t3 else Nothing
     _ -> Nothing
 
+-- top level typing derivation, passing empty context to typeof
 typeof' l = typeof l M.empty
 
 --bound variables of a term
@@ -175,19 +196,22 @@ isZero Zero = true
 plus = Abs 1 TNat $ Abs 2 TNat $ RecNat (Abs 3 TNat $ Abs 4 TNat (Succ (Var 4))) (Var 1) (Var 2)
 plusApp n m = App (App plus n) m
 
-toChurch :: Int -> STTerm
-toChurch 0 = Zero
-toChurch n = Succ (toChurch (n-1))
+-- function converting Haskell Int to Peano nat in System T
+toPeano :: Int -> STTerm
+toPeano 0 = Zero
+toPeano n = Succ (toPeano (n-1))
 
+-- function converting Peano nat to Haskell Int
 toInt :: STTerm -> Int
 toInt Zero = 0
 toInt (Succ n) = 1 + toInt n
 toInt _ = error "Not Nat"
 
+--test cases
 test1 = Abs 1 (TArr TNat TNat) $ Abs 2 TNat $ App (Var 1) (Var 2) -- \f x. f x
 test2 = Abs 1 (TArr TNat TNat) $ Abs 2 TNat $ App (App (Var 1) (Var 2)) (Var 1) -- \f x. (f x) f
 test3 = App (App (Abs 1 TNat (Abs 2 TNat (Var 2))) (Var 2)) (Var 4)
-test4 = plusApp (toChurch 3) (toChurch 2)
+test4 = plusApp (toPeano 3) (toPeano 2)
 --toInt $ reduce (plusApp (toChurch 3) (toChurch 2)) --> 5
 
 
