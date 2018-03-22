@@ -276,13 +276,19 @@ identifier xs = token $ do
 
 -- Simple ULC Repl
 main :: IO ()
-main = do
+main = repl
+
+repl :: IO ()
+repl = do
   putStr "> "
   s <- getLine
-  case apply atom s of
-    (x:xs) -> putStrLn (show $ reduce $ fst x)
-    _ -> putStrLn $ "Cannot Parse Term:" ++ s
-  main 
+  case s of 
+    "" -> putStrLn "Goodbye."
+    _ -> do 
+      case apply atom s of
+        (x:xs) -> putStrLn (show $ reduce $ fst x)
+        _ -> putStrLn $ "Cannot Parse Term:" ++ s
+      main 
 
 
 
