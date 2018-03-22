@@ -3,6 +3,7 @@ module ULC where
 import Control.Applicative (Applicative(..))
 import Control.Monad       (liftM, ap, guard)
 import Data.Char
+import System.IO           (hFlush, stdout)
 
 import Data.Set as S
 import Data.Map.Lazy as M
@@ -278,20 +279,21 @@ identifier xs = token $ do
 main :: IO ()
 main = do
   putStrLn "Welcome to the Untyped \x03bb-calculus REPL"
-  putStrLn "Type some terms or press Enter to leave"
+  putStrLn "Type some terms or press Enter to leave."
   repl
 
 repl :: IO ()
 repl = do
   putStr "> "
+  hFlush stdout
   s <- getLine
   if Prelude.null s 
   then putStrLn "Goodbye."
   else do 
     case apply atom s of
-      (x:xs) -> putStrLn (show $ reduce $ fst x)
+      (x:xs) -> print . reduce $ fst x
       _ -> putStrLn $ "Cannot Parse Term:" ++ s
-    main
+    repl
 
 
 
