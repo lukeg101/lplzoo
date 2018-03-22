@@ -1,4 +1,4 @@
-# Simply Typed Lambda Calculus
+# UnTyped Lambda Calculus
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/)
