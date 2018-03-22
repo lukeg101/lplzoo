@@ -276,19 +276,22 @@ identifier xs = token $ do
 
 -- Simple ULC Repl
 main :: IO ()
-main = repl
+main = do
+  putStrLn "Welcome to the Untyped \x03bb-calculus REPL"
+  putStrLn "Type some terms or press Enter to leave"
+  repl
 
 repl :: IO ()
 repl = do
   putStr "> "
   s <- getLine
-  case s of 
-    "" -> putStrLn "Goodbye."
-    _ -> do 
-      case apply atom s of
-        (x:xs) -> putStrLn (show $ reduce $ fst x)
-        _ -> putStrLn $ "Cannot Parse Term:" ++ s
-      main 
+  if Prelude.null s 
+  then putStrLn "Goodbye."
+  else do 
+    case apply atom s of
+      (x:xs) -> putStrLn (show $ reduce $ fst x)
+      _ -> putStrLn $ "Cannot Parse Term:" ++ s
+    main
 
 
 
