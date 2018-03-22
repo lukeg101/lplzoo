@@ -1,7 +1,7 @@
 # UnTyped Lambda Calculus
 
 ## Prerequisites
-You need [Haskell](https://www.haskell.org/)
+You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
 
 ## To Build & Run
 
