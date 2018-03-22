@@ -274,6 +274,15 @@ identifier xs = token $ do
   x <- sat (\x -> elem x xs)
   return x
 
+-- Simple ULC Repl
+main :: IO ()
+main = do
+  putStr "> "
+  s <- getLine
+  case apply atom s of
+    (x:xs) -> putStrLn (show $ reduce $ fst x)
+    _ -> putStrLn $ "Cannot Parse Term:" ++ s
+  main 
 
 
 
