@@ -40,8 +40,7 @@ char :: Char -> Parser Char
 char c = sat (c ==)
 
 string :: String -> Parser String
-string "" = return ""
-string (c:cs) = do {char c; string cs; return (c:cs)}
+string = mapM char
 
 many :: Parser a -> Parser [a]
 many p = many1 p +++ return []
@@ -63,22 +62,18 @@ p `chainl1` op = do {a <- p; rest a}
 space :: Parser String
 space = many (sat isSpace)
 
-token :: Parser a -> Parser a
-token p = do 
-  a <- p
-  return a
-
 symb :: String -> Parser String
-symb cs = token (string cs)
+symb = string
 
+-- apply a parser to a string
 apply :: Parser a -> String -> [(a,String)]
 apply p = parse (do {space; p})
 
+-- 1 or more digits
 nat :: Parser Int
-nat = do 
-  xs <- many1 $ sat (\x -> '0' <= x && x <= '9')
-  return $ foldl1 (\m n -> 10 * m + n) [ord x - ord '0' | x <- xs] 
+nat = fmap read (many1 (sat isDigit))
 
+-- bracket parses away brackets as you'd expect
 bracket :: Parser a -> Parser a
 bracket p = do
   symb "("
@@ -86,30 +81,32 @@ bracket p = do
   symb ")"
   return x
 
+-- vars are nats packaged up
 var = do
-  x <- token nat
+  x <- nat
   return (Var x)
 
+-- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
 lam = do 
   identifier lambdas
-  x <- token nat
+  x <- nat
   symb "."
-  e <- expr --should be expr
+  e <- expr
   return $ Abs x e
 
---TODO fix
---expr = atom `chainl1` (return App)
+-- app has zero or more spaces
 app = do
   e1 <- expr
   space
   e2 <- expr
   return $ App e1 e2
 
-expr = lam +++ var +++ (bracket  app) 
---nested atom should be expr - fix
+-- expression follows strict BNF form, no bracketing convention
+expr = (bracket lam) +++ var +++ (bracket  app) 
 
+-- identifies key words
 identifier :: [Char] -> Parser Char 
-identifier xs = token $ do
+identifier xs = do
   x <- sat (\x -> elem x xs)
   return x
