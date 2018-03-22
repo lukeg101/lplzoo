@@ -18,8 +18,12 @@ repl = do
   s <- getLine
   if Prelude.null s 
   then putStrLn "Goodbye."
-  else do 
-    case apply atom s of
+  else do
+    if head s == '\'' 
+    then case apply expr (tail s) of
+      (x:xs) -> mapM_ print . reductions $ fst x
+      _ -> putStrLn $ "Cannot Parse Term:" ++ s
+    else case apply expr s of
       (x:xs) -> print . reduce $ fst x
       _ -> putStrLn $ "Cannot Parse Term:" ++ s
     repl
