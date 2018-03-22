@@ -61,7 +61,7 @@ p `chainl1` op = do {a <- p; rest a}
       rest (f a b) +++ return a
 
 space :: Parser String
-space = many (sat (' ' == ))
+space = many (sat isSpace)
 
 token :: Parser a -> Parser a
 token p = do 
@@ -95,18 +95,19 @@ lam = do
   identifier lambdas
   x <- token nat
   symb "."
-  e <- atom --should be expr
+  e <- expr --should be expr
   return $ Abs x e
-
-app = do
-  l1 <- atom
-  l2 <- atom 
-  return $ App l1 l2
 
 --TODO fix
 --expr = atom `chainl1` (return App)
+app = do
+  e1 <- expr
+  space
+  e2 <- expr
+  return $ App e1 e2
 
-atom = lam +++ var +++ (bracket atom) --nested atom should be expr - fix
+expr = lam +++ var +++ (bracket  app) 
+--nested atom should be expr - fix
 
 identifier :: [Char] -> Parser Char 
 identifier xs = token $ do
