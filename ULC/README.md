@@ -14,13 +14,16 @@ Alternatively to use the GHCi Interpreter do:
 then type `main`
 
 In either case you get something like the following:
-```haskell
+```
 Welcome to the Untyped λ-calculus REPL
 Type some terms or press Enter to leave.
 >
 
 ```
+Note: When run in GHCi, you don't have the luxury of backspace, delete etc...
+Compile it using GHC if you need this.
 
+## Examples 
 Where you can then have some fun, try these examples:
 - `1`
 - `\1.1`
