@@ -62,6 +62,13 @@ p `chainl1` op = do {a <- p; rest a}
 space :: Parser String
 space = many (sat isSpace)
 
+spaces :: Parser a -> Parser a 
+spaces p = do
+  space
+  x <- p
+  space
+  return x
+
 symb :: String -> Parser String
 symb = string
 
@@ -83,23 +90,22 @@ bracket p = do
 
 -- vars are nats packaged up
 var = do
-  x <- nat
+  x <- spaces nat
   return (Var x)
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
 lam = do 
-  identifier lambdas
+  spaces $ identifier lambdas
   x <- nat
-  symb "."
-  e <- expr
+  spaces (symb ".")
+  e <- spaces expr
   return $ Abs x e
 
 -- app has zero or more spaces
 app = do
-  e1 <- expr
-  space
-  e2 <- expr
+  e1 <- spaces expr
+  e2 <- spaces expr
   return $ App e1 e2
 
 -- expression follows strict BNF form, no bracketing convention
