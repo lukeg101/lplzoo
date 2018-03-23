@@ -5,63 +5,73 @@ import Control.Applicative (Applicative(..))
 import Control.Monad       (liftM, ap, guard)
 import Data.Char
 
+{-
+Implementation based on ideas in Monadic Parser Combinators paper
+http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf
+-}
+
+-- Parser type takes input string and returns a list of possible parses
 newtype Parser a = Parser (String -> [(a, String)])
 
+-- Necessary AMP additions for Parser instance
 instance Functor Parser where
   fmap = liftM
-
 instance Applicative Parser where
   pure a = Parser (\cs -> [(a,cs)])
   (<*>) = ap
 
+-- Monad instance, generators use the first parser then apply f to the result
 instance Monad Parser where
   return = pure
   p >>= f = Parser (\cs -> concat [parse (f a) cs' | (a,cs') <- parse p cs])
 
-
+-- parser deconstructor
 parse (Parser p) = p
 
+-- takes a string and splits on the first char or fails
 item :: Parser Char
 item = Parser (\cs -> case cs of
   "" -> []
   (c:cs) -> [(c,cs)])
 
+-- combines the results of 2 parsers on an input string
+-- shortcircuits on the first result returned or fails
 (+++) :: Parser a -> Parser a -> Parser a
 p +++ q = Parser (\cs -> case parse p cs ++ parse q cs of
   [] -> []
   (x:xs) -> [x])
 
+-- failure parser
 zerop = Parser (\cs -> [])
 
+-- parses an element and returns if they satisfy a predicate
 sat :: (Char -> Bool) -> Parser Char
 sat p = do {c <- item; if p c then return c else zerop}
 
+-- parses chars only
 char :: Char -> Parser Char
 char c = sat (c ==)
 
+-- parses a string of chars
 string :: String -> Parser String
 string = mapM char
 
+-- parses 0 or more elements
 many :: Parser a -> Parser [a]
 many p = many1 p +++ return []
 
+-- parses 1 or more elements
 many1 :: Parser a -> Parser [a]
-many1 p = do {a <- p; as <- many p; return (a:as)}
+many1 p = do
+  a <- p
+  as <- many p
+  return (a:as)
 
-chainl :: Parser a -> Parser (a -> a -> a) -> a -> Parser a
-chainl p op a = (p `chainl1` op) +++ return a
-
-chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
-p `chainl1` op = do {a <- p; rest a}
-  where
-    rest a = do 
-      f <- op
-      b <- p
-      rest (f a b) +++ return a
-
+-- parses 0 or more whitespace
 space :: Parser String
 space = many (sat isSpace)
 
+-- trims whitespace between an expression
 spaces :: Parser a -> Parser a 
 spaces p = do
   space
@@ -69,6 +79,7 @@ spaces p = do
   space
   return x
 
+-- parses a single string
 symb :: String -> Parser String
 symb = string
 

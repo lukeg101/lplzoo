@@ -11,3 +11,5 @@ used html rendering of gif in readme for syntax
 &&\\
 \upsilon & ::= & 0 | 1 | 2 | ...
 \end{matrix}
+
+(\lambda x . M)N \rightsquigarrow M [x := N]
