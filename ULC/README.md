@@ -1,4 +1,5 @@
-# UnTyped Lambda Calculus
+# Untyped Lambda Calculus
+Haskell implementation on Alonzo Church's untyped lambda calculus. It's a Turing Complete model of computation.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -76,6 +77,6 @@ The semantics implements beta-reduction on terms and alpha-equivalence as the `E
 
 For contributions, see the [project to-do list](https://github.com/lukeg101/lplzoo/projects/1) or submit a PR with something you think it needs.
 
-
+Work initially documented [here](https://gist.github.com/lukeg101/9090f20f4a7b09f401df9390a0e357c9).
 
 
