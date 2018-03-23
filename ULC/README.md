@@ -73,7 +73,7 @@ The semantics implements beta-reduction on terms and alpha-equivalence as the `E
 - ULC.hs contains the Haskell implementation of the calculus, including substitution, reduction, and other useful things.
 - Parser.hs contains the monadic parser combinators needed to parse input strings into term ASTs for the calculus.
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
-- Main.hs is the what is needed for GHC to compile without any flags, it also invokes the repl.
+- Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
 
 For contributions, see the [project to-do list](https://github.com/lukeg101/lplzoo/projects/1) or submit a PR with something you think it needs.
 
