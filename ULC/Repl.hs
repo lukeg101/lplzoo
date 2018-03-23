@@ -5,12 +5,14 @@ import Parser
 
 import System.IO           (hFlush, stdout)
 
+-- top level repl function
 replMain :: IO ()
 replMain = do
   putStrLn "Welcome to the Untyped \x03bb-calculus REPL"
   putStrLn "Type some terms or press Enter to leave."
   repl
 
+-- REPL loop, takes input reduces and prints result, or exits out
 repl :: IO ()
 repl = do
   putStr "> "
