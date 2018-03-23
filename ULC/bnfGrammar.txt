@@ -1,0 +1,13 @@
+Mathmode grammar input onto: 
+https://www.codecogs.com/latex/eqneditor.php
+
+used html rendering of gif in readme for syntax
+
+\begin{matrix}
+ &&\\
+\mathbf{\tau}&  ::= & \mathbf{\upsilon}\\
+&  | & (\mathbf{\tau  \tau}) \\ 
+& | & (\lambda  \mathbf{\upsilon} .  \mathbf{\tau})\\
+&&\\
+\upsilon & ::= & 0 | 1 | 2 | ...
+\end{matrix}

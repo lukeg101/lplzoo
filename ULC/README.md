@@ -54,5 +54,10 @@ The syntax follows the BNF grammar for the untyped calculus *without* the notati
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;(\mathbf{\tau&space;\tau})&space;\\&space;&&space;|&space;&&space;(\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau})\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;0&space;|&space;1&space;|&space;2&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;(\mathbf{\tau&space;\tau})&space;\\&space;&&space;|&space;&&space;(\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau})\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;0&space;|&space;1&space;|&space;2&space;|&space;...&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ & | & (\mathbf{\tau \tau}) \\ & | & (\lambda \mathbf{\upsilon} . \mathbf{\tau})\\ &&\\ \upsilon & ::= & 0 | 1 | 2 | ... \end{matrix}" /></a>
 
+If you want to see the notational conventions, submit a PR! Some notes about the syntax:
+
+- Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x.x`).
+- Nested terms require brackets: `(\1.(1 1))`, whitespace does not matter `(\1      .(1 1))`, non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations. 
+
 
 
