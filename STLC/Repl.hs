@@ -25,11 +25,24 @@ repl = do
     then case apply expr (tail s) of
       (x:xs) -> case typeof' $ fst x of
         Just y -> mapM_ print $ reductions (fst x)
-        _ -> print $ (++) "Cannot Type Term:" $ show (fst x)
-      _ -> print $ "Cannot Parse Term:" ++ s
+        _ -> cannotType s
+      _ -> cannotParse s
+    else if head s == 't'
+    then case apply expr $ tail s of
+      (x:xs) -> case typeof' $ fst x of
+        Just y -> print y
+        _ -> cannotType s
+      _ -> cannotParse s
     else case apply expr s of
       (x:xs) -> case typeof' $ fst x of
         Just y -> print . reduce $ fst x
-        _ -> print $ (++) "Cannot Type Term:" $ show (fst x)
-      _ -> print $ "Cannot Parse Term:" ++ s
+        _ -> cannotType s
+      _ -> cannotParse s
     repl
+
+
+cannotParse :: String -> IO ()
+cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
+
+cannotType :: String -> IO ()
+cannotType s = putStrLn $ (++) "Cannot Type Term: " $ tail s

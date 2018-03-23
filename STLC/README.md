@@ -1,5 +1,5 @@
 # Simply Typed Lambda Calculus
-Haskell implementation on Alonzo Church's untyped lambda calculus. It has a single base type `O` and function type `(T->T)` to eliminate untypeable and paradoxical terms.
+Haskell implementation on Alonzo Church's untyped lambda calculus. It has a base type `O` and function type `(T->T)` to eliminate untypeable and paradoxical terms.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -43,8 +43,16 @@ There is also a reduction tracer, which should print each reduction step. prefix
 > '(\3:O.((\1:O.1) ((\2:O.2) 3)))
 (λ3:O.((λ2:O.2) 3))
 (λ3:O.3)
-
 ```
+
+There is also a typing mechanism, which should display the type or fail as usual.
+```
+> t(\1:(O->O).(1 1))
+Cannot Type Term: (\1:(O->O).(1 1))
+> t(\1:O.1)
+(O->O)
+```
+
 Note: if you provide a non-normalizing term, the type checker will fail and reduction will not occur.
 
 ## Syntax 
@@ -56,7 +64,7 @@ TODO
 If you want to see the notational conventions, submit a PR! Some notes about the syntax:
 
 - Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:O.x`).
-- Nested terms require brackets: `(\1:O.(\2:O. 2))`, whitespace does not matter `(\1:O.          1)`, non-normalizing terms require you to quit with `Ctrl+C` or whatever your machine uses to interrupt computations.
+- Nested terms require brackets: `(\1:O.(\2:O. 2))`, whitespace does not matter `(\1:O.          1)`, and to quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
 
