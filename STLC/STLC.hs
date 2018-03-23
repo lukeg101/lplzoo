@@ -11,7 +11,7 @@ data T
 
 -- Simple show instance, TODO brackets convention for types
 instance Show T where
-  show TVar        = show 'O'
+  show TVar        = "O"
   show (TArr a b)  = '(':show a ++ "->" ++ show b ++")"
 
 -- Simply-Typed Lambda Calculus Terms
