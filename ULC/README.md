@@ -57,7 +57,12 @@ The syntax follows the BNF grammar for the untyped calculus *without* the notati
 If you want to see the notational conventions, submit a PR! Some notes about the syntax:
 
 - Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x.x`).
-- Nested terms require brackets: `(\1.(1 1))`, whitespace does not matter `(\1      .(1 1))`, non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations. 
+- Nested terms require brackets: `(\1.(1 1))`, whitespace does not matter `(\1      .(1 1))`, non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations.
+
+## Semantics
+- This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in ULC.hs). 
+- Reductions include the one-step reduction (see `reduce1` in ULC.hs), the many-step reduction (see `reduce` in ULC.hs). 
+
 
 
 

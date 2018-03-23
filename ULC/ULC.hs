@@ -85,7 +85,7 @@ rename t@(Abs a t') (x,y) = if a == x then t else Abs a $ rename t' (x, y)
 rename (App t1 t2) (x,y) = App (rename t1 (x,y)) (rename t2 (x,y))
 
 --substitute one term for another in a term
---does capture avoiding substitution
+--does capture avoiding substitution (Berenregt)
 substitute :: Term -> (Term, Term) -> Term
 substitute t1@(Var c1) (Var c2, t2) 
   = if c1 == c2 then t2 else t1 
