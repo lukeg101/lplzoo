@@ -1,0 +1,16 @@
+Mathmode grammar input onto: 
+https://www.codecogs.com/latex/eqneditor.php
+
+used html rendering of gif in readme for syntax
+
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ & | & (\mathbf{\tau \tau}) \\ & | & (\lambda \mathbf{\upsilon : \sigma } . \mathbf{\tau})\\ &&\\ \upsilon & ::= & 0 | 1 | 2 | ... \\
+\mathbf{\sigma} & ::= & O \\
+& | & \mathbf{(\mathbf{\sigma} \rightarrow \mathbf{\sigma})}
+\end{matrix}
+
+\overline{\Gamma \vdash x:T}, \mbox{(if $x:T \in \Gamma$)}
+
+\frac{\Gamma ,x:A \vdash t:B}{\Gamma \vdash (\lambda x : A. t) : B }
+
+\frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}
+

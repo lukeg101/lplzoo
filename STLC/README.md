@@ -57,9 +57,9 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 
 ## Syntax 
 
-The syntax follows the BNF grammar for the Simply Typed lambda calculus calculus *without* the notational conventions for brackets or combining adjacent abstractions. The full syntax is:
+The syntax for the parser follows the BNF grammar for the Simply Typed lambda calculus calculus *without* the notational conventions for brackets or combining adjacent abstractions. The full syntax is:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;(\mathbf{\tau&space;\tau})&space;\\&space;&&space;|&space;&&space;(\lambda&space;\mathbf{\upsilon&space;:&space;\sigma&space;}&space;.&space;\mathbf{\tau})\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;0&space;|&space;1&space;|&space;2&space;|&space;...&space;\\&space;\mathbf{\sigma}&space;&&space;::=&space;&&space;O&space;\\&space;&&space;|&space;&&space;\mathbf{(\mathbf{\sigma}&space;\rightarrow&space;\mathbf{\sigma})}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;(\mathbf{\tau&space;\tau})&space;\\&space;&&space;|&space;&&space;(\lambda&space;\mathbf{\upsilon&space;:&space;\sigma&space;}&space;.&space;\mathbf{\tau})\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;0&space;|&space;1&space;|&space;2&space;|&space;...&space;\\&space;\mathbf{\sigma}&space;&&space;::=&space;&&space;O&space;\\&space;&&space;|&space;&&space;\mathbf{(\mathbf{\sigma}&space;\rightarrow&space;\mathbf{\sigma})}&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ & | & (\mathbf{\tau \tau}) \\ & | & (\lambda \mathbf{\upsilon : \sigma } . \mathbf{\tau})\\ &&\\ \upsilon & ::= & 0 | 1 | 2 | ... \\ \mathbf{\sigma} & ::= & O \\ & | & \mathbf{(\mathbf{\sigma} \rightarrow \mathbf{\sigma})} \end{matrix}" /></a>
 
 If you want to see the notational conventions, submit a PR! Some notes about the syntax:
 
@@ -68,9 +68,16 @@ If you want to see the notational conventions, submit a PR! Some notes about the
 
 ## Semantics
 
-The semantics implements beta-reduction on terms and alpha-equivalence as the `Eq` instance of `Term`:
+The semantics implements beta-reduction on terms and alpha-equivalence as the `Eq` instance of `STTerm`. The semantics are the same as the untyped calculus with the addition of types. We reformulate the semantics as [typing judgements](https://existentialtype.wordpress.com/2011/03/27/the-holy-trinity/):
 
-TODO
+for variables:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;x:T},&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;x:T},&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" title="\overline{\Gamma \vdash x:T}, \mbox{(if $x:T \in \Gamma$)}" /></a>
+
+for abstractions:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" title="\frac{\Gamma ,x:A \vdash t:B}{\Gamma \vdash (\lambda x : A. t) : B }" /></a>
+
+and applications:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" title="\frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}" /></a>
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in STLC.hs). 
 - Reductions include the one-step reduction (see `reduce1` in STLC.hs), the many-step reduction (see `reduce` in STLC.hs). 
