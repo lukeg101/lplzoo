@@ -123,7 +123,7 @@ lam = do
   spaces $ identifier lambdas
   x <- nat
   spaces (symb ":")
-  t <- typeVar
+  t <- parseType
   spaces (symb ".")
   e <- spaces expr
   return $ Abs x t e

@@ -142,6 +142,7 @@ reduce1 l@(Abs x t s) = do
   return $ Abs x t s'
 reduce1 l@(App (Abs x t l1) l2) 
   = Just $ substitute l1 (Var x, l2)  --beta conversion
+reduce1 t = Nothing
 
 -- multi-step reduction relation 
 -- NOT GUARANTEED TO TERMINATE IF typeof' FAILS
