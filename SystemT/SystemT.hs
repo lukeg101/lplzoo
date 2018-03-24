@@ -9,10 +9,19 @@ data T
   | TArr T T
   deriving (Eq, Ord) --Type equality is simply equality of the type tree like STLC
 
--- Naive show instance for types, TODO Bracketing convention for System T Types
+paren :: Bool -> String -> String
+paren True  x = "(" ++ x ++ ")"
+paren False x = x
+
+isArr :: T -> Bool
+isArr (TArr _ _) = True
+isArr _          = False
+
+-- Naive show instance for types, follows bracketing convention
 instance Show T where
   show TNat        = "Nat"
-  show (TArr a b)  = '(':show a ++ "->" ++ show b ++")"
+  show (TArr a b)  = paren (isArr a) (show a) ++ "->" ++ show b
+
 
 -- System T Terms
 -- variables are numbers as it's easier for renaming
@@ -68,12 +77,34 @@ termEquality _ _ _ = False
 
 -- Naive show instance for STTerms, TODO implement Bracketing convention for System T
 instance Show STTerm where
-  show Zero         = "Zero"
-  show (Succ n)     = "S " ++ show n
-  show (RecNat h a n)  = "Rec "++ show h ++ " (" ++ show a ++ ") (" ++ show n ++ ")"
+  show Zero         = "z"
+  show (Succ n)     = "s " ++ paren (isAbs n || isApp n || isRec n) (show n)
+  show (RecNat h a n)  = "rec "++ 
+    paren (isAbs h || isApp h || isRec h || isSucc h) (show h) 
+    ++ " " ++ paren (isAbs a || isApp a || isRec a || isSucc a) (show a) 
+    ++ " " ++ paren (isAbs n || isApp n || isRec n || isSucc n) (show n)
   show (Var x)      = show x
-  show (App t1 t2)  = '(':show t1 ++ ' ':show t2 ++ ")" 
-  show (Abs x t l1) = '(':"\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1 ++ ")"
+  show (App t1 t2)  = 
+    paren (isAbs t1) (show t1) ++ ' ' 
+      : paren (isAbs t2 || isApp t2 || isSucc t2 || isRec t2) (show t2)
+  show (Abs x t l1) = 
+    "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
+
+isSucc :: STTerm -> Bool
+isSucc (Succ _) = True
+isSucc _          = False
+
+isRec :: STTerm -> Bool
+isRec (RecNat _ _ _) = True
+isRec _              = False
+
+isAbs :: STTerm -> Bool
+isAbs (Abs _ _ _) = True
+isAbs _         = False
+
+isApp :: STTerm -> Bool
+isApp (App _ _) = True
+isApp _         = False
 
 -- type context is a mapping from variable name to type T
 type Context = M.Map Int T
