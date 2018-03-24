@@ -3,13 +3,17 @@ https://www.codecogs.com/latex/eqneditor.php
 
 used html rendering of gif in readme for syntax
 
-\begin{matrix}
- &&\\
-\mathbf{\tau}&  ::= & \mathbf{\upsilon}\\
-&  | & (\mathbf{\tau  \tau}) \\ 
-& | & (\lambda  \mathbf{\upsilon} .  \mathbf{\tau})\\
+\begin{matrix} &&\\
+ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ 
+& | & \alpha\\
 &&\\
-\upsilon & ::= & 0 | 1 | 2 | ...
+\alpha & ::= & \beta \\
+&| &\mathbf{\alpha\, \tt{space}\, \beta} \\
+&&\\
+\beta & ::= & \tt{(}\tau \tt{)}\\ 
+&|& \upsilon \\ 
+&&\\
+\upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... 
 \end{matrix}
 
 (\lambda x . M)N \rightsquigarrow M [x := N]

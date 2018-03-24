@@ -21,13 +21,13 @@ Type some terms or press Enter to leave.
 >
 
 ```
-Note: When run in GHCi, you don't have the luxury of backspace, delete etc...
+Note: When run in GHCi, you don't have the luxury of escaped characters, backspace, delete etc...
 Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
 - `1`
-- `(\1.1)`
+- `\1.1`
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
@@ -35,30 +35,33 @@ Welcome to the Untyped λ-calculus REPL
 Type some terms or press Enter to leave.
 > 1
 1
-> (\1.1)
-(λ1.1)
-> (λ1.1)
-(λ1.1)
+> \1.1
+λ1.1
+> λ1.1
+λ1.1
 ```
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> '(((\1.1) (\2.2)) 3)
-((λ2.2) 3)
+> '(\1.1) (\2.2) 3
+(λ2.2) 3
 3
 ```
 Note: if you provide a non-normalizing term, reductions will not terminate. Use STLC for termination guarantees.
 
 ## Syntax 
 
-The syntax follows the BNF grammar for the untyped calculus *without* the notational conventions for brackets or combining adjacent abstractions. The full syntax is:
+The syntax follows the BNF grammar for the untyped calculus with the notational conventions for brackets. The full syntax is:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;(\mathbf{\tau&space;\tau})&space;\\&space;&&space;|&space;&&space;(\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau})\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;0&space;|&space;1&space;|&space;2&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;(\mathbf{\tau&space;\tau})&space;\\&space;&&space;|&space;&&space;(\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau})\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;0&space;|&space;1&space;|&space;2&space;|&space;...&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ & | & (\mathbf{\tau \tau}) \\ & | & (\lambda \mathbf{\upsilon} . \mathbf{\tau})\\ &&\\ \upsilon & ::= & 0 | 1 | 2 | ... \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
 
-If you want to see the notational conventions, submit a PR! Some notes about the syntax:
+Some notes about the syntax:
 
 - Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x.x`).
-- Nested terms require brackets: `(\1.(1 1))`, whitespace does not matter `(\1      .(1 1))`, non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations.
+- Nested terms may not require brackets: `\1.1 1` and follows the convention of abstractions being left associative, application being right associative, and application having higher precedence than abstraction. 
+- Whitespace does not matter `(\1      .(1 1))`, except in between application where a minimumum of one space is needed. 
+- Non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations.
+- This grammar left-recursive and non-ambiguous.
 
 ## Semantics
 
@@ -71,7 +74,7 @@ The semantics implements beta-reduction on terms and alpha-equivalence as the `E
 
 ## Other Implementation Details
 - ULC.hs contains the Haskell implementation of the calculus, including substitution, reduction, and other useful things.
-- Parser.hs contains the monadic parser combinators needed to parse input strings into term ASTs for the calculus.
+- Parser.hs contains the monadic parser combinators needed to parse input strings into term ASTs for the calculus. It follows the grammar above.
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
 
