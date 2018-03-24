@@ -71,6 +71,9 @@ many1 p = do
 space :: Parser String
 space = many (sat isSpace)
 
+space1 :: Parser String
+space1 = many1 (sat isSpace)
+
 -- trims whitespace between an expression
 spaces :: Parser a -> Parser a 
 spaces p = do
@@ -86,6 +89,15 @@ symb = string
 -- apply a parser to a string
 apply :: Parser a -> String -> [(a,String)]
 apply p = parse (do {space; p})
+
+-- left recursion
+chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
+p `chainl1` op = do {a <- p; rest a}
+  where
+    rest a = do 
+      f <- op
+      b <- p
+      rest (f a b) +++ return a
 
 -- 1 or more digits
 nat :: Parser Int
@@ -110,17 +122,20 @@ lam = do
   spaces $ identifier lambdas
   x <- nat
   spaces (symb ".")
-  e <- spaces expr
+  e <- spaces term
   return $ Abs x e
 
--- app has zero or more spaces
-app = do
-  e1 <- spaces expr
-  e2 <- spaces expr
-  return $ App e1 e2
+-- app has one or more spaces
+app = chainl1 expr $ do
+  space1
+  return $ App 
 
 -- expression follows strict BNF form, no bracketing convention
-expr = (bracket lam) +++ var +++ (bracket  app) 
+expr = (bracket term) +++ var
+
+term = lam +++ app
+
+
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
