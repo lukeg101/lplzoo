@@ -12,7 +12,16 @@ data T
 -- Simple show instance, TODO brackets convention for types
 instance Show T where
   show TVar        = "O"
-  show (TArr a b)  = '(':show a ++ "->" ++ show b ++")"
+  show (TArr a b)  = show a ++ "->" ++ paren (isArr b) (show b)
+
+paren :: Bool -> String -> String
+paren True  x = "(" ++ x ++ ")"
+paren False x = x
+
+isArr :: T -> Bool
+isArr (TArr _ _) = True
+isArr _          = False
+
 
 -- Simply-Typed Lambda Calculus Terms
 -- variables are numbers as it's easier for renaming
@@ -26,8 +35,18 @@ data STTerm
 -- Simple show instance for STLC, TODO Brackets Convention for terms
 instance Show STTerm where
   show (Var x)    = show x
-  show (App t1 t2)  = '(':show t1 ++ ' ':show t2 ++ ")" 
-  show (Abs x t l1) = '(':"\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1 ++ ")"
+  show (App t1 t2)  = 
+    paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
+  show (Abs x t l1) = 
+    "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
+
+isAbs :: STTerm -> Bool
+isAbs (Abs _ _ _) = True
+isAbs _         = False
+
+isApp :: STTerm -> Bool
+isApp (App _ _) = True
+isApp _         = False
 
 -- alpha equivalence of terms using syntactic term equality
 instance Eq STTerm where
