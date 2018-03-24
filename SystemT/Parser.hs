@@ -151,16 +151,26 @@ zero = do
   char 'z'
   return Zero
 
-succ = do 
-  spaces (char 's')
-  n <- expr
-  return $ Succ n
+succ = succe +++ succs where 
+  succe = do
+    char 's'
+    space1
+    n <- expr
+    return $ Succ n
+  succs = do
+    char 's'
+    space1
+    n <- Parser.succ
+    return $ Succ n
 
 rec = do
   symb "rec"
-  h <- spaces expr
-  a <- spaces expr
-  n <- spaces expr 
+  space1
+  h <- expr
+  space1
+  a <- expr
+  space1
+  n <- expr 
   return $ RecNat h a n
 
 -- expression follows CFG form with bracketing convention
