@@ -88,16 +88,16 @@ symb = string
 
 -- apply a parser to a string
 apply :: Parser a -> String -> [(a,String)]
-apply p = parse (do {space; p})
+apply p = parse p
 
--- left recursion
+-- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 p `chainl1` op = do {a <- p; rest a}
   where
-    rest a = do 
+    rest a = (do 
       f <- op
       b <- p
-      rest (f a b) +++ return a
+      rest (f a b)) +++ return a
 
 -- 1 or more digits
 nat :: Parser Int
@@ -113,15 +113,15 @@ bracket p = do
 
 -- vars are nats packaged up
 var = do
-  x <- spaces nat
+  x <- nat
   return (Var x)
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
 lam = do 
   spaces $ identifier lambdas
-  x <- nat
-  spaces (symb ".")
+  x <- spaces nat
+  symb "."
   e <- spaces term
   return $ Abs x e
 
@@ -130,12 +130,11 @@ app = chainl1 expr $ do
   space1
   return $ App 
 
--- expression follows strict BNF form, no bracketing convention
+-- expression follows CFG form with bracketing convention
 expr = (bracket term) +++ var
 
+-- top level of CFG Gramma
 term = lam +++ app
-
-
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
