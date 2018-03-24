@@ -57,18 +57,19 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 
 ## Syntax 
 
-The syntax for the parser follows the non-ambiguous CFG for the Simply Typed lambda calculus calculus with the notational conventions for brackets. The full syntax is:
+The syntax for the parser follows the non-ambiguous CFG for the Simply Typed lambda calculus calculus with the standard notational conventions for brackets. The full syntax is:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \end{matrix}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\sigma&space;\tt{\rightarrow}&space;\gamma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&space;\tt{(}&space;\sigma&space;\tt{)}&space;|&space;\tt{O}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\sigma&space;\tt{\rightarrow}&space;\gamma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&space;\tt{(}&space;\sigma&space;\tt{)}&space;|&space;\tt{O}&space;\end{matrix}" title="\begin{matrix}\sigma & ::= & \gamma \\ & | & \sigma \tt{\rightarrow} \gamma \\ &&\\ \gamma & ::= \tt{(} \sigma \tt{)} | \tt{O} \end{matrix}" /></a>
 
 
-If you want to see the notational conventions, submit a PR! Some notes about the syntax:
+Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:O.x`).
-- Types are either literal `O` base types or nested arrow types (in brackets): `(O -> O)`. Alternative implementations let O range over a set of base types (like int, float etc...) but this is semantically equivalent unless we care about those types.
-- Nested terms require brackets: `(\1:O.(\2:O. 2))`, whitespace does not matter `(\1:O.          1)`, and to quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
+- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:O.x`).
+- Types are either literal `O` base types or nested arrow types: `O -> O`. Arrows associate to the left so that `O -> O -> O` is the same as `((O -> O) -> O)` but not `O -> (O -> O)`. Alternative implementations let O range over a set of base types (like int, float etc...) but this is semantically equivalent unless we care about those types.
+- Nested terms don't need brackets: `\1:O.\2:O. 2` unless enforcing application on the right. Whitespace does not matter `(\1:O.          1)` unless it is between application where you need at least one space.
+- To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
 
