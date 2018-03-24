@@ -6,10 +6,8 @@ used html rendering of gif in readme for syntax
 \begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma  . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | 
 ... \\
 &&\\
-\sigma & ::= & \gamma  \\
-& | & \sigma \tt{\rightarrow} \gamma \\
-&&\\
-\gamma & ::= \tt{(} \sigma \tt{)} | \tt{O}\end{matrix}
+
+\sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\, |\, \tt{O} \end{matrix}\end{matrix}
 
 \overline{\Gamma \vdash x:T}, \mbox{(if $x:T \in \Gamma$)}
 
