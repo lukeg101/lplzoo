@@ -112,11 +112,11 @@ bracket p = do
   return x
 
 -- top level CFG for arrow types are "(X -> Y)" packaged up
-typTerm = typExpr +++ (do
+typTerm = (do
   x <- typExpr
   spaces (symb "->")
   y <- typTerm
-  return $ TArr x y)
+  return $ TArr x y) +++ typExpr
 
 -- type vars are "o" packaged up 
 typVar = do
@@ -151,7 +151,7 @@ app = chainl1 expr $ do
 expr = (bracket term) +++ termVar
 
 -- top level of CFG Gramma
-term = lam +++ app
+term = app +++ lam
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
