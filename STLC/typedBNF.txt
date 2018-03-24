@@ -3,10 +3,13 @@ https://www.codecogs.com/latex/eqneditor.php
 
 used html rendering of gif in readme for syntax
 
-\begin{matrix} &&\\ \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ & | & (\mathbf{\tau \tau}) \\ & | & (\lambda \mathbf{\upsilon : \sigma } . \mathbf{\tau})\\ &&\\ \upsilon & ::= & 0 | 1 | 2 | ... \\
-\mathbf{\sigma} & ::= & O \\
-& | & \mathbf{(\mathbf{\sigma} \rightarrow \mathbf{\sigma})}
-\end{matrix}
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma  . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | 
+... \\
+&&\\
+\sigma & ::= & \gamma  \\
+& | & \sigma \tt{\rightarrow} \gamma \\
+&&\\
+\gamma & ::= \tt{(} \sigma \tt{)} | \tt{O}\end{matrix}
 
 \overline{\Gamma \vdash x:T}, \mbox{(if $x:T \in \Gamma$)}
 
