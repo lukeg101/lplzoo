@@ -71,6 +71,9 @@ many1 p = do
 space :: Parser String
 space = many (sat isSpace)
 
+space1 :: Parser String
+space1 = many1 (sat isSpace)
+
 -- trims whitespace between an expression
 spaces :: Parser a -> Parser a 
 spaces p = do
@@ -91,6 +94,15 @@ apply p = parse (do {space; p})
 nat :: Parser Int
 nat = fmap read (many1 (sat isDigit))
 
+-- left recursion 
+chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
+p `chainl1` op = do {a <- p; rest a}
+  where
+    rest a = (do 
+      f <- op
+      b <- p
+      rest (f a b)) +++ return a
+
 -- bracket parses away brackets as you'd expect
 bracket :: Parser a -> Parser a
 bracket p = do
@@ -99,23 +111,23 @@ bracket p = do
   symb ")"
   return x
 
-termVar = do
-  x <- spaces nat
-  return $ Var x
+-- top level CFG for arrow types are "(X -> Y)" packaged up
+typTerm = chainl1 typExpr $ do
+  spaces (symb "->")
+  return $ TArr
 
--- type vars are "o" packaged up
-typeVar = do
-  spaces (symb "O")
+-- type vars are "o" packaged up 
+typVar = do
+  symb "O"
   return TVar
 
--- arrow types are "(X -> Y)" packaged up
-typeArr = do
-  x <- parseType
-  spaces (symb "->")
-  y <- parseType
-  return $ TArr x y
+-- second level of CFG for types
+typExpr = (bracket typTerm) +++ typVar
 
-parseType = typeVar +++ bracket typeArr
+-- parser for term variables
+termVar = do
+  x <- nat
+  return $ Var x
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
@@ -123,19 +135,21 @@ lam = do
   spaces $ identifier lambdas
   x <- nat
   spaces (symb ":")
-  t <- parseType
+  t <- typTerm
   spaces (symb ".")
-  e <- spaces expr
+  e <- spaces term
   return $ Abs x t e
 
 -- app has zero or more spaces
-app = do
-  e1 <- spaces expr
-  e2 <- spaces expr
-  return $ App e1 e2
+app = chainl1 expr $ do
+  space1
+  return $ App 
 
--- expression follows strict BNF form, no bracketing convention
-expr = (bracket lam) +++ termVar +++ (bracket  app) 
+-- expression follows CFG form with bracketing convention
+expr = (bracket term) +++ termVar
+
+-- top level of CFG Gramma
+term = lam +++ app
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
