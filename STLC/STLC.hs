@@ -9,10 +9,10 @@ data T
   | TArr T T
   deriving (Eq, Ord) --equivalence of types compares the binary trees of each type
 
--- Simple show instance, TODO brackets convention for types
+-- Simple show instance
 instance Show T where
   show TVar        = "O"
-  show (TArr a b)  = show a ++ "->" ++ paren (isArr b) (show b)
+  show (TArr a b)  = paren (isArr a) (show a) ++ "->" ++ show b
 
 paren :: Bool -> String -> String
 paren True  x = "(" ++ x ++ ")"

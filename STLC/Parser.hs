@@ -112,9 +112,11 @@ bracket p = do
   return x
 
 -- top level CFG for arrow types are "(X -> Y)" packaged up
-typTerm = chainl1 typExpr $ do
+typTerm = typExpr +++ (do
+  x <- typExpr
   spaces (symb "->")
-  return $ TArr
+  y <- typTerm
+  return $ TArr x y)
 
 -- type vars are "o" packaged up 
 typVar = do

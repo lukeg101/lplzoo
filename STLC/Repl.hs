@@ -25,13 +25,13 @@ repl = do
     then case apply term (tail s) of
       (x:xs) -> case typeof' $ fst x of
         Just y -> mapM_ print $ reductions (fst x)
-        _ -> cannotType s
+        _ -> cannotType $ tail s
       _ -> cannotParse s
     else if head s == 't'
     then case apply term $ tail s of
       (x:xs) -> case typeof' $ fst x of
         Just y -> print y
-        _ -> cannotType s
+        _ -> cannotType $ tail s
       _ -> cannotParse s
     else case apply term s of
       (x:xs) -> case typeof' $ fst x of
