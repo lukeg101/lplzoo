@@ -63,6 +63,9 @@ The syntax for the parser follows the non-ambiguous CFG for the Simply Typed lam
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\sigma&space;\tt{\rightarrow}&space;\gamma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&space;\tt{(}&space;\sigma&space;\tt{)}&space;|&space;\tt{O}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\sigma&space;\tt{\rightarrow}&space;\gamma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&space;\tt{(}&space;\sigma&space;\tt{)}&space;|&space;\tt{O}&space;\end{matrix}" title="\begin{matrix}\sigma & ::= & \gamma \\ & | & \sigma \tt{\rightarrow} \gamma \\ &&\\ \gamma & ::= \tt{(} \sigma \tt{)} | \tt{O} \end{matrix}" /></a>
 
+and the reduction relation adopted from the untyped theory (with types added in the abstraction):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)N \rightsquigarrow M [x := N]" /></a>
 
 Some notes about the syntax:
 

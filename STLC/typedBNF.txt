@@ -17,3 +17,4 @@ used html rendering of gif in readme for syntax
 
 \frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}
 
+(\lambda x : T . M)N \rightsquigarrow M [x := N]
