@@ -22,18 +22,18 @@ repl = do
   then putStrLn "Goodbye."
   else do
     if head s == '\'' 
-    then case apply expr (tail s) of
+    then case apply term (tail s) of
       (x:xs) -> case typeof' $ fst x of
         Just y -> mapM_ print $ reductions (fst x)
         _ -> cannotType s
       _ -> cannotParse s
     else if head s == 't'
-    then case apply expr $ tail s of
+    then case apply term $ tail s of
       (x:xs) -> case typeof' $ fst x of
         Just y -> print y
         _ -> cannotType s
       _ -> cannotParse s
-    else case apply expr s of
+    else case apply term s of
       (x:xs) -> case typeof' $ fst x of
         Just y -> print . reduce $ fst x
         _ -> cannotType s
