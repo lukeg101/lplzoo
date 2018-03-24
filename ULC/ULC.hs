@@ -1,4 +1,4 @@
-module ULC where 
+module ULC where
 
 import Data.Set as S
 import Data.Map.Lazy as M
@@ -18,8 +18,8 @@ instance Eq Term where
 -- each abstraction adds to the map and increments the id
 -- variable occurrence checks for ocurrences in t1 and t2 using the logic:
 -- if both bound, check that s is same in both maps
--- if neither is bound, check literal equality 
--- if bound t1 XOR bound t2 == true then False 
+-- if neither is bound, check literal equality
+-- if bound t1 XOR bound t2 == true then False
 -- application recursively checks both the LHS and RHS
 termEquality :: (Term, Term) -> (Map Int Int, Map Int Int) -> Int -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
@@ -27,20 +27,32 @@ termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
     Just b -> a == b
     _ -> False
   _ -> x == y
-termEquality (Abs x t1, Abs y t2) (m1, m2) s = 
+termEquality (Abs x t1, Abs y t2) (m1, m2) s =
   termEquality (t1, t2) (m1', m2') (s+1)
-  where 
+  where
     m1' = M.insert x s m1
     m2' = M.insert y s m2
-termEquality (App a1 b1, App a2 b2) c s = 
+termEquality (App a1 b1, App a2 b2) c s =
   termEquality (a1, a2) c s && termEquality (b1, b2) c s
 termEquality _ _ _ = False
-  
---Show instance TODO brackets convention
+
+  --Show instance
 instance Show Term where
   show (Var x)      = show x
-  show (App t1 t2)  = '(':show t1 ++ ' ':show t2 ++ ")" 
-  show (Abs x t1)   = '(':"\x03bb" ++ show x++ "." ++ show t1 ++ ")"
+  show (App t1 t2)  = paren (isAbs t1) (show t1) ++ " " ++ paren (isAbs t2 || isApp t2) (show t2)
+  show (Abs x t1)   = "\x03bb" ++ show x ++ "." ++ show t1
+
+paren :: Bool -> String -> String
+paren True  x = "(" ++ x ++ ")"
+paren False x = x
+
+isAbs :: Term -> Bool
+isAbs (Abs _ _) = True
+isAbs _         = False
+
+isApp :: Term -> Bool
+isApp (App _ _) = True
+isApp _         = False
 
 --bound variables of a term
 bound :: Term -> Set Int
@@ -66,7 +78,7 @@ sub t@(App t1 t2)  = S.insert t $ S.union (sub t1) (sub t2)
 
 --element is bound in a term
 notfree :: Int -> Term -> Bool
-notfree x = not . S.member x . free 
+notfree x = not . S.member x . free
 
 --set of variables in a term
 vars :: Term -> Set Int
@@ -87,9 +99,9 @@ rename (App t1 t2) (x,y) = App (rename t1 (x,y)) (rename t2 (x,y))
 --substitute one term for another in a term
 --does capture avoiding substitution (Berenregt)
 substitute :: Term -> (Term, Term) -> Term
-substitute t1@(Var c1) (Var c2, t2) 
-  = if c1 == c2 then t2 else t1 
-substitute (App t1 t2) c 
+substitute t1@(Var c1) (Var c2, t2)
+  = if c1 == c2 then t2 else t1
+substitute (App t1 t2) c
   = App (substitute t1 c) (substitute t2 c)
 substitute (Abs y s) c@(Var x, t)
   | y == x = Abs y s
@@ -99,35 +111,35 @@ substitute (Abs y s) c@(Var x, t)
 
 --eta reduction
 eta :: Term -> Maybe Term
-eta (Abs x (App t (Var y))) 
+eta (Abs x (App t (Var y)))
   | x == y && x `notfree` t = Just t
   | otherwise = Nothing
 
 --term is normal form if has no subterms of the form (\x.s) t
 isNormalForm :: Term -> Bool
-isNormalForm = not . any testnf . sub 
-  where 
+isNormalForm = not . any testnf . sub
+  where
     testnf t = case t of
       (App (Abs _ _) _) -> True
-      _ -> False 
+      _ -> False
 
---one-step reduction relation 
-reduce1 :: Term -> Maybe Term 
+--one-step reduction relation
+reduce1 :: Term -> Maybe Term
 reduce1 t@(Var x) = Nothing
 reduce1 t@(Abs x s) = case reduce1 s of
   Just s' -> Just $ Abs x s'
   Nothing -> Nothing
-reduce1 t@(App (Abs x t1) t2) 
+reduce1 t@(App (Abs x t1) t2)
   = Just $ substitute t1 (Var x, t2)  --beta conversion
-reduce1 t@(App t1 t2) = case reduce1 t1 of 
+reduce1 t@(App t1 t2) = case reduce1 t1 of
   Just t' -> Just $ App t' t2
-  _ -> case reduce1 t2 of 
+  _ -> case reduce1 t2 of
     Just t' -> Just $ App t1 t'
     _ -> Nothing
 
 --multi-step reduction relation - NOT GUARANTEED TO TERMINATE
 reduce :: Term -> Term
-reduce t = case reduce1 t of 
+reduce t = case reduce1 t of
     Just t' -> reduce t'
     Nothing -> t
 
@@ -155,32 +167,7 @@ toChurch n = Abs 0 (Abs 1 (toChurch' n))
   where
     toChurch' 0 = Var 1
     toChurch' n = App (Var 0) (toChurch' (n-1))
- 
+
 test1 = App i (Abs 1 (App (Var 1) (Var 1)))
 test2 = App (App (Abs 1 (Abs 2 (Var 2))) (Var 2)) (Var 4)
 test3 = App (App (toChurch 3) (Abs 0 (App (Var 0) (toChurch 2)))) (toChurch 1)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
