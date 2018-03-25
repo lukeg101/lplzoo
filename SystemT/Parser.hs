@@ -151,16 +151,10 @@ zero = do
   char 'z'
   return Zero
 
-succ = succe +++ succs where 
-  succe = do
+succ = do
     char 's'
     space1
     n <- expr
-    return $ Succ n
-  succs = do
-    char 's'
-    space1
-    n <- Parser.succ
     return $ Succ n
 
 rec = do
