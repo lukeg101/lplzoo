@@ -73,6 +73,8 @@ termEquality (Zero, Zero) c s = True
 termEquality (Y, Y) c s = True
 termEquality _ _ _ = False
 
+-- use application to combine E.g App Y f and let the lambda machinery do the work
+
 -- show instance for PCFTerms, following bracketing convention
 instance Show PCFTerm where
   show Zero    = "z"
@@ -114,7 +116,6 @@ typeof l@(App Succ l2) ctx = do
   guard (typeof l2 ctx == Just TNat)
   Just TNat
 typeof l@(App Pred l2) ctx = do
-  guard (l2 /= Zero)
   guard (typeof l2 ctx == Just TNat)
   Just TNat
 typeof l@(App Y l2) ctx = case typeof l2 ctx of
