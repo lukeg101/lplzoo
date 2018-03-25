@@ -1,0 +1,17 @@
+
+
+
+
+
+see semantics for STLC
+
+\overline{\Gamma \vdash z:Nat}
+
+\frac{\Gamma \vdash n : Nat}{\Gamma \vdash s\, n : Nat}
+
+\frac{\Gamma \vdash h : Nat \rightarrow T \rightarrow T\quad \Gamma \vdash a : T\quad \Gamma \vdash n:Nat }
+{\Gamma \vdash rec_{T}\,h\,a\,n : T}
+
+rec_{T}\,h\,a\,z \rightsquigarrow a
+
+rec_{T}\,h\,a\,(s\, n) \rightsquigarrow h\,n\,(rec_{T}\, h\,a\,n)

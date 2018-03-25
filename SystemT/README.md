@@ -92,9 +92,19 @@ the reduction relation is adopted from STLC:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)N \rightsquigarrow M [x := N]" /></a>
 
-and there are special reduction rules for primitive recursion on Nats:
+for zero and succ:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;z:Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;z:Nat}" title="\overline{\Gamma \vdash z:Nat}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;s\,&space;n&space;:&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;s\,&space;n&space;:&space;Nat}" title="\frac{\Gamma \vdash n : Nat}{\Gamma \vdash s\, n : Nat}" /></a>
+
+and there are special elimination and reduction rules for primitive recursion on Nats:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;h&space;:&space;Nat&space;\rightarrow&space;T&space;\rightarrow&space;T\quad&space;\Gamma&space;\vdash&space;a&space;:&space;T\quad&space;\Gamma&space;\vdash&space;n:Nat&space;}&space;{\Gamma&space;\vdash&space;rec_{T}\,h\,a\,n&space;:&space;T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;h&space;:&space;Nat&space;\rightarrow&space;T&space;\rightarrow&space;T\quad&space;\Gamma&space;\vdash&space;a&space;:&space;T\quad&space;\Gamma&space;\vdash&space;n:Nat&space;}&space;{\Gamma&space;\vdash&space;rec_{T}\,h\,a\,n&space;:&space;T}" title="\frac{\Gamma \vdash h : Nat \rightarrow T \rightarrow T\quad \Gamma \vdash a : T\quad \Gamma \vdash n:Nat } {\Gamma \vdash rec_{T}\,h\,a\,n : T}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=rec_{T}\,h\,a\,z&space;\rightsquigarrow&space;a" target="_blank"><img src="https://latex.codecogs.com/gif.latex?rec_{T}\,h\,a\,z&space;\rightsquigarrow&space;a" title="rec_{T}\,h\,a\,z \rightsquigarrow a" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=rec_{T}\,h\,a\,(s\,&space;n)&space;\rightsquigarrow&space;h\,n\,(rec_{T}\,&space;h\,a\,n)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?rec_{T}\,h\,a\,(s\,&space;n)&space;\rightsquigarrow&space;h\,n\,(rec_{T}\,&space;h\,a\,n)" title="rec_{T}\,h\,a\,(s\, n) \rightsquigarrow h\,n\,(rec_{T}\, h\,a\,n)" /></a>
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in SystemT.hs). 
 - Reductions include the one-step reduction (see `reduce1` in SystemT.hs), the many-step reduction (see `reduce` in SystemT.hs). 
