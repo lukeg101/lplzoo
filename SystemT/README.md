@@ -27,7 +27,7 @@ Compile it using GHC if you need this.
 ## Examples 
 Where you can then have some fun, try these examples:
 - `\1:Nat.1`
-- `s s z`
+- `s (s z)`
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
