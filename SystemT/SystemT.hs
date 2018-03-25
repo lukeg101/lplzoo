@@ -73,9 +73,14 @@ termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s =
     m2' = M.insert y s m2
 termEquality (App a1 b1, App a2 b2) c s = 
   termEquality (a1, a2) c s && termEquality (b1, b2) c s
+termEquality (Succ n, Succ m) c s = termEquality (n, m) c s
+termEquality (Zero, Zero) c s = True
+termEquality (RecNat h1 a1 n1, RecNat h2 a2 n2) c s =
+  termEquality (h1, h2) c s && termEquality (a1, a2) c s 
+  && termEquality (n1, n2) c s
 termEquality _ _ _ = False
 
--- Naive show instance for STTerms, TODO implement Bracketing convention for System T
+-- show instance for STTerms, following bracketing convention
 instance Show STTerm where
   show Zero         = "z"
   show (Succ n)     = "s " ++ paren (isAbs n || isApp n || isRec n) (show n)
@@ -237,14 +242,14 @@ reduce1 l@(App l1 l2) = do
 --multi-step reduction relation - NOT GUARANTEED TO TERMINATE
 reduce :: STTerm -> STTerm
 reduce t = case reduce1 t of 
-    Just t' -> reduce t'
-    Nothing -> t
+  Just t' -> reduce t'
+  Nothing -> t
 
 ---multi-step reduction relation that accumulates all reduction steps
 reductions :: STTerm -> [STTerm]
 reductions t = case reduce1 t of
-    Just t' -> t' : reductions t'
-    _       -> []
+  Just t' -> t' : reductions t'
+  _       -> []
 
 --common combinators
 i_Nat t = Abs 1 t (Var 1)
