@@ -83,7 +83,7 @@ termEquality _ _ _ = False
 -- show instance for STTerms, following bracketing convention
 instance Show STTerm where
   show Zero         = "z"
-  show (Succ n)     = "s " ++ paren (isAbs n || isApp n || isRec n) (show n)
+  show (Succ n)     = "s " ++ paren (isAbs n || isApp n || isRec n || isSucc n) (show n)
   show (RecNat h a n)  = "rec "++ 
     paren (isAbs h || isApp h || isRec h || isSucc h) (show h) 
     ++ " " ++ paren (isAbs a || isApp a || isRec a || isSucc a) (show a) 
