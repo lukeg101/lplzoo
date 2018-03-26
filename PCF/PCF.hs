@@ -240,23 +240,26 @@ reduce1 l@(Abs x t s) = do
   Just $ Abs x t s'
 reduce1 l@(App (Abs x t l') l2) = 
   Just $ substitute l' (Var x, l2) --beta conversion
-reduce1 l@(App Y (Abs x t l')) = 
-  Just $ substitute l (Var x, l')  -- Y f ~> f (Y f)
-reduce1 l@(App Y l2) = do
-  l2' <- reduce1 l2
-  Just $ App Y l2'
 reduce1 (App Pred (App Succ l1)) = Just l1
-reduce1 (App Succ (App Pred l1)) = Just l1
 reduce1 (App Pred Zero) = Just Zero
+reduce1 (App Pred n) = case reduce1 n of
+  Just n' -> Just $ App Pred n'
+  _ -> Nothing
+reduce1 (App Succ n) = case reduce1 n of
+  Just n' -> Just $ App Pred n'
+  _ -> Nothing
 reduce1 l@(App (App (App If Zero) l3) l4) = do
   Just l3
 reduce1 l@(App (App (App If (App Succ l2)) l3) l4) = do
-  case reduce1 l2 of 
-    Just l2' -> Just (App (App (App If (App Succ l2')) l3) l4)
-    _ -> Just l4
+  Just l4
 reduce1 l@(App (App (App If l2) l3) l4) = do
   l2' <- reduce1 l2
   Just $ App (App (App If l2') l3) l4
+reduce1 l@(App Y (Abs x t l')) = 
+  Just $ substitute l' (Var x, l)  -- Y f ~> f (Y f)
+reduce1 l@(App Y l2) = do
+  l2' <- reduce1 l2
+  Just $ App Y l2'
 reduce1 l@(App l1 l2) = do
   l' <- reduce1 l1
   Just $ App l' l2

@@ -28,6 +28,7 @@ Compile it using GHC if you need this.
 Where you can then have some fun, try these examples:
 - `\1:Nat.1`
 - `p (s z)`
+- `Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (s (s z))`
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
@@ -39,10 +40,19 @@ The parser is also smart enough to recognise λ, so you can copy and paste from 
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> '(\1:Nat.\2:Nat. 1) z (s z)
-(λ2:Nat.z) (s z)
+> 'Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (s (s z))
+(λ1:Nat.if 1 z (if (p 1) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p 1))))) (s (s z))
+if (s (s z)) z (if (p (s (s z))) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p (s (s z))))))
+if (p (s (s z))) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p (s (s z)))))
+if (s z) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p (s (s z)))))
+Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p (s (s z))))
+(λ1:Nat.if 1 z (if (p 1) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p 1))))) (p (p (s (s z))))
+if (p (p (s (s z)))) z (if (p (p (p (s (s z))))) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p (p (p (s (s z))))))))
+if (p (s z)) z (if (p (p (p (s (s z))))) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p (p (p (s (s z))))))))
+if z z (if (p (p (p (s (s z))))) (s z) (Y (λ0:Nat->Nat.λ1:Nat.if 1 z (if (p 1) (s z) (0 (p (p 1))))) (p (p (p (p (s (s z))))))))
 z
 ```
+Note: the above is a function to check if 2 is even.
 
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
