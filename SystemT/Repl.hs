@@ -23,20 +23,29 @@ repl = do
   else do
     if head s == '\'' 
     then case apply term (tail s) of
-      (x:xs) -> case typeof' $ fst x of
-        Just y -> mapM_ print $ reductions (fst x)
-        _ -> cannotType $ tail s
+      (x:xs) -> do
+        if (null $ snd x)
+        then case typeof' $ fst x of
+          Just y -> mapM_ print $ reductions (fst x)
+          _ -> cannotType $ tail s
+        else cannotParse s
       _ -> cannotParse s
     else if head s == 't'
     then case apply term $ tail s of
-      (x:xs) -> case typeof' $ fst x of
-        Just y -> print y
-        _ -> cannotType $ tail s
+      (x:xs) -> do
+        if (null $ snd x)
+        then case typeof' $ fst x of
+          Just y -> print y
+          _ -> cannotType $ tail s
+        else cannotParse s
       _ -> cannotParse s
     else case apply term s of
-      (x:xs) -> case typeof' $ fst x of
-        Just y -> print . reduce $ fst x
-        _ -> cannotType s
+      (x:xs) -> do
+        if (null $ snd x)
+        then case typeof' $ fst x of
+          Just y -> print . reduce $ fst x
+          _ -> cannotType s
+        else cannotParse s
       _ -> cannotParse s
     repl
 

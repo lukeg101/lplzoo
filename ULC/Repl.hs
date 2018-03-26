@@ -23,9 +23,19 @@ repl = do
   else do
     if head s == '\'' 
     then case apply term (tail s) of
-      (x:xs) -> mapM_ print . reductions $ fst x
-      _ -> putStrLn $ "Cannot Parse Term:" ++ s
+      (x:xs) -> do
+        if (null $ snd x)
+        then mapM_ print . reductions $ fst x
+        else cannotParse s
+      _ -> cannotParse s
     else case apply term s of
-      (x:xs) -> print . reduce $ fst x
-      _ -> putStrLn $ "Cannot Parse Term:" ++ s
+      (x:xs) -> do
+        if (null $ snd x)
+        then print . reduce $ fst x
+        else cannotParse s
+      _ -> cannotParse s
     repl
+
+cannotParse :: String -> IO ()
+cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
+

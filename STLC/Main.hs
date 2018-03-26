@@ -2,6 +2,6 @@ module Main where
 
 import Repl
 
--- Simple ULC Repl
+-- Simple STLC Repl
 main :: IO ()
 main = replMain
