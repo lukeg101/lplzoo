@@ -34,8 +34,8 @@ data PCFTerm
   | Abs Int T PCFTerm
   | App PCFTerm PCFTerm
   | Zero
-  | Succ
-  | Pred
+  | Succ --Succ n is implemented as App Succ n 
+  | Pred --same as succ, app reduction rules handle this
   | Y
   deriving Ord
 
@@ -84,13 +84,9 @@ instance Show PCFTerm where
   show (Var x) = show x
   show (App t1 t2)  = 
     paren (isAbs t1) (show t1) ++ ' ' 
-      : paren (isAbs t2 || isApp t2 || isSucc t2) (show t2)
+      : paren (isAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) = 
     "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
-
-isSucc :: PCFTerm -> Bool
-isSucc Succ = True
-isSucc _    = False
 
 isAbs :: PCFTerm -> Bool
 isAbs (Abs _ _ _) = True
