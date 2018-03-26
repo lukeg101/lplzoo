@@ -93,7 +93,7 @@ the reduction relation is adopted from STLC:
 
 for zero, pred, and succ:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;p\,&space;n&space;:&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;p\,&space;n&space;:&space;Nat}" title="\frac{\Gamma \vdash n : Nat}{\Gamma \vdash p\, n : Nat}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{&space;\Gamma&space;\vdash&space;n&space;:&space;Nat}{&space;\Gamma&space;\vdash&space;p\,&space;n&space;:&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{&space;\Gamma&space;\vdash&space;n&space;:&space;Nat}{&space;\Gamma&space;\vdash&space;p\,&space;n&space;:&space;Nat}" title="\frac{ \Gamma \vdash n : Nat}{ \Gamma \vdash p\, n : Nat}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;z:Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;z:Nat}" title="\overline{\Gamma \vdash z:Nat}" /></a>
 
