@@ -37,6 +37,7 @@ data PCFTerm
   | Succ --Succ n is implemented as App Succ n 
   | Pred --same as succ, app reduction rules handle this
   | Y
+  | If
   deriving Ord
 
 -- alpha equivalence of terms, same as STLC
@@ -70,8 +71,9 @@ termEquality (App a1 b1, App a2 b2) c s =
 termEquality (Succ, Succ) c s = True
 termEquality (Pred, Pred) c s = True
 termEquality (Zero, Zero) c s = True
-termEquality (Y, Y) c s = True
-termEquality _ _ _ = False
+termEquality (If, If) c s     = True
+termEquality (Y, Y) c s       = True
+termEquality _ _ _            = False
 
 -- use application to combine E.g App Y f and let the lambda machinery do the work
 
@@ -81,6 +83,7 @@ instance Show PCFTerm where
   show Succ    = "s"
   show Pred    = "p"
   show Y       = "Y"
+  show If      = "if"
   show (Var x) = show x
   show (App t1 t2)  = 
     paren (isAbs t1) (show t1) ++ ' ' 
@@ -119,6 +122,14 @@ typeof l@(App Y l2) ctx = case typeof l2 ctx of
     guard (t1 == t2)
     Just t1
   _ -> Nothing
+typeof l@(App (App (App If l2) l3) l4) ctx =
+  case typeof l2 ctx of
+    Just TNat -> do
+      t3 <- typeof l3 ctx
+      t4 <- typeof l4 ctx
+      guard (t3 == t4)
+      Just t3
+    _ -> Nothing
 typeof l@(App l1 l2) ctx = do
   t1 <- typeof l2 ctx
   case typeof l1 ctx of
@@ -126,7 +137,7 @@ typeof l@(App l1 l2) ctx = do
       guard (t1 == t2)
       Just t3
     _ -> Nothing
-
+typeof _ _ = Nothing
 
 -- top level typing derivation, passing empty context to typeof
 typeof' l = typeof l M.empty
@@ -137,6 +148,7 @@ bound Zero         = S.empty
 bound Succ         = S.empty
 bound Pred         = S.empty
 bound Y            = S.empty
+bound If           = S.empty
 bound (Var n)      = S.empty
 bound (Abs n t l1) = S.insert n $ bound l1
 bound (App l1 l2)  = S.union (bound l1) (bound l2)
@@ -147,6 +159,7 @@ free Zero         = S.empty
 free Succ         = S.empty
 free Pred         = S.empty
 free Y            = S.empty
+free If           = S.empty
 free (Var n)      = S.singleton n
 free (Abs n t l1) = S.delete n (free l1)
 free (App l1 l2)  = S.union (free l1) (free l2)
@@ -161,6 +174,7 @@ sub l@Zero         = S.singleton l
 sub l@Succ         = S.singleton l
 sub l@Pred         = S.singleton l
 sub l@Y            = S.singleton l
+sub l@If           = S.singleton l
 sub l@(Var x)      = S.singleton l
 sub l@(Abs c t l1) = S.insert l $ sub l1
 sub l@(App l1 l2)  = S.insert l $ S.union (sub l1) (sub l2)
@@ -175,6 +189,7 @@ vars Zero         = S.empty
 vars Succ         = S.empty
 vars Pred         = S.empty
 vars Y            = S.empty
+vars If           = S.empty
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t l1) = S.insert x $ vars l1
@@ -189,6 +204,7 @@ rename Zero c = Zero
 rename Succ c = Succ
 rename Pred c = Pred
 rename Y c    = Y
+rename If c   = If
 rename (Var a) (x,y) = if a == x then Var y else Var a
 rename l@(Abs a t l1) (x,y) = if a == x then l else Abs a t $ rename l1 (x, y)
 rename (App l1 l2) (x,y) = App (rename l1 (x,y)) (rename l2 (x,y))
@@ -200,6 +216,7 @@ substitute Zero c = Zero
 substitute Succ c = Succ
 substitute Pred c = Pred
 substitute Y c    = Y
+substitute If c   = If
 substitute l1@(Var c1) (Var c2, l2) 
   = if c1 == c2 then l2 else l1 
 substitute (App l1 l2) c 
@@ -216,6 +233,7 @@ reduce1 Zero = Nothing
 reduce1 Succ = Nothing
 reduce1 Pred = Nothing
 reduce1 Y    = Nothing 
+reduce1 If   = Nothing
 reduce1 l@(Var x) = Nothing
 reduce1 l@(Abs x t s) = do
   s' <- reduce1 s
@@ -229,7 +247,16 @@ reduce1 l@(App Y l2) = do
   Just $ App Y l2'
 reduce1 (App Pred (App Succ l1)) = Just l1
 reduce1 (App Succ (App Pred l1)) = Just l1
-reduce1 (App Pred Zero) = Just Zero 
+reduce1 (App Pred Zero) = Just Zero
+reduce1 l@(App (App (App If Zero) l3) l4) = do
+  Just l3
+reduce1 l@(App (App (App If (App Succ l2)) l3) l4) = do
+  case reduce1 l2 of 
+    Just l2' -> Just (App (App (App If (App Succ l2')) l3) l4)
+    _ -> Just l4
+reduce1 l@(App (App (App If l2) l3) l4) = do
+  l2' <- reduce1 l2
+  Just $ App (App (App If l2') l3) l4
 reduce1 l@(App l1 l2) = do
   l' <- reduce1 l1
   Just $ App l' l2

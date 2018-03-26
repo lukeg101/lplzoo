@@ -166,9 +166,13 @@ pred = do
   char 'p'
   return $ Pred
 
+if_ = do
+  symb "if"
+  return $ If
+
 -- expression follows CFG form with bracketing convention
 expr = (bracket term) +++ termVar +++ zero +++ rec
-  +++ Parser.pred +++ Parser.succ
+  +++ Parser.pred +++ Parser.succ +++ if_
 
 -- top level of CFG Gramma
 term = lam +++ app
