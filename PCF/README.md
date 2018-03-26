@@ -107,7 +107,7 @@ and there are special elimination and reduction rules for general recursion:
 
 or in other words:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;(Y\,&space;f)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;(Y\,&space;f)" title="Y\, f \rightsquigarrow\, f\, (Y\, f)" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;\(Y\,&space;f\)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;\(Y\,&space;f\)" title="Y\, f \rightsquigarrow\, f\, \(Y\, f\)" /></a>
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in PCF.hs). 
 - Reductions include the one-step reduction (see `reduce1` in PCF.hs), the many-step reduction (see `reduce` in PCF.hs). 
