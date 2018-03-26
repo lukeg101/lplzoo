@@ -1,0 +1,13 @@
+
+
+typing judgements
+
+see STLC
+
+\frac{\Gamma \vdash n : Nat}{\Gamma \vdash p\, n : Nat}
+
+\frac{\Gamma \vdash t : T \rightarrow T}{\Gamma \vdash Y\,t:T} 
+
+Y\,(\lambda x : t . M) \rightsquigarrow M[x := Y\,(\lambda x:t.M)]
+
+Y\, f \rightsquigarrow\, f\, (Y\, f)

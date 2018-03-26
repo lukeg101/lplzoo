@@ -1,5 +1,5 @@
 # Programming Computable Functions
-Haskell implementation on Gordon Plotkin's typed lambda calculus. It has a base type `Nat`, the function type `T->T`, `Succ`\`Pred`essors on Nats, and [general](https://stackoverflow.com/questions/1712237/how-does-primitive-recursion-differ-from-normal-recursion) recursion on Nats through use of a [Y combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus).
+Haskell implementation on Gordon Plotkin's typed lambda calculus. It has a base type `Nat`, the function type `T->T`, `Succ` \\ `Pred`essors on Nats, and [general](https://stackoverflow.com/questions/1712237/how-does-primitive-recursion-differ-from-normal-recursion) recursion on Nats through use of a [Y combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus).
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -93,7 +93,7 @@ the reduction relation is adopted from STLC:
 
 for zero, pred, and succ:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;p\,&space;n&space;:&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;p\,&space;n&space;:&space;Nat}" title="\frac{\Gamma \vdash n : Nat}{\Gamma \vdash p\, n : Nat}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;z:Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;z:Nat}" title="\overline{\Gamma \vdash z:Nat}" /></a>
 
@@ -101,7 +101,13 @@ TODO
 
 and there are special elimination and reduction rules for general recursion:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;t&space;:&space;T&space;\rightarrow&space;T}{\Gamma&space;\vdash&space;Y\,t:T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;t&space;:&space;T&space;\rightarrow&space;T}{\Gamma&space;\vdash&space;Y\,t:T}" title="\frac{\Gamma \vdash t : T \rightarrow T}{\Gamma \vdash Y\,t:T}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=Y\,(\lambda&space;x&space;:&space;t&space;.&space;M)&space;\rightsquigarrow&space;M[x&space;:=&space;Y\,(\lambda&space;x:t.M)]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Y\,(\lambda&space;x&space;:&space;t&space;.&space;M)&space;\rightsquigarrow&space;M[x&space;:=&space;Y\,(\lambda&space;x:t.M)]" title="Y\,(\lambda x : t . M) \rightsquigarrow M[x := Y\,(\lambda x:t.M)]" /></a>
+
+or in other words:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;(Y\,&space;f)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;(Y\,&space;f)" title="Y\, f \rightsquigarrow\, f\, (Y\, f)" /></a>
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in PCF.hs). 
 - Reductions include the one-step reduction (see `reduce1` in PCF.hs), the many-step reduction (see `reduce` in PCF.hs). 
