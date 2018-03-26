@@ -1,4 +1,15 @@
+syntax
 
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ 
+&|&\tt{z}\\
+&|&\tt{s}\\
+&|&\tt{p}\\
+&|&\tt{if}\\
+&|&\tt{Y}\\
+&&\\ \end{matrix}
+
+&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | 
+... \\
 
 typing judgements
 
