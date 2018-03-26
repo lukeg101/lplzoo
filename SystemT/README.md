@@ -70,7 +70,7 @@ The syntax for the parser follows the CFG for System T with the standard notatio
 It's possible this grammar is ambiguous; submit a PR if you check! Some notes about the syntax:
 
 - Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:Nat.x`).
-- Types are either literal `Nat` base types or nested arrow types: `T -> T`. Arrows associate to the left so that `Nat -> Nat -> Nat` is the same as `((Nat -> Nat) -> Nat)` but not `Nat -> (Nat -> Nat)`.
+- Types are either literal `Nat` base types or nested arrow types: `T -> T`. Arrows associate to the right so that `Nat -> Nat -> Nat` is the same as `Nat -> (Nat -> Nat)` but not `((Nat -> Nat) -> Nat)`.
 - Nested terms don't need brackets: `\1:Nat.\2:Nat. 2` unless enforcing application on the right. Whitespace does not matter `(\1:Nat.          1)` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
