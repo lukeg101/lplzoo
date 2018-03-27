@@ -1,5 +1,7 @@
-# Untyped Lambda Calculus
-Haskell implementation on  Moses Schinfinkel's SK-combintator calculus. It's a Turing Complete model of computation consisting purely of applying terms `S`, `K` and `I`.
+# SKI Combinator Calculus
+Haskell implementation on  Moses Schonfinkel's SKI-combintator calculus. It's a Turing Complete model of computation consisting purely of applying terms `S`, `K` and `I`.
+
+This Calculus can be used as a basis for all combinatory logic.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -63,18 +65,18 @@ Note: if you provide a non-normalizing term (e.g. with `(S I I (S I I))` which i
 
 ## Syntax 
 
-We base the language on the BNF for the untyped calculus:
+We base the language on the BNF for the SKI calculus:
 
 TODO
 
-However we adopt the standard bracketing conventions to eliminate ambiguity in the parser. Concretly, the parser implements the non-ambiguous grammar as follows:
+However we adopt the standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
 
 TODO
 
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters. Some treatments of the SKI calculus omit variables, but as long as there is no notion of binding it should be ok.
-- Nested terms may not require brackets: `((S K) K) 1` and follows the convention application being left associative where `S K K 1` is the same as `((S K) K) 1` but not `S (K (K 1))`.
+- Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me to implement. This is isomorphic to a whiteboard treatment using characters. Some treatments of the SKI calculus omit variables, but as long as there is no notion of binding it should be ok.
+- Nested terms may not require brackets and follows the convention of application being left associative where `S K K 1` is the same as `((S K) K) 1`, but not `S (K (K 1))`.
 - Whitespace does not matter, except in between application where a minimumum of one space is needed. 
 - Non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations.
 - This grammar left-recursive and non-ambiguous.
