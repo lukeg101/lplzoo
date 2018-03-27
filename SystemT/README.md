@@ -1,6 +1,8 @@
 # System T
 Haskell implementation on Kurt Godel's typed lambda calculus. It has a base type `Nat`, `Succ`essors on Nats, the function type `T->T`, and primitive recursion on Nats. It is strongly normalizing, but not Turing Complete.
 
+Godel used this language to prove the consistency of arithmetic.
+
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
 

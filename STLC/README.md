@@ -1,6 +1,8 @@
 # Simply Typed Lambda Calculus
 Haskell implementation on Alonzo Church's untyped lambda calculus. It has a base type `O` and function type `T->T` to eliminate untypeable and paradoxical terms.
 
+This calculus is of intense [foundational](https://existentialtype.wordpress.com/2011/03/27/the-holy-trinity/) interest and builds on ULC by prohibiting untypeable/paradoxical terms such as `\x.x x`.
+
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
 

@@ -1,6 +1,8 @@
 # Untyped Lambda Calculus
 Haskell implementation on Alonzo Church's untyped lambda calculus. It's a Turing Complete model of computation.
 
+This calculus is considered the canonical _hello world_ of functional programming languages.
+
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
 
