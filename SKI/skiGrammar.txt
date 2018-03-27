@@ -30,11 +30,13 @@ SKI Semantics
 
 \overline{x \in CL}, \mbox{(if $x \in \upsilon$)}
 
-\frac{x \in CL}{I\,x \in CL}
+\overline{I \in CL}
 
-\frac{x \in CL\quad y \in CL}{K\,x\,y \in CL}
+\overline{S \in CL}
 
-\frac{x \in CL\quad y \in CL\quad z \in CL}{S\,x\,y\,z \in CL}
+\overline{K \in CL}
+
+\frac{x \in CL\quad y \in CL}{(x\,y) \in CL}
 
 I\,x \rightsquigarrow x\newline
 K\,x\,y \rightsquigarrow x\newline

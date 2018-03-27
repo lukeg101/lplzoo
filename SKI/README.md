@@ -87,11 +87,13 @@ The SKI calculus operates on combinations of `S`, `K`, and `I`, which can be for
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{x&space;\in&space;CL},&space;\mbox{(if&space;$x&space;\in&space;\upsilon$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{x&space;\in&space;CL},&space;\mbox{(if&space;$x&space;\in&space;\upsilon$)}" title="\overline{x \in CL}, \mbox{(if $x \in \upsilon$)}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL}{I\,x&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL}{I\,x&space;\in&space;CL}" title="\frac{x \in CL}{I\,x \in CL}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{I&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{I&space;\in&space;CL}" title="\overline{I \in CL}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{K\,x\,y&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{K\,x\,y&space;\in&space;CL}" title="\frac{x \in CL\quad y \in CL}{K\,x\,y \in CL}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{S&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{S&space;\in&space;CL}" title="\overline{S \in CL}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL\quad&space;z&space;\in&space;CL}{S\,x\,y\,z&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL\quad&space;z&space;\in&space;CL}{S\,x\,y\,z&space;\in&space;CL}" title="\frac{x \in CL\quad y \in CL\quad z \in CL}{S\,x\,y\,z \in CL}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{K&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{K&space;\in&space;CL}" title="\overline{K \in CL}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{(x\,y)&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{(x\,y)&space;\in&space;CL}" title="\frac{x \in CL\quad y \in CL}{(x\,y) \in CL}" /></a>
 
 and reduced with rules:
 
