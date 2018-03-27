@@ -83,7 +83,19 @@ Some notes about the syntax:
 
 ## Semantics
 
-TODO
+The SKI calculus operates on combinations of `S`, `K`, and `I`, which can be formed with introduction and elimination rules:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{x&space;\in&space;CL},&space;\mbox{(if&space;$x&space;\in&space;\upsilon$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{x&space;\in&space;CL},&space;\mbox{(if&space;$x&space;\in&space;\upsilon$)}" title="\overline{x \in CL}, \mbox{(if $x \in \upsilon$)}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL}{I\,x&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL}{I\,x&space;\in&space;CL}" title="\frac{x \in CL}{I\,x \in CL}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{K\,x\,y&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{K\,x\,y&space;\in&space;CL}" title="\frac{x \in CL\quad y \in CL}{K\,x\,y \in CL}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL\quad&space;z&space;\in&space;CL}{S\,x\,y\,z&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL\quad&space;z&space;\in&space;CL}{S\,x\,y\,z&space;\in&space;CL}" title="\frac{x \in CL\quad y \in CL\quad z \in CL}{S\,x\,y\,z \in CL}" /></a>
+
+and reduced with rules:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=I\,x&space;\rightsquigarrow&space;x\newline&space;K\,x\,y&space;\rightsquigarrow&space;x\newline&space;S\,x\,y\,z&space;\rightsquigarrow&space;x\,z\,(y\,z)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?I\,x&space;\rightsquigarrow&space;x\newline&space;K\,x\,y&space;\rightsquigarrow&space;x\newline&space;S\,x\,y\,z&space;\rightsquigarrow&space;x\,z\,(y\,z)" title="I\,x \rightsquigarrow x\newline K\,x\,y \rightsquigarrow x\newline S\,x\,y\,z \rightsquigarrow x\,z\,(y\,z)" /></a>
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and has free variables for simplicity. 
 - Reductions include the one-step reduction (see `reduce1` in SKI.hs), the many-step reduction (see `reduce` in SKI.hs). 

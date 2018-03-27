@@ -25,3 +25,17 @@ SKI parser grammar
 &&\\ 
 \upsilon&::=& {\tt 0} | {\tt 1} | {\tt 2} | ...
 \end{matrix}
+
+SKI Semantics
+
+\overline{x \in CL}, \mbox{(if $x \in \upsilon$)}
+
+\frac{x \in CL}{I\,x \in CL}
+
+\frac{x \in CL\quad y \in CL}{K\,x\,y \in CL}
+
+\frac{x \in CL\quad y \in CL\quad z \in CL}{S\,x\,y\,z \in CL}
+
+I\,x \rightsquigarrow x\newline
+K\,x\,y \rightsquigarrow x\newline
+S\,x\,y\,z \rightsquigarrow x\,z\,(y\,z)
