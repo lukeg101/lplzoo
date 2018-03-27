@@ -1,0 +1,27 @@
+syntax
+
+SKI bnf
+
+\begin{matrix}
+ \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ 
+& | & \tau\,{\tt space}\,\tau\\
+& | & S\,\tau\,\tau\,\tau &&\\  
+& | & K\, \tau\,\tau &&\\ 
+& | & I\, \tau&&\\ 
+\upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... 
+\end{matrix}
+
+SKI parser grammar
+
+\begin{matrix}
+\tau & ::= & \beta \\ 
+&| &\mathbf{\tau\, \tt{space}\, \beta} \\
+ &&\\ 
+\beta & ::= & \tt{(}\tau \tt{)}\\ 
+&|& \upsilon \\ 
+&|&\tt{S}\\ 
+&|&\tt{K}\\ 
+&|&\tt{I}\\ 
+&&\\ 
+\upsilon&::=& {\tt 0} | {\tt 1} | {\tt 2} | ...
+\end{matrix}
