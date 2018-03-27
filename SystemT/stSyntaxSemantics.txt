@@ -1,4 +1,9 @@
+syntax
 
+st bnf
+
+
+st parser grammar
 
 \begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &|& \tt{s}\, \tt{space}\,\beta \\ &|&\tt{rec}\, \tt{space}\,\beta\, \tt{space}\,\beta\, \tt{space}\,\beta \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|&z\\&&\\ \end{matrix}
 
@@ -6,6 +11,7 @@
 \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\, |\, \tt{Nat} 
 \end{matrix}
 
+st semantics
 
 see semantics for STLC
 
