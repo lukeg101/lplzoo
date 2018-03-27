@@ -12,9 +12,7 @@ bnf for stlc
 &&\\
 \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ 
 &&\\
-\sigma & | & {\tt O}\\
-& | & \sigma \rightarrow \sigma 
-\end{matrix}
+\sigma & ::= & {\tt O}\\ & | & \sigma \rightarrow \sigma \end{matrix}
 
 grammar for stlc parser
 
