@@ -3,11 +3,28 @@ https://www.codecogs.com/latex/eqneditor.php
 
 used html rendering of gif in readme for syntax
 
+bnf for stlc
+
+\begin{matrix} 
+\mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ 
+& | & \tau\, {\tt space}\, \tau\\ 
+& | & \upsilon \\
+&&\\
+\upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ 
+&&\\
+\sigma & | & {\tt O}\\
+& | & \sigma \rightarrow \sigma 
+\end{matrix}
+
+grammar for stlc parser
+
 \begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma  . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | 
 ... \\
 &&\\
 
 \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\, |\, \tt{O} \end{matrix}\end{matrix}
+
+semantics for stlc
 
 \overline{\Gamma \vdash x:T}, \mbox{(if $x:T \in \Gamma$)}
 
