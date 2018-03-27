@@ -36,12 +36,24 @@ typeEquality (Pi x1 t1, Pi x2 t2) (m1, m2) s =
     m2' = M.insert (Right x2) s m2
 typeEquality _ _ _ = False
 
--- naive show implementation, uses Unicode for Pi type
--- TODO implement bracketing convention for types
+-- show implementation, uses Unicode for Pi type
+-- uses bracketing convention for types
 instance Show T where
   show (TVar c)    = show c
-  show (TArr a b)  = '(':show a ++ "->" ++ show b ++")"
+  show (TArr a b)  = paren (isArr a || isPi a) (show a) ++ "->" ++ show b
   show (Pi t1 t2)  = "\x3a0" ++ show t1 ++ "." ++ show t2
+
+paren :: Bool -> String -> String
+paren True  x = "(" ++ x ++ ")"
+paren False x = x
+
+isArr :: T -> Bool
+isArr (TArr _ _) = True
+isArr _          = False
+
+isPi :: T -> Bool
+isPi (Pi _ _) = True
+isPi _        = False
 
 -- System F Term
 -- variables are numbers as it's easier for renaming
@@ -95,13 +107,23 @@ termEquality (PiAbs x1 t1, PiAbs x2 t2) (m1,m2) s =
     m2' = M.insert (Right x2) s m2
 termEquality _ _ _ = False
 
--- naive show implementation for System F terms
+-- show implementation for System F terms
+-- uses bracketing convention for terms
 instance Show SFTerm where
   show (Var x)      = show x
-  show (Typ t)      = show t
-  show (App t1 t2)  = '(':show t1 ++ ' ':show t2 ++ ")" 
-  show (Abs x t l1) = '(':"\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1 ++ ")"
+  show (Typ t)      = "[" ++ show t ++"]"
+  show (App t1 t2)  = 
+    paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
+  show (Abs x t l1) = "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
   show (PiAbs t l1) = "\x39b" ++ show t ++ "." ++ show l1
+
+isAbs :: SFTerm -> Bool
+isAbs (Abs _ _ _) = True
+isAbs _         = False
+
+isApp :: SFTerm -> Bool
+isApp (App _ _) = True
+isApp _         = False
 
 --type context of term variables and type variables
 --input term or type variable as an Int
