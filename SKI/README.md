@@ -1,0 +1,97 @@
+# Untyped Lambda Calculus
+Haskell implementation on  Moses Schinfinkel's SK-combintator calculus. It's a Turing Complete model of computation consisting purely of applying terms `S`, `K` and `I`.
+
+## Prerequisites
+You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
+
+## To Build & Run
+
+To compile and run do:
+`ghc -O2 -o ski Main`
+then run `./ski`
+
+Alternatively to use the GHCi Interpreter do:
+`ghci Main`
+then type `main`
+
+In either case you get something like the following:
+```
+Welcome to the SKI combinator calculus REPL
+Type some terms or press Enter to leave.
+>
+```
+
+Note: When run in GHCi, you don't have the luxury of escaped characters, backspace, delete etc...
+Compile it using GHC if you need this.
+
+## Examples 
+Where you can then have some fun, try these examples:
+- `S K K 1`
+- `S (K S) K` (known as B)
+- `S (S (K (S (K S) K)) S) (K K)` (known as C)
+
+You can copy and paste from the output:
+```
+Welcome to the SKI combinator calculus REPL
+Type some terms or press Enter to leave.
+> S K K 1
+1
+> 1
+1
+```
+
+There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
+```
+> 'S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))
+S (K S) (S (K K) I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+K S (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+S (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+S (K K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+S (K (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K S) (S (K K) I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K S (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) I)
+```
+Note: the above computes 2^2 in Church Numeral format
+
+Note: if you provide a non-normalizing term (e.g. with `(S I I (S I I))` which is the same as `(\1.1 1)(\1.1 1)` in ULC), reductions will not terminate. Use STLC for termination guarantees.
+
+## Syntax 
+
+We base the language on the BNF for the untyped calculus:
+
+TODO
+
+However we adopt the standard bracketing conventions to eliminate ambiguity in the parser. Concretly, the parser implements the non-ambiguous grammar as follows:
+
+TODO
+
+Some notes about the syntax:
+
+- Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters. Some treatments of the SKI calculus omit variables, but as long as there is no notion of binding it should be ok.
+- Nested terms may not require brackets: `((S K) K) 1` and follows the convention application being left associative where `S K K 1` is the same as `((S K) K) 1` but not `S (K (K 1))`.
+- Whitespace does not matter, except in between application where a minimumum of one space is needed. 
+- Non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations.
+- This grammar left-recursive and non-ambiguous.
+
+## Semantics
+
+TODO
+
+- This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and has free variables for simplicity. 
+- Reductions include the one-step reduction (see `reduce1` in SKI.hs), the many-step reduction (see `reduce` in SKI.hs). 
+
+## Other Implementation Details
+- SKI.hs contains the Haskell implementation of the calculus, including substitution, reduction, and other useful things.
+- Parser.hs contains the monadic parser combinators needed to parse input strings into term ASTs for the calculus. It follows the grammar above.
+- Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
+- Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
+
+For contributions, see the project to-do list or submit a PR with something you think it needs.
+
+

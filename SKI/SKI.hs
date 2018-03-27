@@ -100,14 +100,6 @@ vars I            = S.empty
 newlabel :: SKTerm -> Int
 newlabel = (+1) . maximum . vars
 
---rename t (x,y): renames free occurences of x in t to y
-rename :: SKTerm -> (Int, Int) -> SKTerm
-rename (Var a) (x,y) = if a == x then Var y else Var a
-rename K c = K
-rename S c = S
-rename I c = I
-rename (App t1 t2) c = App (rename t1 c) (rename t2 c)
-
 --one-step reduction relation
 reduce1 :: SKTerm -> Maybe SKTerm
 reduce1 t@(Var x) = Nothing
