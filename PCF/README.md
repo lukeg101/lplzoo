@@ -113,11 +113,25 @@ for zero, pred, and succ:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;s\,&space;n&space;:&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;s\,&space;n&space;:&space;Nat}" title="\frac{\Gamma \vdash n : Nat}{\Gamma \vdash s\, n : Nat}" /></a>
 
+<a href="https://www.codecogs.com/eqnedit.php?latex={\tt&space;p\,(s\,}n)&space;\rightsquigarrow&space;n&space;\newline&space;{\tt&space;p\,&space;z}&space;\rightsquigarrow&space;{\tt&space;z}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?{\tt&space;p\,(s\,}n)&space;\rightsquigarrow&space;n&space;\newline&space;{\tt&space;p\,&space;z}&space;\rightsquigarrow&space;{\tt&space;z}" title="{\tt p\,(s\,}n) \rightsquigarrow n \newline {\tt p\, z} \rightsquigarrow {\tt z}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{n&space;\rightsquigarrow&space;n'}{{\tt&space;p}\,&space;n&space;\rightsquigarrow&space;{\tt&space;p}\,n'}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{n&space;\rightsquigarrow&space;n'}{{\tt&space;p}\,&space;n&space;\rightsquigarrow&space;{\tt&space;p}\,n'}" title="\frac{n \rightsquigarrow n'}{{\tt p}\, n \rightsquigarrow {\tt p}\,n'}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{n&space;\rightsquigarrow&space;n'}{{\tt&space;s}\,&space;n&space;\rightsquigarrow&space;{\tt&space;s}\,n'}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{n&space;\rightsquigarrow&space;n'}{{\tt&space;s}\,&space;n&space;\rightsquigarrow&space;{\tt&space;s}\,n'}" title="\frac{n \rightsquigarrow n'}{{\tt s}\, n \rightsquigarrow {\tt s}\,n'}" /></a>
+
+for if statements:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat\quad&space;\Gamma&space;\vdash&space;t_{1}&space;:&space;T\quad&space;t_{2}&space;\vdash&space;T}{\Gamma&space;\vdash&space;{\tt&space;if}\,n\,t_{1}\,t_{2}&space;:&space;T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat\quad&space;\Gamma&space;\vdash&space;t_{1}&space;:&space;T\quad&space;t_{2}&space;\vdash&space;T}{\Gamma&space;\vdash&space;{\tt&space;if}\,n\,t_{1}\,t_{2}&space;:&space;T}" title="\frac{\Gamma \vdash n : Nat\quad \Gamma \vdash t_{1} : T\quad t_{2} \vdash T}{\Gamma \vdash {\tt if}\,n\,t_{1}\,t_{2} : T}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex={\tt&space;if}\,z\,M\,N&space;\rightsquigarrow&space;M&space;\newline&space;{\tt&space;if}\,({\tt&space;s}\,&space;n)\,M\,N&space;\rightsquigarrow&space;N" target="_blank"><img src="https://latex.codecogs.com/gif.latex?{\tt&space;if}\,z\,M\,N&space;\rightsquigarrow&space;M&space;\newline&space;{\tt&space;if}\,({\tt&space;s}\,&space;n)\,M\,N&space;\rightsquigarrow&space;N" title="{\tt if}\,z\,M\,N \rightsquigarrow M \newline {\tt if}\,({\tt s}\, n)\,M\,N \rightsquigarrow N" /></a>
+
 and there are special elimination and reduction rules for general recursion:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;t&space;:&space;T&space;\rightarrow&space;T}{\Gamma&space;\vdash&space;Y\,t:T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;t&space;:&space;T&space;\rightarrow&space;T}{\Gamma&space;\vdash&space;Y\,t:T}" title="\frac{\Gamma \vdash t : T \rightarrow T}{\Gamma \vdash Y\,t:T}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=Y\,(\lambda&space;x&space;:&space;t&space;.&space;M)&space;\rightsquigarrow&space;M[x&space;:=&space;Y\,(\lambda&space;x:t.M)]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Y\,(\lambda&space;x&space;:&space;t&space;.&space;M)&space;\rightsquigarrow&space;M[x&space;:=&space;Y\,(\lambda&space;x:t.M)]" title="Y\,(\lambda x : t . M) \rightsquigarrow M[x := Y\,(\lambda x:t.M)]" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{f&space;\rightsquigarrow&space;f'}{{\tt&space;Y}\,&space;f&space;\rightsquigarrow&space;{\tt&space;Y}\,f'}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{f&space;\rightsquigarrow&space;f'}{{\tt&space;Y}\,&space;f&space;\rightsquigarrow&space;{\tt&space;Y}\,f'}" title="\frac{f \rightsquigarrow f'}{{\tt Y}\, f \rightsquigarrow {\tt Y}\,f'}" /></a>
 
 or in other words:
 

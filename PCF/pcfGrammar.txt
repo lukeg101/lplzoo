@@ -22,3 +22,16 @@ see STLC
 Y\,(\lambda x : t . M) \rightsquigarrow M[x := Y\,(\lambda x:t.M)]
 
 Y\, f \rightsquigarrow\, f\, (Y\, f)
+
+\frac{\Gamma \vdash n : Nat\quad \Gamma \vdash t_{1} : T\quad t_{2} \vdash T}{\Gamma \vdash {\tt if}\,n\,t_{1}\,t_{2} : T}
+
+{\tt if}\,z\,M\,N \rightsquigarrow M \newline {\tt if}\,({\tt s}\, n)\,M\,N \rightsquigarrow N 
+
+{\tt p\,(s\,}n) \rightsquigarrow n \newline
+{\tt p\, z} \rightsquigarrow {\tt z}
+
+\frac{n \rightsquigarrow n'}{{\tt p}\, n \rightsquigarrow {\tt p}\,n'}
+\newline
+\frac{n \rightsquigarrow n'}{{\tt s}\, n \rightsquigarrow {\tt s}\,n'} 
+
+\frac{f \rightsquigarrow f'}{{\tt Y}\, f \rightsquigarrow {\tt Y}\,f'}

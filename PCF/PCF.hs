@@ -246,7 +246,7 @@ reduce1 (App Pred n) = case reduce1 n of
   Just n' -> Just $ App Pred n'
   _ -> Nothing
 reduce1 (App Succ n) = case reduce1 n of
-  Just n' -> Just $ App Pred n'
+  Just n' -> Just $ App Succ n'
   _ -> Nothing
 reduce1 l@(App (App (App If Zero) l3) l4) = do
   Just l3
