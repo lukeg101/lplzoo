@@ -2,6 +2,18 @@ Mathmode grammar input onto:
 https://www.codecogs.com/latex/eqneditor.php
 
 used html rendering of gif in readme for syntax
+bnf
+
+\begin{matrix} 
+\mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ 
+& | & \tau\,{\tt space}\,\tau\\ 
+& | & \upsilon
+&&\\ 
+\upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... 
+\end{matrix}
+
+parser grammar
+
 
 \begin{matrix} &&\\
  \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ 
@@ -15,5 +27,7 @@ used html rendering of gif in readme for syntax
 &&\\
 \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... 
 \end{matrix}
+
+semantics
 
 (\lambda x . M)N \rightsquigarrow M [x := N]
