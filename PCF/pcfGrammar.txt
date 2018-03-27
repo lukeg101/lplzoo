@@ -23,15 +23,15 @@ Y\,(\lambda x : t . M) \rightsquigarrow M[x := Y\,(\lambda x:t.M)]
 
 Y\, f \rightsquigarrow\, f\, (Y\, f)
 
-\frac{\Gamma \vdash n : Nat\quad \Gamma \vdash t_{1} : T\quad \Gamma \vdash t_{2} : T}{\Gamma \vdash {\tt if}\,n\,t_{1}\,t_{2} : T}
+\frac{\Gamma \vdash n : Nat\quad \Gamma \vdash t_{1} : T\quad \Gamma \vdash t_{2} : T}{\Gamma \vdash if\,n\,t_{1}\,t_{2} : T}
 
-{\tt if}\,z\,M\,N \rightsquigarrow M \newline {\tt if}\,({\tt s}\, n)\,M\,N \rightsquigarrow N 
+if\,z\,M\,N \rightsquigarrow M \newline if\,(s\, n)\,M\,N \rightsquigarrow N
 
-{\tt p\,(s\,}n) \rightsquigarrow n \newline
-{\tt p\, z} \rightsquigarrow {\tt z}
+p\,(s\,n) \rightsquigarrow n\newline
+p\, z \rightsquigarrow z
 
-\frac{n \rightsquigarrow n'}{{\tt p}\, n \rightsquigarrow {\tt p}\,n'}
+\frac{n \rightsquigarrow n'}{p\, n \rightsquigarrow p\,n'}
 \newline
-\frac{n \rightsquigarrow n'}{{\tt s}\, n \rightsquigarrow {\tt s}\,n'} 
+\frac{n \rightsquigarrow n'}{s\, n \rightsquigarrow s\,n'}
+\frac{f \rightsquigarrow f'}{Y\, f \rightsquigarrow Y\,f'}
 
-\frac{f \rightsquigarrow f'}{{\tt Y}\, f \rightsquigarrow {\tt Y}\,f'}
