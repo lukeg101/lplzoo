@@ -145,7 +145,7 @@ lam = app +++ (do
 -- app has zero or more spaces
 app = (chainl1 expr $ do
   space1
-  return $ App) +++ Parser.succ +++ rec
+  return $ App) 
 
 zero = do 
   char 'z'
@@ -153,22 +153,14 @@ zero = do
 
 succ = do
     char 's'
-    space1
-    n <- expr
-    return $ Succ n
+    return Succ
 
 rec = do
   symb "rec"
-  space1
-  h <- expr
-  space1
-  a <- expr
-  space1
-  n <- expr 
-  return $ RecNat h a n
+  return RecNat
 
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termVar +++ zero
+expr = (bracket term) +++ termVar +++ zero +++ Parser.succ +++ rec
 
 -- top level of CFG Gramma
 term = lam +++ app
