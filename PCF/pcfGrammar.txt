@@ -23,7 +23,7 @@ Y\,(\lambda x : t . M) \rightsquigarrow M[x := Y\,(\lambda x:t.M)]
 
 Y\, f \rightsquigarrow\, f\, (Y\, f)
 
-\frac{\Gamma \vdash n : Nat\quad \Gamma \vdash t_{1} : T\quad t_{2} \vdash T}{\Gamma \vdash {\tt if}\,n\,t_{1}\,t_{2} : T}
+\frac{\Gamma \vdash n : Nat\quad \Gamma \vdash t_{1} : T\quad \Gamma \vdash t_{2} : T}{\Gamma \vdash {\tt if}\,n\,t_{1}\,t_{2} : T}
 
 {\tt if}\,z\,M\,N \rightsquigarrow M \newline {\tt if}\,({\tt s}\, n)\,M\,N \rightsquigarrow N 
 
