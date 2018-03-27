@@ -1,5 +1,5 @@
 # Programming Computable Functions
-Haskell implementation on Gordon Plotkin's typed lambda calculus. It has a base type `Nat`, the function type `T->T`, `Succ` \\ `Pred`essors on Nats, and [general](https://stackoverflow.com/questions/1712237/how-does-primitive-recursion-differ-from-normal-recursion) recursion on Nats through use of a [Y combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus).
+Haskell implementation on Gordon Plotkin's typed lambda calculus. It has a base type `Nat`, the function type `T->T`, `Succ` \\ `Pred`essors on Nats, and [general](https://stackoverflow.com/questions/1712237/how-does-primitive-recursion-differ-from-normal-recursion) recursion on Nats through use of a [Y combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus). It is Turing Complete, but not strongly normalizing for all terms.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -134,6 +134,7 @@ and there are special elimination and reduction rules for general recursion:
 <a href="https://www.codecogs.com/eqnedit.php?latex=Y\,(\lambda&space;x&space;:&space;t&space;.&space;M)&space;\rightsquigarrow&space;M[x&space;:=&space;Y\,(\lambda&space;x:t.M)]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Y\,(\lambda&space;x&space;:&space;t&space;.&space;M)&space;\rightsquigarrow&space;M[x&space;:=&space;Y\,(\lambda&space;x:t.M)]" title="Y\,(\lambda x : t . M) \rightsquigarrow M[x := Y\,(\lambda x:t.M)]" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{f&space;\rightsquigarrow&space;f'}{Y\,&space;f&space;\rightsquigarrow&space;Y\,f'}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{f&space;\rightsquigarrow&space;f'}{Y\,&space;f&space;\rightsquigarrow&space;Y\,f'}" title="\frac{f \rightsquigarrow f'}{Y\, f \rightsquigarrow Y\,f'}" /></a>
+
 or in other words:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;(Y\,&space;f)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?Y\,&space;f&space;\rightsquigarrow\,&space;f\,&space;(Y\,&space;f)" title="Y\, f \rightsquigarrow\, f\, (Y\, f)" /></a>
