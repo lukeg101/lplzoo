@@ -93,6 +93,8 @@ The SKI calculus operates on combinations of `S`, `K`, and `I`, which can be for
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{K&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{K&space;\in&space;CL}" title="\overline{K \in CL}" /></a>
 
+combined with application:
+
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{(x\,y)&space;\in&space;CL}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{x&space;\in&space;CL\quad&space;y&space;\in&space;CL}{(x\,y)&space;\in&space;CL}" title="\frac{x \in CL\quad y \in CL}{(x\,y) \in CL}" /></a>
 
 and reduced with rules:
