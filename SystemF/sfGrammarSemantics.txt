@@ -3,17 +3,27 @@ syntax
 
 bnf 
 
-\begin{matrix} 
-\mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\
-& | & \tau\, \tau\\
-& | & \upsilon \\ 
-& | & \Lambda \upsilon.\tau
-&&\\ 
-\upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... 
-\end{matrix}
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \upsilon.\tau &&\\&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}
 
 \begin{matrix} \sigma & ::= & {\tt \upsilon}\\ & | & \sigma \rightarrow \sigma\\
 &|& \Pi \upsilon . \sigma\end{matrix}
+
+parser grammar
+
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ 
+&|& \Lambda\upsilon.\tau \\
+& | & \alpha\\ 
+&&\\ \alpha & ::= & \beta \\ 
+&| &\mathbf{\alpha\, \tt{space}\, \beta} \\
+&|& \[ \sigma\] \\
+ &&\\ 
+\beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \end{matrix}
+
+\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ 
+&|& \Pi\upsilon.\sigma\\
+&&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\\
+& |&\, \upsilon
+ \end{matrix}
 
 
 semantics
