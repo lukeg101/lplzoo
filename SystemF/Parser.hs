@@ -119,7 +119,7 @@ sqbracket p = do
   symb "]"
   return x
 
--- type vars are "o" packaged up 
+-- type vars are nats packaged up 
 typVar = do
   x <- nat
   return $ TVar x
@@ -149,8 +149,8 @@ termVar = do
   return $ Var x
 
 termTyp = do
-  x <- sqbracket $ spaces nat
-  return $ Typ $ TVar x
+  x <- sqbracket $ spaces typTerm
+  return $ Typ x
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']

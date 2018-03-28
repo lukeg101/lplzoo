@@ -31,8 +31,9 @@ Where you can then have some fun, try these examples:
 - `L1.\2:1.2` where `L` stands for second-order abstraction.
 - `(L2.\3:2->2.\4:2.4)` this is _zero_.
 - `λ1:Π2.(2->2)->2->2.Λ2.λ3:2->2.λ4:2.3 (1 [2] 3 4)` this is _succ_
+- `(L1. \2:1.2) [P3.(3->3)->3->3]`
 
-Note; `Π` the second-order product, `Λ` is second-order abstraction and `[2]` is the type variable `2`. Alternatively typed as `P`, `L`, and `[2]` respectively.
+Note: `Π` is the second-order product type, `Λ` is second-order abstraction and `[2]` is the type variable `2`. Alternatively typed as `P`, `L`, and `[2]` respectively.
 
 The parser is smart enough to recognise λ, Π ,and Λ; so you can copy and paste from the output:
 ```
@@ -78,32 +79,39 @@ TODO
 
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:O.x`).
-- Types are either literal `O` base types or nested arrow types: `O -> O`. Arrows associate to the right so that `O -> O -> O` is the same as `O -> (O -> O)` but not `((O -> O) -> O)`. Alternative implementations let O range over a set of base types (like int, float etc...) but this is semantically equivalent unless we care about those types.
-- Nested terms don't need brackets: `\1:O.\2:O. 2` unless enforcing application on the right. Whitespace does not matter `(\1:O.          1)` unless it is between application where you need at least one space.
+TODO
+
+- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:1.x`).
+- Types are also positive integers for the same reasons. Type variables should be distinct from term variables, althought it is not prohibited. This term is the polymorphic identity for Nats `(L1.\1:1.1) [P2.(2->2)->2->2]` but is less readable due to the dual use of `1`.
+- Types are either type variables, abstractions, or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. The product binds weaker than arrows, so `Π2.2->2` is the same as `Π2.(2->2)`. 
+- Nested terms don't need brackets: `\1:3.\2:3. 2` unless enforcing application on the right. Whitespace does not matter `L2.\1:2.          1` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 TODO
 
 ## Semantics
 
-The semantics implements beta-reduction on terms and alpha-equivalence as the `Eq` instance of `STTerm`. The semantics are the same as the untyped calculus with the addition of types. We reformulate the semantics as [typing judgements](https://existentialtype.wordpress.com/2011/03/27/the-holy-trinity/):
+The semantics implements beta-reduction on terms and alpha-equivalence as the `Eq` instance of `SFTerm`. The semantics are the same as STLC with the addition of second-order abstraction over types. We reformulate the semantics as [typing judgements](https://existentialtype.wordpress.com/2011/03/27/the-holy-trinity/):
 
-for variables:
+for variables (adopted from STLC):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" title="\overline{\Gamma \vdash x:T},\quad \mbox{(if $x:T \in \Gamma$)}" /></a>
 
-for abstractions:
+for abstractions (adopted from STLC):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" title="\frac{\Gamma ,x:A \vdash t:B}{\Gamma \vdash (\lambda x : A. t) : B }" /></a>
 
-and application:
+and application (adopted from STLC):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" title="\frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}" /></a>
 
-and the reduction relation adopted from the untyped theory (with types added in the abstraction):
+and the reduction relation (adopted from STLC):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)N \rightsquigarrow M [x := N]" /></a>
+
+and special introduction, elimination, and reduction rules for Types:
+
+TODO
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in STLC.hs). 
 - Reductions include the one-step reduction (see `reduce1` in STLC.hs), the many-step reduction (see `reduce` in STLC.hs). 
