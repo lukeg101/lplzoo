@@ -70,7 +70,9 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 
 We base the language on the BNF for the typed calculus:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\upsilon.\tau&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\upsilon.\tau&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \upsilon.\tau &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\upsilon}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\Pi&space;\upsilon&space;.&space;\sigma\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\upsilon}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\Pi&space;\upsilon&space;.&space;\sigma\end{matrix}" title="\begin{matrix} \sigma & ::= & {\tt \upsilon}\\ & | & \sigma \rightarrow \sigma\\ &|& \Pi \upsilon . \sigma\end{matrix}" /></a>
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
 
@@ -78,10 +80,8 @@ TODO
 
 Some notes about the syntax:
 
-TODO
-
 - Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:1.x`).
-- Types are also positive integers for the same reasons. Type variables should be distinct from term variables, althought it is not prohibited. This term is the polymorphic identity for Nats `(L1.\1:1.1) [P2.(2->2)->2->2]` but is less readable due to the dual use of `1`.
+- Types are also positive integers for the same reasons. Type variables should be distinct from term variables, although it is not prohibited: The term `(L1.\1:1.1) [P2.(2->2)->2->2]` is valid but less readable due to the dual use of `1`.
 - Types are either type variables, abstractions, or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. The product binds weaker than arrows, so `Π2.2->2` is the same as `Π2.(2->2)`. 
 - Nested terms don't need brackets: `\1:3.\2:3. 2` unless enforcing application on the right. Whitespace does not matter `L2.\1:2.          1` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
@@ -116,7 +116,8 @@ and special introduction, elimination, and reduction rules for types:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\Lambda&space;X.t)\,A&space;\rightsquigarrow&space;t[X:=A]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\Lambda&space;X.t)\,A&space;\rightsquigarrow&space;t[X:=A]" title="(\Lambda X.t)\,A \rightsquigarrow t[X:=A]" /></a>
 
-- This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in SystemF.hs). 
+- This means the typing context now also contains types, and types occur in terms. The phrase `X Type` means X is a type. We do not implement Agda style type hierarchies here.
+- This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in SystemF.hs). The variable convention is adopted for both types and terms.
 - Reductions include the one-step reduction (see `reduce1` in SystemF.hs), the many-step reduction (see `reduce` in SystemF.hs). 
 
 ## Other Implementation Details
@@ -125,7 +126,7 @@ and special introduction, elimination, and reduction rules for types:
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
 
-For contributions, see the [project to-do list] or submit a PR with something you think it needs.
+For contributions, see the project to-do list or submit a PR with something you think it needs.
 
 Work initially documented [here](https://gist.github.com/lukeg101/f1c13024cf9ccbeaff3c3553baca037f).
 
