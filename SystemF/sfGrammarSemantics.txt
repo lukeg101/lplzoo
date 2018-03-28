@@ -25,6 +25,7 @@ parser grammar
 & |&\, \upsilon
  \end{matrix}
 
+ \begin{matrix} &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ...\end{matrix}
 
 semantics
 
