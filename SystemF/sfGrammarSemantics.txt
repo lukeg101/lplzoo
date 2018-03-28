@@ -1,0 +1,13 @@
+
+
+
+semantics
+
+see STLC
+
+\frac{\Gamma\,, X\, Type \vdash t : T}{\Gamma \vdash (\Lambda X.t):\Pi X.T}
+
+\frac{\Gamma \vdash f : \Pi X.T}{\Gamma \vdash (f\, A):T[X := A]}
+
+(\Lambda X.t)\,A \rightsquigarrow t[X:=A]
+

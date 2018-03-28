@@ -61,7 +61,6 @@ There is also a typing mechanism, which should display the type or fail as usual
 Π2.(2->2)->2->2
 > tL1.\2:1. 2 2
 Cannot Type Term: L1.\2:1. 2 2
->
 ```
 where `Π2.(2->2)->2->2` is the System F type for Nats
 
@@ -109,21 +108,25 @@ and the reduction relation (adopted from STLC):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)N \rightsquigarrow M [x := N]" /></a>
 
-and special introduction, elimination, and reduction rules for Types:
+and special introduction, elimination, and reduction rules for types:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma\,,&space;X\,&space;Type&space;\vdash&space;t&space;:&space;T}{\Gamma&space;\vdash&space;(\Lambda&space;X.t):\Pi&space;X.T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma\,,&space;X\,&space;Type&space;\vdash&space;t&space;:&space;T}{\Gamma&space;\vdash&space;(\Lambda&space;X.t):\Pi&space;X.T}" title="\frac{\Gamma\,, X\, Type \vdash t : T}{\Gamma \vdash (\Lambda X.t):\Pi X.T}" /></a>
 
-- This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in STLC.hs). 
-- Reductions include the one-step reduction (see `reduce1` in STLC.hs), the many-step reduction (see `reduce` in STLC.hs). 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;X.T}{\Gamma&space;\vdash&space;(f\,&space;A):T[X&space;:=&space;A]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;X.T}{\Gamma&space;\vdash&space;(f\,&space;A):T[X&space;:=&space;A]}" title="\frac{\Gamma \vdash f : \Pi X.T}{\Gamma \vdash (f\, A):T[X := A]}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\Lambda&space;X.t)\,A&space;\rightsquigarrow&space;t[X:=A]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\Lambda&space;X.t)\,A&space;\rightsquigarrow&space;t[X:=A]" title="(\Lambda X.t)\,A \rightsquigarrow t[X:=A]" /></a>
+
+- This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in SystemF.hs). 
+- Reductions include the one-step reduction (see `reduce1` in SystemF.hs), the many-step reduction (see `reduce` in SystemF.hs). 
 
 ## Other Implementation Details
-- STLC.hs contains the Haskell implementation of the calculus, including substitution, reduction, and other useful things.
+- SystemF.hs contains the Haskell implementation of the calculus, including substitution, reduction, and other useful things.
 - Parser.hs contains the monadic parser combinators needed to parse input strings into typed-term ASTs for the calculus.
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
 
-For contributions, see the [project to-do list](https://github.com/lukeg101/lplzoo/projects/2) or submit a PR with something you think it needs.
+For contributions, see the [project to-do list] or submit a PR with something you think it needs.
 
-Work initially documented [here](https://gist.github.com/lukeg101/b3b305ac9438d1a57a0669f81cb0bab2).
+Work initially documented [here](https://gist.github.com/lukeg101/f1c13024cf9ccbeaff3c3553baca037f).
 
 
