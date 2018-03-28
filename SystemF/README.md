@@ -30,9 +30,9 @@ Compile it using GHC if you need this.
 Where you can then have some fun, try these examples:
 - `L1.\2:1.2` where `L` stands for second-order abstraction.
 - `(L2.\3:2->2.\4:2.4)` this is _zero_.
-- `λ1:Π2.(2->2)->2->2.Λ2.λ3:2->2.λ4:2.3 (1 [2] 3 4)` this is _succ_
+- `λ1:Π2.(2->2)->2->2.Λ2.λ3:2->2.λ4:2.3 (1 [2] 3 4)` this is _succ_, where Π the second-order product, Λ is second-order abstraction and `[2]` is a type variable.
 
-The parser is also smart enough to recognise λ and Λ, so you can copy and paste from the output:
+The parser is also smart enough to recognise λ, Π ,and Λ. You can copy and paste from the output:
 ```
 Welcome to the System F REPL
 Type some terms or press Enter to leave.
