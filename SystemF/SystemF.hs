@@ -113,7 +113,7 @@ instance Show SFTerm where
   show (Var x)      = show x
   show (Typ t)      = "[" ++ show t ++"]"
   show (App t1 t2)  = 
-    paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
+    paren (isAbs t1 || isPiAbs t1 ) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) = "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
   show (PiAbs t l1) = "\x39b" ++ show t ++ "." ++ show l1
 
@@ -124,6 +124,10 @@ isAbs _         = False
 isApp :: SFTerm -> Bool
 isApp (App _ _) = True
 isApp _         = False
+
+isPiAbs :: SFTerm -> Bool
+isPiAbs (PiAbs _ _) = True
+isPiAbs _           = False
 
 --type context of term variables and type variables
 --input term or type variable as an Int
@@ -255,14 +259,20 @@ rename l@(PiAbs x t) c = PiAbs x $ rename t c
 --does capture avoiding substitution
 substitute :: SFTerm -> (SFTerm, SFTerm) -> SFTerm
 substitute l1@(Var c1) (Var c2, l2) 
-  = if c1 == c2 then l2 else l1 
+  | c1 == c2 = l2 
+  | otherwise = l1 
+substitute l1@(Typ (TVar x)) c@(Var y, l2) 
+  | x == y = l2
+  | otherwise = l1
 substitute (App l1 l2) c 
   = App (substitute l1 c) (substitute l2 c)
-substitute (Abs y t l1) c@(Var x, l2)
-  | y == x = Abs y t l1
+substitute l@(Abs y t l1) c@(Var x, l2)
+  | y == x = l
   | y `notfree` l2 = Abs y t $ substitute l1 c
   | otherwise = Abs z t $ substitute (rename l1 (y,z)) c
   where z = max (newlabel l1) (newlabel l2)
+substitute l@(PiAbs x t) c@(Var y, l2)
+  | x /= y = PiAbs x $ substitute t c
 
 --one-step reduction relation, TODO implement other reduction strats
 reduce1 :: SFTerm -> Maybe SFTerm 
@@ -275,8 +285,11 @@ reduce1 l@(App (Abs x t l') l2) =
 reduce1 l@(App (PiAbs x1 t) (Typ x2)) = 
   Just $ tSubUnder t (TVar x1, x2)  --type-level beta: (Pi X. t) A ~> t[X := A]
 reduce1 l@(App l1 l2) = do
-  l' <- reduce1 l1
-  Just $ App l' l2
+  case reduce1 l1 of 
+    Just l' -> Just $ App l' l2
+    _ -> case reduce1 l2 of
+      Just l' -> Just $ App l1 l'
+      _ -> Nothing
 reduce1 l@(Typ t) = Nothing
 reduce1 l@(PiAbs x t) = do
   t' <- reduce1 t
@@ -309,14 +322,16 @@ reductions t = case reduce1 t of
 ident = PiAbs 0 (Abs 1 (TVar 0) (Var 1))
 natType = Pi 2 (TArr (TArr (TVar 2) (TVar 2)) (TArr (TVar 2) (TVar 2)))
 zero = PiAbs 2 (Abs 4 (TArr (TVar 2) (TVar 2)) (Abs 5 (TVar 2) (Var 5)))
-
+xx = Abs 1 (TArr natType natType) (App (Var 1) (Var 1)) --won't type check as expected
+succ = Abs 1 natType $ PiAbs 2 $ Abs 3 (TArr (TVar 2) (TVar 2)) 
+  $ Abs 4 (TVar 2) (App (Var 3) (App (App (App (Var 1) (Typ (TVar 2))) (Var 3)) (Var 4)))
 
 {-
 TODO Implement examples 
 
 true t f = Abs 1 t (Abs 2 f (Var 1))
 false t f= Abs 1 t (Abs 2 f (Var 2))
-xx = Abs 1 (TArr TNat TNat) (App (Var 1) (Var 1)) --won't type check as expected
+
 omega = App xx xx --won't type check, see above
 _if = \c t f -> App (App c t) f
 isZero Zero = true

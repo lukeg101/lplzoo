@@ -45,7 +45,7 @@ repl = do
         if (null $ snd x)
         then case typeof' $ fst x of
           Just y -> print . reduce $ fst x
-          _ -> cannotType $ tail s
+          _ -> cannotType s
         else cannotParse s
       _ -> cannotParse s
     repl
