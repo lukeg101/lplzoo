@@ -185,7 +185,7 @@ renameNamed (Named x t) c@(z,y)
   | x == z = Named y (renameNamed t c)
   | otherwise = Named x (renameNamed t c)
 
---substitute one term for another in a term
+--substitute one lambda term for another in a term
 --does capture avoiding substitution
 substitute :: MuTerm -> (MuTerm, MuTerm) -> MuTerm
 substitute l1@(Var c1) (Var c2, l2) 
@@ -197,6 +197,8 @@ substitute (Abs y t l1) c@(Var x, l2)
   | y `notfree` l2 = Abs y t $ substitute l1 c
   | otherwise = Abs z t $ substitute (rename l1 (y,z)) c
   where z = max (newlabel l1) (newlabel l2)
+substitute (Mu x t l2) c = Mu x t $ substitute l2 c
+substitute (Named x l2) c = Named x $ substitute l2 c
 
 -- one-step reduction relation 
 reduce1 :: MuTerm -> Maybe MuTerm 
