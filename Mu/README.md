@@ -1,7 +1,7 @@
-# Simply Typed Lambda Calculus
-Haskell implementation on Michel Parigot's untyped lambda calculus. It has a base type `O` and function type `T->T` to eliminate untypeable and paradoxical terms.
+# Lambda Mu Calculus
+Haskell implementation on Michel Parigot's λμ calculus. It has the features of STLC and the addition of `μ` and `[_]` operators to handle continuations.
 
-Parigot used this to encode [Classical Natural Deduction](https://www.cs.ru.nl/~freek/courses/tt-2011/papers/parigot.pdf) in a programming language, which highlights the [Propositions-as-Types](http://homepages.inf.ed.ac.uk/wadler/papers/propositions-as-types/propositions-as-types.pdf) paradigm. Later discovered by [Hofmann and Streicher](https://pdfs.semanticscholar.org/24ec/2e8104e20983cd747ab6868265559ab7db01.pdf) to completely capture the semantics for [continuations](https://en.wikipedia.org/wiki/Continuation-passing_style) in programming languages.
+This strongly normalising calculus encodes [Classical Natural Deduction](https://www.cs.ru.nl/~freek/courses/tt-2011/papers/parigot.pdf) in a programming language. [Hofmann and Streicher](https://pdfs.semanticscholar.org/24ec/2e8104e20983cd747ab6868265559ab7db01.pdf) later discovered it captures [continuation semantics](https://en.wikipedia.org/wiki/Continuation-passing_style) for programming languages.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -51,6 +51,8 @@ There is also a typing mechanism, which should display the type or fail as usual
 ```
 > tλ0:(A->B)->A.μ1:A.[1]0 (λ2:A.μ3:B.[1]2)
 ((A->B)->A)->A
+> \1:A.1 1
+Cannot Type Term: \1:A.1 1
 ```
 
 Note: if you provide a non-normalizing term, the type checker will fail and reduction will not occur.
@@ -68,7 +70,7 @@ TODO
 Some notes about the syntax:
 
 - Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:A.x`).
-- Types are either char `A` base types or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. This differs from the Types approach in STLC, where the the emphasis is on base versus arrow types. 
+- Types are either chars `A,B,C,...` base types or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. This differs from the approach in STLC, where the the emphasis is on base `O` versus arrow types `(O->O)->O` etc... 
 - Type equality is strict syntactic equality, so A = A but not A = B (think of them as propositions!). Term equality adopts alpha-equivalence (assuming types match)
 - Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `(\1:A.          1)` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
@@ -93,7 +95,7 @@ the reduction relation (adopted from STLC):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)N \rightsquigarrow M [x := N]" /></a>
 
-and special introduction, elimination and reduction rules for μ and [] operators:
+and special introduction, elimination, and reduction rules for μ and [] operators:
 
 TODO
 
