@@ -19,7 +19,7 @@ The intention here is to maximise your understanding of language design whilst m
 3. _STLC_: Alonzo Church's [Simply-Typed Lambda Calculus](https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus) (Church) with one base type and function types
 4. _SystemT_: Kurt Godel's [System T](https://en.wikipedia.org/wiki/Dialectica_interpretation). In essence the STLC with [Nat](https://wiki.haskell.org/Peano_numbers) swapped out for the base type and [primitive recursion](https://www.quora.com/What-is-primitive-recursion) on Nats.
 5. _PCF_: Gordon Plotkin's [Programming Computable Functions](http://www.cs.bham.ac.uk/~axj/pub/papers/Jung-2014-Teaching-denotational-semantics.pdf). In essence it's System T but using the [Y combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus) for general recursion instead of primitive.
-6. _Mu_: Michel Parigot's [Lambda-Mu](). In essence it's STLC with [continuations](https://en.wikipedia.org/wiki/Continuation) that don't rely on the reduction strategy used.
+6. _Mu_: Michel Parigot's [Lambda-Mu](https://www.cs.ru.nl/~freek/courses/tt-2011/papers/parigot.pdf). In essence it's STLC with [continuations](https://en.wikipedia.org/wiki/Continuation) that don't rely on the reduction strategy used.
 7. _SystemF_: Jean Yves-Girard's [System F](https://en.wikipedia.org/wiki/System_F). In essence it's STLC with [parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism) built in. 
 
 See each repo for details on installation/use and submit a PR if there's something you want to fix!
