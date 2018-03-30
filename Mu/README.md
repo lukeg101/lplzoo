@@ -1,5 +1,5 @@
 # Lambda Mu Calculus
-Haskell implementation on Michel Parigot's λμ calculus. It has the features of STLC and the addition of `μ` and `[_]` operators to handle continuations.
+Haskell implementation on Michel Parigot's λμ calculus. It has the features of STLC, but you can name types (not system F!) and use `μ` and `[_]` operators.
 
 This strongly normalising calculus encodes [Classical Natural Deduction](https://www.cs.ru.nl/~freek/courses/tt-2011/papers/parigot.pdf) in a programming language. [Hofmann and Streicher](https://pdfs.semanticscholar.org/24ec/2e8104e20983cd747ab6868265559ab7db01.pdf) later discovered it captures [continuation semantics](https://en.wikipedia.org/wiki/Continuation-passing_style) for programming languages.
 
