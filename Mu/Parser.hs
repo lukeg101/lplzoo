@@ -131,8 +131,12 @@ typVar = do
   x <- sat isUpper
   return $ TVar x
 
+bottom = do
+  identifier ['\x22a5','_']
+  return Bottom
+
 -- second level of CFG for types
-typExpr = (bracket typTerm) +++ typVar
+typExpr = (bracket typTerm) +++ typVar +++ bottom
 
 -- parser for term variables
 termVar = do
