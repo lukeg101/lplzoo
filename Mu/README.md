@@ -28,7 +28,7 @@ Compile it using GHC if you need this.
 ## Examples 
 Where you can then have some fun, try these examples:
 - `\1:A.1`
-- `λ0:(A->B)->A.μ1:A.[1]0 (λ2:A.μ3:B.[1]2)` an encoding of [_Pierce's Law_](https://en.wikipedia.org/wiki/Peirce%27s_law).
+- `λ0:(A->B)->A.μ1:A.[1]0 (λ2:A.μ3:B.[1]2)` an encoding of [_Peirce's Law_](https://en.wikipedia.org/wiki/Peirce%27s_law).
 
 Note: `λ` is the lambda abstraction, `μ` is the mu(control) abstraction, `[2]` is the bracketing operator for μ-variable `2`. Alternatively typed as `\`, `M`, and `[2]` respectively.
 
@@ -61,7 +61,8 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 
 We base the language on the BNF for the typed calculus:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\mu\upsilon:\sigma.&space;\[&space;\upsilon&space;\]\tau&space;&&\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;X,Y,Z}...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\mu\upsilon:\sigma.&space;\[&space;\upsilon&space;\]\tau&space;&&\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;X,Y,Z}...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \mu\upsilon:\sigma. \[ \upsilon \]\tau &&\\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & {\tt X,Y,Z}...\\ & | & \sigma \rightarrow \sigma \end{matrix}" /></a>
+
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
 

@@ -1,0 +1,7 @@
+mu bnf
+
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ 
+&|& \mu\upsilon:\sigma. \[ \upsilon \]\tau 
+&&\\
+&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & {\tt X,Y,Z}...\\ & | & \sigma \rightarrow \sigma \end{matrix}
+
