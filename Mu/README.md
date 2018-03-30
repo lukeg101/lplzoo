@@ -30,9 +30,8 @@ Where you can then have some fun, try these examples:
 - `\1:A.1`
 - `λ0:(A->B)->A.μ1:A.[1]0 (λ2:A.μ3:B.[1]2)` an encoding of [_Peirce's Law_](https://en.wikipedia.org/wiki/Peirce%27s_law) or _call/cc_.
 - `\0:(Q->_)->(P->_).\1:P.M2:Q.0 (\3:Q.[2] 3) 1` [_proof by contradiction_](https://en.wikipedia.org/wiki/Proof_by_contradiction).
--
 
-Note: `λ` is the lambda abstraction, `μ` is the mu (control) abstraction, `[2]` is the bracketing (command) operator for μ-variable `2`. Alternatively typed as `\`, `M`, and `[2]` respectively.
+Note: `λ` is the lambda abstraction, `μ` is the mu (control) abstraction, `[2]` is the bracketing (command) operator for μ-variable `2`, and `⊥` is the bottom type. Alternatively typed as `\`, `M`, and `[2]`, and `_` respectively.
 
 Note: you cannot encode `((A->⊥)->⊥) -> A` (ie double negation elimination) in this language as the type is not inhabited (see [Ariola and Herbelin](http://pauillac.inria.fr/~herbelin/talks/icalp03-talk.pdf) for some solutions).
 
@@ -105,7 +104,7 @@ and special introduction, elimination, and reduction rules for μ and [] operato
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma\vdash&space;t:T}{\Gamma&space;\vdash&space;[\alpha]t:\bot}\mbox{(if}\,\alpha:T\in\Gamma)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma\vdash&space;t:T}{\Gamma&space;\vdash&space;[\alpha]t:\bot}\mbox{(if}\,\alpha:T\in\Gamma)" title="\frac{\Gamma\vdash t:T}{\Gamma \vdash [\alpha]t:\bot}\mbox{(if}\,\alpha:T\in\Gamma)" /></a>
 
-
+TODO reductions
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Mu.hs). 
 - Reductions include the one-step reduction (see `reduce1` in Mu.hs), the many-step reduction (see `reduce` in Mu.hs). 
