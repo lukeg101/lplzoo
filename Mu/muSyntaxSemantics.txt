@@ -1,14 +1,27 @@
 mu bnf
 
-\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \mu\upsilon:\sigma. \[ \upsilon \]\tau &&\\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & \bot\\&|&{\tt X,Y,Z}...\\ & | & \sigma \rightarrow \sigma \end{matrix}
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \mu\upsilon:\sigma.\phi  &&\\&&\\ 
+\phi & ::= &  \[ \upsilon \]\tau\\
+&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & \bot\\&|&{\tt X,Y,Z}...\\ & | & \sigma \rightarrow \sigma \end{matrix}
 
 parser grammar
 
-TODO
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ 
+&|&\mu\upsilon:\sigma.\tau\\
+&|&\[ \upsilon\]\tau\\
+& | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \end{matrix}
+
+\begin{matrix}\sigma & ::= & \bot\\&|&\gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\, |\, \tt{\delta } \\
+&&\\
+\delta & ::= & {\tt X |Y |Z |...}\end{matrix}
 
 mu semantics
+
+
+see STLC semantics
 
 \frac{\Gamma,\alpha:T  \vdash c : \bot}{\Gamma \vdash \mu\alpha:T.c:T}
 
 \frac{\Gamma\vdash t:T}{\Gamma \vdash [\alpha]t:\bot}\mbox{(if}\,\alpha:T\in\Gamma)
 
+todo mu[] reductions
