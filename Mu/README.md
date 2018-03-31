@@ -29,7 +29,7 @@ Compile it using GHC if you need this.
 Where you can then have some fun, try these examples:
 - `\1:A.1`
 - `λ0:(A->B)->A.μ1:A.[1]0 (λ2:A.μ3:B.[1]2)` an encoding of [_Peirce's Law_](https://en.wikipedia.org/wiki/Peirce%27s_law) or _call/cc_.
-- `\0:(Q->_)->(P->_).\1:P.M2:Q.0 (\3:Q.[2] 3) 1` [_proof by contra-position](https://en.wikipedia.org/wiki/Contraposition).
+- `\0:(Q->_)->(P->_).\1:P.M2:Q.0 (\3:Q.[2] 3) 1` [contra-position](https://en.wikipedia.org/wiki/Contraposition).
 
 Note: `λ` is the lambda abstraction, `μ` is the mu (control) abstraction, `[2]` is the bracketing (command) operator for μ-variable `2`, and `⊥` is the bottom type. Alternatively typed as `\`, `M`, and `[2]`, and `_` respectively.
 
@@ -108,6 +108,7 @@ and special introduction, elimination, and reduction rules for μ and [] operato
 
 TODO reductions
 
+- λ variables and μ variables are stored in the same context. Most treatments have separate contexts for this but we have one to ensure term naming is distinct.
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Mu.hs). 
 - Reductions include the one-step reduction (see `reduce1` in Mu.hs), the many-step reduction (see `reduce` in Mu.hs). 
 
