@@ -1,5 +1,5 @@
 # Programming Computable Functions
-Haskell implementation on Gordon Plotkin's typed lambda calculus. It has a base type `Nat`, the function type `T->T`, `Succ` \\ `Pred`essors on Nats, and [general](https://stackoverflow.com/questions/1712237/how-does-primitive-recursion-differ-from-normal-recursion) recursion on Nats through use of a [Y combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus). It is Turing Complete, but not strongly normalizing for all terms.
+Haskell implementation of Gordon Plotkin's typed lambda calculus. It has a base type `Nat`, the function type `T->T`, `Succ` \\ `Pred`essors on Nats, and [general](https://stackoverflow.com/questions/1712237/how-does-primitive-recursion-differ-from-normal-recursion) recursion on Nats through use of a [Y combinator](https://en.wikipedia.org/wiki/Fixed-point_combinator#Fixed_point_combinators_in_lambda_calculus). It is Turing Complete, but not strongly normalizing for all terms.
 
 PCF is considered to be a simplified version of modern functional languages such as Haskell; where non-nonsensical terms are prohibited by the type system but recursion is afforded by `Y`. 
 
