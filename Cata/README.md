@@ -1,5 +1,5 @@
 # The Cata(morphic) Programming Language
-Haskell implementation of the simply typed lambda calculus with inductive types. It ranges over base types `A,B,C...`, the function type `T->T`, Products, Sums, Units, and has a special `μ` type (with `μ` variable `X`) to define well-founded [recursive types](). It is Strongly normalizing due to the well-founded nature of inductive types but not Turing Complete.
+Haskell implementation of the simply typed lambda calculus with inductive types. It ranges over base types `A,B,C...`, the function type `T->T`, Products, Sums, Units, and has a special `μ` type (with `μ` variable `X`) to define [recursive types](https://en.wikipedia.org/wiki/Recursive_data_type). It is strongly normalizing due to the well-founded nature of inductive types but not Turing Complete.
 
 Inductive types are an important stepping-stone towards [algebraic datatypes](https://en.wikipedia.org/wiki/Algebraic_data_type) in functional languages and a powerful tool to use with [inductive equational reasoning](https://en.wikipedia.org/wiki/Structural_induction). 
 
@@ -28,22 +28,29 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- ``
-- ``
-- ``
+- `\1:A.1`
+- `in (inl (): 1 + M (1+X)):1+M(1+X)` (the encoding of [peano](https://wiki.haskell.org/Peano_numbers) style _zero_)
+- `\1:M(1+((1*X)*X)).1` (the identity function for a binary tree, with nil leaves and elements stored internally)
+- `case (inr ():1+A) (\1:1.1) (\2:A.())` (performs simple case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
+- `\1:A.\2:B.snd (1,2)`.
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
-
+> \1:A.1
+λ1:A.1
+> λ1:A.1
+λ1:A.1
 ```
+Note: see syntax below for a description of what the various symbols mean.
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-
+TODO
 ```
 
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
+TODO
 ```
 
 Note: if you provide a un-typeable term, the type checker will fail and reduction will not occur.
@@ -64,6 +71,8 @@ Some notes about the syntax:
 - Products have the highest precedence, followed by sums, arrows, and then all other types. 
 - Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `(\1:A.          1)` unless it is between application where you need at least one space.
 - Products are 2-element pairs like in Haskell and sums are 2-element co-pairs (like union in C or types with 2 constructors in Haskell). Units are simple base terms `()` like in Haskell.
+TODO
+
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
@@ -112,6 +121,4 @@ TODO
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
 
 For contributions, see the project to-do list or submit a PR with something you think it needs.
-
-
 
