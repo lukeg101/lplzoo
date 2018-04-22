@@ -31,7 +31,7 @@ Where you can then have some fun, try these examples:
 - `\1:A.1`
 - `in (inl (): 1 + M (1+X)):1+M(1+X)` (the encoding of [peano](https://wiki.haskell.org/Peano_numbers) style _zero_)
 - `\1:M(1+((1*X)*X)).1` (the identity function for a binary tree, with nil leaves and elements stored internally)
-- `case (inr ():1+A) (\1:1.1) (\2:A.())` (performs simple case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
+- `case (inr ():1+A) (\1:1.1) (\2:A.())` (performs case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
 - `\1:A.\2:B.snd (1,2)`.
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
@@ -66,11 +66,15 @@ TODO
 Some notes about the syntax:
 
 - Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:A.x`).
-- Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, product types `A * B` (or `×`), sum types `A + B`, unit types `1` (or `⊤`), a special Mu type `μT` (or `M`), and Mu type variable `X`.  
+- Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, product types `A * B` (or `×`), sum types `A + B`, unit types `1` (or `⊤`), a special Mu type `μ(T)` (or `M(T)`), and Mu type variable `X`.  
 - Arrows associate to the right so that `A -> A -> A` is the same as `A -> (A -> A)` but not `((A -> A) -> A)`. Similar rules follow for the other types.
 - Products have the highest precedence, followed by sums, arrows, and then all other types. 
 - Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `(\1:A.          1)` unless it is between application where you need at least one space.
-- Products are 2-element pairs like in Haskell and sums are 2-element co-pairs (like union in C or types with 2 constructors in Haskell). Units are simple base terms `()` like in Haskell.
+- Products are 2-element pairs like in Haskell. You form products like `(1, 2)` and access each element using `fst` (or `π1`) and `snd` (or `π2`).
+- Sums are 2-element co-pairs, formed with either `inl 1:A` or `inr 2:B` (assuming either `1:A` or `2:B` is in scope). Do case analysis using `case c f g` performs case analysis on the first argument to `case`, passing the result to the function `f` if `inl` or otherwise `g` if `inr`.
+- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`).
+- Inductive types are formed by prefixing a term with `in` and a type with `M` (or `μ`). Concretely, that means a term would like something like `in x:t` where `x` is the term and `t` is its type. Similarly, an inductive type looks like `μ (T)` where `T` is the type we insist is inductive. For example, inductively defined nats have the type `μ(1+X)` where `1` is the base case, and `X` is a μ variable capturing the subterm (also a nat). The term zero above captures this idea.
+
 TODO
 
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
