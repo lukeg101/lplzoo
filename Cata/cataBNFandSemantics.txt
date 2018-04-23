@@ -1,0 +1,79 @@
+cata bnf
+
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& in\,\tau:\sigma\\ &|& cata\,\tau\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case\,\tau\,\tau\,\tau\\ &|& (\tau, \tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& () \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}
+
+\begin{matrix} \sigma & ::= & A,B,C,...\\ & | & \sigma \rightarrow \sigma \\
+&|& \top\\
+&|& \sigma \times \sigma\\
+&|& \sigma + \sigma\\
+&|& \mu\, \sigma\\
+&|& {\tt X}
+\end{matrix}
+
+cata parser
+
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ 
+\end{matrix}
+
+\begin{matrix}&&\\
+\beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\
+&|& () \\
+&|& in\,\tau:\sigma\\
+&|& cata\\
+&|& (\tau,\tau)\\
+&|& \pi_{1}\,\tau\\
+&|& \pi_{2}\,\tau\\
+&|& inl\,\tau:\sigma\\
+&|& inr\,\tau:\sigma\\
+&|& case
+\end{matrix}
+
+\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ 
+\gamma & ::=& \delta + \delta\\
+&|&\delta\\&&\\
+\delta &::=& \rho \times \rho\\
+&|& \rho\\&&\\
+\rho & ::=& \tt{(} \sigma \tt{)}\\
+&|& {\tt X}\\
+&|& A,B,C,...\\
+&|& \top \\
+&|& \mu\,(\sigma)
+ \end{matrix}
+
+
+product semantics
+
+\frac{\Gamma \vdash a : A\quad \Gamma \vdash b : B}{\Gamma \vdash  (a,b):A\times B}
+
+\frac{\Gamma \vdash p:A\times B}{\Gamma \vdash \pi_{1}\,p:A}
+
+\frac{\Gamma \vdash p:A\times B}{\Gamma \vdash \pi_{2}\,p:B}
+
+\pi_{1}(a,b) \rightsquigarrow a
+
+\pi_{2}(a,b) \rightsquigarrow b
+
+sum semantics
+
+\frac{\Gamma \vdash a:A}{\Gamma \vdash inl\,a : A + B}
+
+\frac{\Gamma \vdash b:B}{\Gamma \vdash inr\,b : A + B}
+
+\frac{\Gamma \vdash s: A+B\quad\Gamma\vdash f :A\rightarrow X\quad\Gamma\vdash g:B\rightarrow X}{\Gamma \vdash case\, s\, f\, g:X}
+
+case\,(inl\, a)\,f\,g\rightsquigarrow\,f\,a
+
+case\,(inr\, b)\,f\,g\rightsquigarrow\,g\,b
+
+unit semantics
+
+\overline{\Gamma\vdash () : \top}
+
+mu semantics
+
+\frac{\Gamma\vdash t : F\,(\mu F)}{\Gamma\vdash in\, t : \mu\,F}
+
+\frac{\Gamma\vdash f : F\,X\rightarrow X}{\Gamma\vdash\,cata\,f:\mu F \rightarrow X}
+
+cata\,f\,(in\,t) \rightsquigarrow\,f\,(F\,(cata\,f)\, t)
+
