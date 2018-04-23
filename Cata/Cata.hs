@@ -1,4 +1,4 @@
- module Cata where
+module Cata where
 
 import Data.Map as M
 import Data.Set as S
@@ -169,12 +169,12 @@ typeof (App (Inl (TSum t1 t2)) l1) ctx = do
   t3 <- typeof l1 ctx
   guard (t1 == t3)
   return $ TSum t1 t2
-typeof (App (Inr (TSum t1 t2)) l1) ctx = do
+typeof (App (Inr t@(TSum t1 t2)) l1) ctx = do
   t3 <- typeof l1 ctx
   case t3 of 
-    TSum _ t4 -> do
-      guard (t2 == t4)
-      return $ TSum t1 t2
+    t'@(TSum _ _) -> do
+      guard (t == t')
+      return t
     _ -> Nothing
 typeof (App (App (App Case l1) l2) l3) ctx = do
   t1 <- typeof l1 ctx
@@ -203,7 +203,7 @@ typeof l@(App l1 l2) ctx = do
       guard (t1 == t2)
       return t3
     _ -> Nothing
-typeof _ _ = Nothing
+--typeof _ _ = Nothing
 
 --simple function to see if any leaf in the type tree is of a type
 contains :: T -> T -> Bool

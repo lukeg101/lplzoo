@@ -180,7 +180,7 @@ termInr = do
   l1 <- term
   spaces $ symb ":"
   t1 <- typTerm
-  return $ App (Inl t1) l1
+  return $ App (Inr t1) l1
 
 termCase = symb "case" >> return Case
 
