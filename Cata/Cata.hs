@@ -207,7 +207,7 @@ typeof l@(App l1 l2) ctx = do
       guard (t1 == t2)
       return t3
     _ -> Nothing
---typeof _ _ = Nothing
+typeof _ _ = Nothing
 
 --simple function to see if any leaf in the type tree is of a type
 contains :: T -> T -> Bool
