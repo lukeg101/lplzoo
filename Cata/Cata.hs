@@ -69,10 +69,14 @@ data CataTerm
 instance Show CataTerm where
   show (Var x)      = show x
   show (App (App (Prod) a) b) = paren True (show a ++ ", " ++ show b)
-  show (App (Inl t) a) = "inl " ++ show a ++ ":" ++ show t
-  show (App (Inr t) a) = "inr " ++ show a ++ ":" ++ show t --left of sum
-  show (App Prj1 a) = "\x03C0" ++ "1 " ++ show a 
-  show (App Prj2 a) = "\x03C0" ++ "2 " ++ show a 
+  show (App (Inl t) a) = "inl " ++ 
+    paren (isAbs a || isApp a || isSum a || isProd a) (show a) ++ ":" ++ show t
+  show (App (Inr t) a) = "inr " ++ 
+    paren (isAbs a || isApp a || isSum a || isProd a) (show a) ++ ":" ++ show t --left of sum
+  show (App Prj1 a) = "\x03C0" ++ "1 " ++ 
+    paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
+  show (App Prj2 a) = "\x03C0" ++ "2 " ++ 
+    paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
   show (App (In t) a) = 
     "in " ++ paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
     ++ ":" ++ show t  --inside inductive type
@@ -98,8 +102,8 @@ isApp (App _ _) = True
 isApp _         = False
 
 isSum :: CataTerm -> Bool
-isSum (Inl _) = True
-isSum (Inr _) = True
+isSum (App (Inl t) a) = True
+isSum (App (Inr t) a) = True
 isSum _ = False
 
 isProd :: CataTerm -> Bool

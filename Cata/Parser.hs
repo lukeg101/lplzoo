@@ -118,7 +118,7 @@ typVar = do
 
 -- units are simply 1
 typUnit = do
-  spaces $ identifier ['1']
+  spaces $ identifier ['1','⊤']
   return $ TUnit
 
 -- mu variables X, TODO Generalise impl to mu variables
