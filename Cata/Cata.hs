@@ -55,7 +55,7 @@ data CataTerm
   | Abs Int T CataTerm
   | App CataTerm CataTerm
   | In T  --inductive type wrapper
-  | Cata  --Catamorphism (fold) on inductive type
+  | Cata T --Catamorphism on inductive type
   | Inl T --left injection
   | Inr T --right injection
   | Case --case analysis of sums, like case in haskell
@@ -80,12 +80,15 @@ instance Show CataTerm where
   show (App (In t) a) = 
     "in " ++ paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
     ++ ":" ++ show t  --inside inductive type
+  show (App (Cata t) a) = 
+    "cata " ++ paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
+    ++ ":" ++ show t  --cata term
   show (App t1 t2)  = 
     paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) = 
     "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
-  show (In t)     = "in " --above case should handle this
-  show Cata         = "cata"
+  show (In t)       = "in " --above case should handle this
+  show (Cata t)     = "cata"--above case should handle this
   show (Inl t)      = "inl" --above should handle this case
   show (Inr t)      = "inr" --above should handle this case
   show Unit         = "()"
@@ -141,6 +144,7 @@ termEquality (App a1 b1, App a2 b2) c s =
 termEquality (In t1, In t2) c s = t1 == t2
 termEquality (Inl t1, Inl t2) c s = t1 == t2
 termEquality (Inr t1, Inr t2) c s = t1 == t2
+termEquality (Cata t1, Cata t2) c s = t1 == t2
 termEquality (x, y) c s = x == y
 
 -- Type context for t:T is Map v T where v is a variable name and T is it's supplied Type
@@ -193,13 +197,8 @@ typeof (App (In t1) l1) ctx = do -- t : F (mu F) then In t : Mu F
   t2 <- typeof l1 ctx
   guard (t1 == t2)
   return $ typeSub t1 (X, TMu t1)
-typeof (App Cata l1) ctx = do -- f : F X -> X then cata f : Mu F -> X
-  t1 <- typeof l1 ctx
-  case t1 of 
-    TArr t2 X -> do
-      guard (t2 `contains` X)
-      return $ TArr (TMu t2) X
-    _ -> Nothing 
+typeof (App (Cata t1) l1) ctx = do -- f : F X -> X then cata f : Mu F -> X
+  error "nope"
 typeof l@(App l1 l2) ctx = do
   t1 <- typeof l2 ctx
   case typeof l1 ctx of
@@ -319,8 +318,8 @@ reduce1 (App (App (App Case (App (Inl t1) l1)) f) _) =
   return $ App f l1
 reduce1 (App (App (App Case (App (Inr t1) l1)) _) g) =
   return $ App g l1
-reduce1 l@(App (App Cata f) (App (In t) l1)) =
-  return $ App f $ App (findFmap t (App Cata f)) l1 
+reduce1 l@(App (App (Cata t1) f) (App (In t2) l1)) =
+  return $ App f $ App (findFmap t2 (App (Cata t1) f)) l1 
 -- cata f (in t) ~> f (F (cata f) t)
 reduce1 t = Nothing
 
@@ -334,9 +333,6 @@ findFmap t@(TSum t1 t2) f = Abs 1 t $ App (App (App Case (Var 1)) inl) inr
     fm t = findFmap t f
     inl = App (Inl t) $ fm t1
     inr = App (Inr t) $ fm t2
-
-testFind1 = Cata.findFmap (TSum TUnit X) (App Cata (Var 1))
-
 
 -- multi-step reduction relation 
 -- NOT GUARANTEED TO TERMINATE IF typeof' FAILS
@@ -355,6 +351,12 @@ reductions t = case reduce1 t of
 -- function takes a functor and applies Mu to it
 applMu :: T -> T 
 applMu t = typeSub t (X, TMu t)
+
+-- the one step unfolding of an inductive type
+-- used so the type checker can check types
+unfold1 :: T -> T 
+unfold1 (TMu t1) = applMu t1
+unfold1 t = applMu t
 
 --common combinators
 i = Abs 1 (TVar 'A') (Var 1)

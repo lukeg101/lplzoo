@@ -196,7 +196,12 @@ termPrj1 = (string "fst") +++ (string "π1") >> return Prj1
 
 termPrj2 = (string "snd") +++ (string "π2") >> return Prj2  
 
-termCata = symb "cata" >> return Cata
+termCata = do 
+  symb "cata" 
+  l1 <- term
+  spaces $ symb ":"
+  t1 <- typTerm
+  return $ App (Cata t1) l1
 
 termIn = do
   spaces $ symb "in"
