@@ -34,6 +34,7 @@ Where you can then have some fun, try these examples:
 - `case (inl () : 1 + A) (\1:1.1) (\2:A.())` (performs case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
 - `\1:A.\2:B.snd (1,2)`.
 - `\0:M(1+X).in (inr 0:1+M(1+X)):M(1+X)` the successor function for inductively defined nats.
+- `\0:M(1+X). cata (\1:1+M(1+X). case 1 (\2:1.0) (\2:M(1+X).in (inr 2:1+M(1+X)):M(1+X))):M(1+X) -> M(1+X)` add for inductively defined nats
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
