@@ -190,15 +190,20 @@ typeof (App (App (App Case l1) l2) l3) ctx = do
   t3 <- typeof l3 ctx
   case (t1,t2,t3) of
     (TSum t4 t5,TArr t6 t7, TArr t8 t9) -> do
-      guard (t4 == t6 && t5 == t8 && t7 == t9)
+      guard (t7 == t9 && t4 == t6 && t5 == t8)
       return $ t7
     _ -> Nothing
 typeof (App (In t1) l1) ctx = do -- t : F (mu F) then In t : Mu F
   t2 <- typeof l1 ctx
   guard (t1 == t2)
   return $ typeSub t1 (X, TMu t1)
-typeof (App (Cata t1) l1) ctx = do -- f : F X -> X then cata f : Mu F -> X
-  error "nope"
+typeof (App (Cata (TArr (TMu t1) t2)) l1) ctx = do -- f : F X -> X then cata f : Mu F -> X
+  t3 <- typeof l1 ctx
+  case t3 of 
+    (TArr t4 t5) -> do
+      guard (t2 == t5 && typeSub t1 (X, t2) == t4)
+      return $ TArr (TMu t1) t2
+    _ -> Nothing
 typeof l@(App l1 l2) ctx = do
   t1 <- typeof l2 ctx
   case typeof l1 ctx of
@@ -227,6 +232,11 @@ typeSub l@(TMu t1) c = l
 typeSub TUnit c = TUnit
 typeSub (TProd t1 t2) c = TProd (typeSub t1 c) (typeSub t2 c)
 typeSub (TSum t1 t2) c = TSum (typeSub t1 c) (typeSub t2 c)
+
+-- function takes a functor and applies Mu to it
+applMu :: T -> T 
+applMu t = typeSub t (X, TMu t)
+
 
 -- top level typing function providing empty context
 typeof' l = typeof l M.empty
@@ -347,10 +357,6 @@ reductions :: CataTerm -> [CataTerm]
 reductions t = case reduce1 t of
   Just t' -> t' : reductions t'
   _       -> []
-
--- function takes a functor and applies Mu to it
-applMu :: T -> T 
-applMu t = typeSub t (X, TMu t)
 
 -- the one step unfolding of an inductive type
 -- used so the type checker can check types

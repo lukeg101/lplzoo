@@ -198,6 +198,7 @@ termPrj2 = (string "snd") +++ (string "π2") >> return Prj2
 
 termCata = do 
   symb "cata" 
+  space1
   l1 <- term
   spaces $ symb ":"
   t1 <- typTerm
