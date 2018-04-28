@@ -177,13 +177,10 @@ typeof (App (Inl (TSum t1 t2)) l1) ctx = do
   t3 <- typeof l1 ctx
   guard (t1 == t3)
   return $ TSum t1 t2
-typeof (App (Inr t@(TSum t1 t2)) l1) ctx = do
+typeof (App (Inr (TSum t1 t2)) l1) ctx = do
   t3 <- typeof l1 ctx
-  case t3 of 
-    t'@(TSum _ _) -> do
-      guard (t == t')
-      return t
-    _ -> Nothing
+  guard (t2 == t3)
+  return $ TSum t1 t2
 typeof (App (App (App Case l1) l2) l3) ctx = do
   t1 <- typeof l1 ctx
   t2 <- typeof l2 ctx
@@ -193,9 +190,9 @@ typeof (App (App (App Case l1) l2) l3) ctx = do
       guard (t7 == t9 && t4 == t6 && t5 == t8)
       return $ t7
     _ -> Nothing
-typeof (App (In t1) l1) ctx = do -- t : F (mu F) then In t : Mu F
+typeof (App (In l@(TMu t1)) l1) ctx = do -- t : F (mu F) then In t : Mu F
   t2 <- typeof l1 ctx
-  guard (t1 == t2)
+  guard ((typeSub t1 (X, l)) == t2)
   return $ typeSub t1 (X, TMu t1)
 typeof (App (Cata (TArr (TMu t1) t2)) l1) ctx = do -- f : F X -> X then cata f : Mu F -> X
   t3 <- typeof l1 ctx

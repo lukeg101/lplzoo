@@ -29,13 +29,11 @@ Compile it using GHC if you need this.
 ## Examples 
 Where you can then have some fun, try these examples:
 - `\1:A.1`
-- `in (inl (): 1 + M (1+X)):1+M(1+X)` (the encoding of [peano](https://wiki.haskell.org/Peano_numbers) style _zero_)
+- `in (inl ():1+M(1+X)):M(1+X)` (the encoding of [peano](https://wiki.haskell.org/Peano_numbers) style _zero_)
 - `\1:M(1+((1*X)*X)).1` (the identity function for a binary tree, with nil leaves and elements stored internally)
-- `case (inr ():1+A) (\1:1.1) (\2:A.())` (performs case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
+- `case (inl () : 1 + A) (\1:1.1) (\2:A.())` (performs case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
 - `\1:A.\2:B.snd (1,2)`.
-- `\0:1+M(1+X). in (inr 0:1+M(1+X)):1+M(1+X)` the successor function for inductively defined nats.
-- `\0:1+M(1+X).cata (\1:1+M(1+X). case 1 (\2:1.0) (\2:M(1+X). (\0:1+M(1+X). in (inr 0:1+M(1+X)):1+M(1+X)) 0)):M(1+M(1+X)) -> (1+M(1+X))
-` addition for Peano nats.
+- `\0:M(1+X).in (inr 0:1+M(1+X)):M(1+X)` the successor function for inductively defined nats.
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
