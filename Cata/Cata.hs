@@ -304,6 +304,15 @@ substitute l _ = l
 -- one-step reduction relation 
 reduce1 :: CataTerm -> Maybe CataTerm 
 reduce1 l@(Var x) = Nothing
+reduce1 l@(Case)  = Nothing
+reduce1 l@(Inl t1)  = Nothing
+reduce1 l@(Inr t1)  = Nothing
+reduce1 l@(In t1)  = Nothing
+reduce1 l@(Cata t1)  = Nothing
+reduce1 l@(Unit)  = Nothing
+reduce1 l@(Prod)  = Nothing
+reduce1 l@(Prj1)  = Nothing
+reduce1 l@(Prj2)  = Nothing
 reduce1 l@(Abs x t s) = do
   s' <- reduce1 s
   return $ Abs x t s'
@@ -317,24 +326,36 @@ reduce1 l@(App (App Prod l1) l2) = do
       _ -> Nothing 
 reduce1 l@(App Prj1 (App (App prod l1) _)) = Just l1
 reduce1 l@(App Prj2 (App (App prod _) l2)) = Just l2
-reduce1 l@(App (Inl t) l1) = do
+reduce1 l@(App (Inl t) l1) = do -- reduce under inl
   l1' <- reduce1 l1
   return $ App (Inl t) l1'
-reduce1 l@(App (Inr t) l1) = do
+reduce1 l@(App (Inr t) l1) = do -- reduce under inr
   l1' <- reduce1 l1
   return $ App (Inr t) l1'
 reduce1 (App (App (App Case (App (Inl t1) l1)) f) _) =
-  return $ App f l1
+  return $ App f l1 -- case (inl x) f g ~> f x
 reduce1 (App (App (App Case (App (Inr t1) l1)) _) g) =
-  return $ App g l1
+  return $ App g l1 -- case (inr x) f g ~> g x
+reduce1 (App (In t1) l1) = do --reduce under in
+  l1' <- reduce1 l1
+  return $ App (In t1) l1' 
+reduce1 (App (Cata t1) l1) = do -- reduce under cata
+  l1' <- reduce1 l1
+  return $ App (Cata t1) l1'
 reduce1 l@(App (App (Cata t1) f) (App (In t2) l1)) =
   return $ App f $ App (findFmap t2 (App (Cata t1) f)) l1 
 -- cata f (in t) ~> f (F (cata f) t)
-reduce1 t = Nothing
+reduce1 (App l1 l2) = do -- reduce under app
+  case reduce1 l1 of
+    Just l1' -> return $ App l1' l2
+    _ -> case reduce1 l2 of
+      Just l2' -> return $ App l1 l2'
+      _ -> Nothing
+reduce1 t = error $ show t
 
 findFmap :: T -> CataTerm -> CataTerm
-findFmap X f              = f 
 findFmap TUnit f          = Unit
+findFmap X f              = f 
 findFmap (TArr t1 t2) f   = Abs 1 t1 $ findFmap t2 f
 findFmap (TProd t1 t2) f  = App (App Prod (findFmap t1 f)) (findFmap t2 f)
 findFmap t@(TSum t1 t2) f = Abs 1 t $ App (App (App Case (Var 1)) inl) inr
@@ -342,6 +363,7 @@ findFmap t@(TSum t1 t2) f = Abs 1 t $ App (App (App Case (Var 1)) inl) inr
     fm t = findFmap t f
     inl = App (Inl t) $ fm t1
     inr = App (Inr t) $ fm t2
+findFmap t f              = Abs 0 t (Var 0)
 
 -- multi-step reduction relation 
 -- NOT GUARANTEED TO TERMINATE IF typeof' FAILS
@@ -357,11 +379,6 @@ reductions t = case reduce1 t of
   Just t' -> t' : reductions t'
   _       -> []
 
--- the one step unfolding of an inductive type
--- used so the type checker can check types
-unfold1 :: T -> T 
-unfold1 (TMu t1) = applMu t1
-unfold1 t = applMu t
 
 --common combinators
 i = Abs 1 (TVar 'A') (Var 1)
