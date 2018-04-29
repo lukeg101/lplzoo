@@ -5,7 +5,7 @@ import Data.Set as S
 import Control.Monad (guard)
 
 -- Cata, of the form C or 'T -> T' or a mix of both
-data T 
+data T
   = TVar Char
   | TArr T T
   | TUnit
@@ -13,7 +13,7 @@ data T
   | TSum T T
   | TMu T
   | X
-  deriving (Eq, Ord) 
+  deriving (Eq, Ord)
 --equivalence of types compares the binary trees of each type
 --we use strict propositional equality
 --we could equally encode this using system F (which is how Haskell does it)
@@ -26,9 +26,9 @@ instance Show T where
   show (TArr a b) = paren (isArr a) (show a) ++ "->" ++ show b
   show (TUnit)    = "\x22A4"
   show (TMu t)  = "\x03bc" ++ paren True (show t)
-  show (TProd a b)= paren (isArr a) (show a) 
+  show (TProd a b)= paren (isArr a) (show a)
     ++ " \x00D7 " ++ paren (isArr b) (show b)
-  show (TSum a b) = paren (isTProd a || isArr a) (show a) 
+  show (TSum a b) = paren (isTProd a || isArr a) (show a)
     ++ " + " ++ paren (isTProd b || isArr b) (show b)
 
 paren :: Bool -> String -> String
@@ -69,23 +69,23 @@ data CataTerm
 instance Show CataTerm where
   show (Var x)      = show x
   show (App (App (Prod) a) b) = paren True (show a ++ ", " ++ show b)
-  show (App (Inl t) a) = "inl " ++ 
+  show (App (Inl t) a) = "inl " ++
     paren (isAbs a || isApp a || isSum a || isProd a) (show a) ++ ":" ++ show t
-  show (App (Inr t) a) = "inr " ++ 
+  show (App (Inr t) a) = "inr " ++
     paren (isAbs a || isApp a || isSum a || isProd a) (show a) ++ ":" ++ show t --left of sum
-  show (App Prj1 a) = "\x03C0" ++ "1 " ++ 
-    paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
-  show (App Prj2 a) = "\x03C0" ++ "2 " ++ 
-    paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
-  show (App (In t) a) = 
-    "in " ++ paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
+  show (App Prj1 a) = "\x03C0" ++ "1 " ++
+    paren (isAbs a || isApp a || isSum a || isProd a) (show a)
+  show (App Prj2 a) = "\x03C0" ++ "2 " ++
+    paren (isAbs a || isApp a || isSum a || isProd a) (show a)
+  show (App (In t) a) =
+    "in " ++ paren (isAbs a || isApp a || isSum a || isProd a) (show a)
     ++ ":" ++ show t  --inside inductive type
-  show (App (Cata t) a) = 
-    "cata " ++ paren (isAbs a || isApp a || isSum a || isProd a) (show a) 
+  show (App (Cata t) a) =
+    "cata " ++ paren (isAbs a || isApp a || isSum a || isProd a) (show a)
     ++ ":" ++ show t  --cata term
-  show (App t1 t2)  = 
+  show (App t1 t2)  =
     paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
-  show (Abs x t l1) = 
+  show (Abs x t l1) =
     "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
   show (In t)       = "in " --above case should handle this
   show (Cata t)     = "cata"--above case should handle this
@@ -122,24 +122,24 @@ instance Eq CataTerm where
 -- also checks that each term is identical
 -- variable occurrence checks for ocurrences in t1 and t2 using the logic:
 -- if both bound, check that s is same in both maps
--- if neither is bound, check literal equality 
--- if bound t1 XOR bound t2 == true then False 
+-- if neither is bound, check literal equality
+-- if bound t1 XOR bound t2 == true then False
 -- application recursively checks both the LHS and RHS
-termEquality :: (CataTerm, CataTerm) 
-  -> (Map Int Int, Map Int Int) 
-  -> Int 
+termEquality :: (CataTerm, CataTerm)
+  -> (Map Int Int, Map Int Int)
+  -> Int
   -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
   Just a -> case M.lookup y m2 of
     Just b -> a == b
     _ -> False
   _ -> x == y
-termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s = 
-  t1 == t2 && termEquality (l1, l2) (m1', m2') (s+1) 
-  where 
+termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s =
+  t1 == t2 && termEquality (l1, l2) (m1', m2') (s+1)
+  where
     m1' = M.insert x s m1
     m2' = M.insert y s m2
-termEquality (App a1 b1, App a2 b2) c s = 
+termEquality (App a1 b1, App a2 b2) c s =
   termEquality (a1, a2) c s && termEquality (b1, b2) c s
 termEquality (In t1, In t2) c s = t1 == t2
 termEquality (Inl t1, Inl t2) c s = t1 == t2
@@ -151,12 +151,12 @@ termEquality (x, y) c s = x == y
 type Context = M.Map Int T
 
 -- typing derivation for a term in a given context
--- Just T denotes successful type derivation 
+-- Just T denotes successful type derivation
 -- Nothing denotes failure to type the term
 typeof :: CataTerm -> Context -> Maybe T
 typeof Unit ctx = Just TUnit
 typeof (Var v) ctx = M.lookup v ctx
-typeof l@(Abs x t l1) ctx = do 
+typeof l@(Abs x t l1) ctx = do
   t' <- typeof l1 (M.insert x t ctx)
   return $ TArr t t'
 typeof l@(App (App Prod l1) l2) ctx = do
@@ -198,7 +198,7 @@ typeof (App (In l@(TMu t1)) l1) ctx = do -- t : F (mu F) then In t : Mu F
   return $ TMu t1
 typeof (App (Cata (TArr (TMu t1) t2)) l1) ctx = do -- f : F X -> X then cata f : Mu F -> X
   t3 <- typeof l1 ctx
-  case t3 of 
+  case t3 of
     (TArr t4 t5) -> do
       guard (t2 == t5 && typeSub t1 (X, t2) == t4)
       return $ TArr (TMu t1) t2
@@ -233,7 +233,7 @@ typeSub (TProd t1 t2) c = TProd (typeSub t1 c) (typeSub t2 c)
 typeSub (TSum t1 t2) c = TSum (typeSub t1 c) (typeSub t2 c)
 
 -- function takes a functor and applies Mu to it
-applMu :: T -> T 
+applMu :: T -> T
 applMu t = typeSub t (X, TMu t)
 
 
@@ -267,7 +267,7 @@ sub l    = S.singleton l
 
 --element is bound in a term
 notfree :: Int -> CataTerm -> Bool
-notfree x = not . S.member x . free 
+notfree x = not . S.member x . free
 
 --set of variables in a term
 vars :: CataTerm -> Set Int
@@ -290,9 +290,9 @@ rename l c = l
 --substitute one term for another in a term
 --does capture avoiding substitution
 substitute :: CataTerm -> (CataTerm, CataTerm) -> CataTerm
-substitute l1@(Var c1) (Var c2, l2) 
-  = if c1 == c2 then l2 else l1 
-substitute (App l1 l2) c 
+substitute l1@(Var c1) (Var c2, l2)
+  = if c1 == c2 then l2 else l1
+substitute (App l1 l2) c
   = App (substitute l1 c) (substitute l2 c)
 substitute (Abs y t l1) c@(Var x, l2)
   | y == x = Abs y t l1
@@ -301,8 +301,8 @@ substitute (Abs y t l1) c@(Var x, l2)
   where z = max (newlabel l1) (newlabel l2)
 substitute l _ = l
 
--- one-step reduction relation 
-reduce1 :: CataTerm -> Maybe CataTerm 
+-- one-step reduction relation
+reduce1 :: CataTerm -> Maybe CataTerm
 reduce1 l@(Var x) = Nothing
 reduce1 l@(Case)  = Nothing
 reduce1 l@(Inl t1)  = Nothing
@@ -316,14 +316,14 @@ reduce1 l@(Prj2)  = Nothing
 reduce1 l@(Abs x t s) = do
   s' <- reduce1 s
   return $ Abs x t s'
-reduce1 l@(App (Abs x t l1) l2) 
+reduce1 l@(App (Abs x t l1) l2)
   = Just $ substitute l1 (Var x, l2)  --beta conversion
 reduce1 l@(App (App Prod l1) l2) = do
   case reduce1 l1 of
     Just l1' -> Just $ App (App Prod l1') l2
-    _ -> case reduce1 l2 of 
+    _ -> case reduce1 l2 of
       Just l2' -> Just $ App (App Prod l1) l2'
-      _ -> Nothing 
+      _ -> Nothing
 reduce1 l@(App Prj1 (App (App prod l1) _)) = Just l1
 reduce1 l@(App Prj2 (App (App prod _) l2)) = Just l2
 reduce1 l@(App (Inl t) l1) = do -- reduce under inl
@@ -338,12 +338,12 @@ reduce1 (App (App (App Case (App (Inr t1) l1)) _) g) =
   return $ App g l1 -- case (inr x) f g ~> g x
 reduce1 (App (In t1) l1) = do --reduce under in
   l1' <- reduce1 l1
-  return $ App (In t1) l1' 
+  return $ App (In t1) l1'
 reduce1 (App (Cata t1) l1) = do -- reduce under cata
   l1' <- reduce1 l1
   return $ App (Cata t1) l1'
-reduce1 l@(App (App (Cata t1) f) (App (In t2) l1)) =
-  return $ App f $ App (findFmap t2 (App (Cata t1) f)) l1 
+reduce1 l@(App (App (Cata t1) f) (App (In (TMu t2)) l1)) =
+  return $ App f $ App (findFmap t2 (App (Cata t1) f)) l1
 -- cata f (in t) ~> f (F (cata f) t)
 reduce1 (App l1 l2) = do -- reduce under app
   case reduce1 l1 of
@@ -354,21 +354,22 @@ reduce1 (App l1 l2) = do -- reduce under app
 reduce1 t = error $ show t
 
 findFmap :: T -> CataTerm -> CataTerm
-findFmap TUnit f          = Unit
-findFmap X f              = f 
-findFmap (TArr t1 t2) f   = Abs 1 t1 $ findFmap t2 f
-findFmap (TProd t1 t2) f  = App (App Prod (findFmap t1 f)) (findFmap t2 f)
-findFmap t@(TSum t1 t2) f = Abs 1 t $ App (App (App Case (Var 1)) inl) inr
-  where 
-    fm t = findFmap t f
-    inl = App (Inl t) $ fm t1
-    inr = App (Inr t) $ fm t2
-findFmap t f              = Abs 0 t (Var 0)
+findFmap X f               = f
+findFmap t@(TArr  t1 t2) f = Abs 0 t $ Abs 1 t1 $ App (findFmap t2 f) $ App (Var 0) (Var 1)
+findFmap t@(TProd t1 t2) f = Abs 0 t $ App (App Prod left) right
+  where
+    left  = App (findFmap t1 f) $ App Prj1 (Var 0)
+    right = App (findFmap t2 f) $ App Prj2 (Var 0)
+findFmap t@(TSum  t1 t2) f = Abs 0 t $ App (App (App Case (Var 0)) inl) inr
+  where
+    inl = Abs 1 t1 (App (Inl t) (App (findFmap t1 f) (Var 1)))
+    inr = Abs 1 t1 (App (Inr t) (App (findFmap t2 f) (Var 1)))
+findFmap t f               = Abs 0 t (Var 0)
 
--- multi-step reduction relation 
+-- multi-step reduction relation
 -- NOT GUARANTEED TO TERMINATE IF typeof' FAILS
 reduce :: CataTerm -> CataTerm
-reduce t = case reduce1 t of 
+reduce t = case reduce1 t of
   Just t' -> reduce t'
   Nothing -> t
 
@@ -391,8 +392,8 @@ succ = Abs 1 (applMu typeNat) $ App (In $ applMu typeNat) (App (Inr $ applMu typ
 succApp n = App Cata.succ n
 typeTree = TSum TUnit (TProd (TVar 'A') X) --list type
 nil = App (In typeTree) $ App (Inl typeTree) Unit
-{-cons = Abs 1 (TVar 'A') 
-  $ Abs 2 (TVar 'A') $ App (In (applMu typeTree)) 
+{-cons = Abs 1 (TVar 'A')
+  $ Abs 2 (TVar 'A') $ App (In (applMu typeTree))
   $ App (Inr (applMu typeTree)) $ App (App Prod (Var 1)) (Var 2)-}
 xx = Abs 1 (TArr (TVar 'A') (TVar 'A')) (App (Var 1) (Var 1)) --won't type check as expected
 omega = App xx xx --won't type check, see above
