@@ -212,16 +212,6 @@ typeof l@(App l1 l2) ctx = do
     _ -> Nothing
 typeof _ _ = Nothing
 
---simple function to see if any leaf in the type tree is of a type
-contains :: T -> T -> Bool
-contains t@(TVar a) y    = t == y
-contains t@(TUnit) y     = t == y
-contains t@(X) y         = t == y
-contains t@(TProd a b) y = t == y || contains a y || contains b y
-contains t@(TSum a b) y  = t == y || contains a y || contains b y
-contains t@(TMu a) y     = t == y || contains a y
-contains t@(TArr a b) y  = t == y || contains a y || contains b y
-
 -- similar to type substitution but at the type level
 typeSub :: T -> (T, T) -> T
 typeSub l@(TVar x) c = l
@@ -351,7 +341,6 @@ reduce1 (App l1 l2) = do -- reduce under app
     _ -> case reduce1 l2 of
       Just l2' -> return $ App l1 l2'
       _ -> Nothing
-reduce1 t = error $ show t
 
 findFmap :: T -> CataTerm -> CataTerm
 findFmap X f               = f

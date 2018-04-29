@@ -1,0 +1,28 @@
+ana bnf
+
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& out\,\tau\\ &|& (ana\,\tau:\sigma)\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case\,\tau\,\tau\,\tau\\ &|& (\tau, \tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& () \\ \end{matrix}
+
+\begin{matrix} \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}
+
+\begin{matrix} \sigma & ::= & A,B,C,...\\ & | & \sigma \rightarrow \sigma \\ &|& \top\\ &|& \sigma \times \sigma\\ &|& \sigma + \sigma\\ &|& \nu\, \sigma\\ &|& {\tt X} \end{matrix}
+
+parser
+
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \end{matrix}
+
+\begin{matrix}&&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& () \\ &|& out\,\tau\\ &|& ana\\ &|& (\tau,\tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case \end{matrix}
+
+\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \delta + \delta\\ &|&\delta\\&&\\ \delta &::=& \rho \times \rho\\ &|& \rho\\&&\\ \rho & ::=& \tt{(} \sigma \tt{)}\\ &|& {\tt X}\\ &|& A,B,C,...\\ &|& \top \\ &|& \nu\,(\sigma) \end{matrix}
+
+\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \delta + \delta\\ &|&\delta\\&&\\ \end{matrix}
+
+\begin{matrix}\delta &::=& \rho \times \rho\\ &|& \rho\\&&\\ \rho & ::=& \tt{(} \sigma \tt{)}\\ &|& {\tt X}\\ &|& A,B,C,...\\ &|& \top \\ &|& \nu\,(\sigma) \end{matrix}
+
+ana semantics (see cata semantics for full list)
+
+\frac{\Gamma\vdash t : \nu F}{\Gamma\vdash out\, t : F(\nu\,F)}
+
+\frac{\Gamma\vdash f : X\rightarrow F\,X}{\Gamma\vdash\,ana\,f:X \rightarrow \nu F}
+
+out\,(ana\,f\,t) \rightsquigarrow\,F\,(ana\, f)\,(f\,t)
+

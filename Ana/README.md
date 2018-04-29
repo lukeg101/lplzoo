@@ -33,7 +33,10 @@ Where you can then have some fun, try these examples:
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
-TODO
+> \1:A.1
+λ1:A.1
+> λ1:A.1
+λ1:A.1
 ```
 Note: see syntax below for a description of what the various symbols mean.
 
@@ -51,15 +54,23 @@ TODO
 
 We base the language on the BNF for Ana:
 
-TODO 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;(ana\,\tau:\sigma)\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;()&space;\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;(ana\,\tau:\sigma)\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;()&space;\\&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& out\,\tau\\ &|& (ana\,\tau:\sigma)\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case\,\tau\,\tau\,\tau\\ &|& (\tau, \tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& () \\ \end{matrix}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;A,B,C,...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\\&space;&|&&space;\top\\&space;&|&&space;\sigma&space;\times&space;\sigma\\&space;&|&&space;\sigma&space;&plus;&space;\sigma\\&space;&|&&space;\nu\,&space;\sigma\\&space;&|&&space;{\tt&space;X}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;A,B,C,...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\\&space;&|&&space;\top\\&space;&|&&space;\sigma&space;\times&space;\sigma\\&space;&|&&space;\sigma&space;&plus;&space;\sigma\\&space;&|&&space;\nu\,&space;\sigma\\&space;&|&&space;{\tt&space;X}&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & A,B,C,...\\ & | & \sigma \rightarrow \sigma \\ &|& \top\\ &|& \sigma \times \sigma\\ &|& \sigma + \sigma\\ &|& \nu\, \sigma\\ &|& {\tt X} \end{matrix}" /></a>
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \end{matrix}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;ana\\&space;&|&&space;(\tau,\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;ana\\&space;&|&&space;(\tau,\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case&space;\end{matrix}" title="\begin{matrix}&&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& () \\ &|& out\,\tau\\ &|& ana\\ &|& (\tau,\tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case \end{matrix}" /></a>
 
 and types:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\delta&space;&plus;&space;\delta\\&space;&|&\delta\\&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\delta&space;&plus;&space;\delta\\&space;&|&\delta\\&&\\&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \delta + \delta\\ &|&\delta\\&&\\ \end{matrix}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}\delta&space;&::=&&space;\rho&space;\times&space;\rho\\&space;&|&&space;\rho\\&&\\&space;\rho&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&|&&space;{\tt&space;X}\\&space;&|&&space;A,B,C,...\\&space;&|&&space;\top&space;\\&space;&|&&space;\nu\,(\sigma)&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}\delta&space;&::=&&space;\rho&space;\times&space;\rho\\&space;&|&&space;\rho\\&&\\&space;\rho&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&|&&space;{\tt&space;X}\\&space;&|&&space;A,B,C,...\\&space;&|&&space;\top&space;\\&space;&|&&space;\nu\,(\sigma)&space;\end{matrix}" title="\begin{matrix}\delta &::=& \rho \times \rho\\ &|& \rho\\&&\\ \rho & ::=& \tt{(} \sigma \tt{)}\\ &|& {\tt X}\\ &|& A,B,C,...\\ &|& \top \\ &|& \nu\,(\sigma) \end{matrix}" /></a>
 
 Some notes about the syntax:
 
@@ -131,7 +142,11 @@ and for units:
 
 with the obvious rules for reduction inside each term that has a subterm. Finally, we have rules for `ν` type introduction, elimination and, reduction.
 
-TODO 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma\vdash&space;t&space;:&space;\nu&space;F}{\Gamma\vdash&space;out\,&space;t&space;:&space;F(\nu\,F)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma\vdash&space;t&space;:&space;\nu&space;F}{\Gamma\vdash&space;out\,&space;t&space;:&space;F(\nu\,F)}" title="\frac{\Gamma\vdash t : \nu F}{\Gamma\vdash out\, t : F(\nu\,F)}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma\vdash&space;f&space;:&space;X\rightarrow&space;F\,X}{\Gamma\vdash\,ana\,f:X&space;\rightarrow&space;\nu&space;F}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma\vdash&space;f&space;:&space;X\rightarrow&space;F\,X}{\Gamma\vdash\,ana\,f:X&space;\rightarrow&space;\nu&space;F}" title="\frac{\Gamma\vdash f : X\rightarrow F\,X}{\Gamma\vdash\,ana\,f:X \rightarrow \nu F}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=out\,(ana\,f\,t)&space;\rightsquigarrow\,F\,(ana\,&space;f)\,(f\,t)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?out\,(ana\,f\,t)&space;\rightsquigarrow\,F\,(ana\,&space;f)\,(f\,t)" title="out\,(ana\,f\,t) \rightsquigarrow\,F\,(ana\, f)\,(f\,t)" /></a>
 
 with reduction inside terms like above.
 
