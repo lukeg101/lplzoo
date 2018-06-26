@@ -22,6 +22,7 @@ The intention here is to maximise your understanding of language design whilst m
 6. _Mu_: Michel Parigot's [Lambda-Mu](https://www.cs.ru.nl/~freek/courses/tt-2011/papers/parigot.pdf). In essence it's STLC with [continuations](https://en.wikipedia.org/wiki/Continuation) that don't rely on the reduction strategy used.
 7. _SystemF_: Jean Yves-Girard's [System F](https://en.wikipedia.org/wiki/System_F). In essence it's STLC with [parametric polymorphism](https://en.wikipedia.org/wiki/Parametric_polymorphism) built in.
 8. _Cata_: In essence it's STLC with [inductive types](https://en.wikipedia.org/wiki/Inductive_type). 
-8. _Ana_: In essence it's STLC with [coinductive types](https://en.wikipedia.org/wiki/Coinduction).
+9. _Ana_: In essence it's STLC with [coinductive types](https://en.wikipedia.org/wiki/Coinduction).
+10. _Sub_: Benjamin Pierce's Lambda Calculus with Subtypes. In essence it's STLC with generalised records and [subtype polymorphism](https://en.wikipedia.org/wiki/Subtyping).
 
 See each repo for details on installation/use and submit a PR if there's something you want to fix!
