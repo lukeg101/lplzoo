@@ -112,9 +112,9 @@ bracket p = do
   symb ")"
   return x
 
--- type vars are nats packaged up 
+-- type vars are uppercase alphabetical terms packaged up 
 typVar = do
-  x <- nat
+  x <- sat (\x -> isUpper x && isAlpha x && x /= '1')
   return $ TVar x
 
 typeArr = (do
@@ -128,11 +128,29 @@ typUnit = do
   spaces $ identifier ['1','⊤']
   return $ TUnit
 
+-- record types are simply tuples of types with  ":"
+typRec = do
+  symb "{"
+  t  <- many1 typRecField
+  ts <- many (do {spaces $ symb ","; (x,t) <- typRecField; return (x,t)})
+  if ((nub . fst $ unzip (t++ts)) == (fst $ unzip (t++ts)))
+  then do -- checks if each record is unique
+    symb "}"
+    return $ TRec $ t ++ ts
+  else zerop
+
+-- parser for the fields in each type record
+typRecField = do
+  x <- spaces $ nat
+  symb ":"
+  t <- spaces typTerm
+  return (x, t)
+
 -- top level CFG for arrow types are "(X -> Y)" packaged up
 typTerm = typeArr
 
 -- second level of CFG for types
-typExpr = (bracket typTerm) +++ typVar +++ typUnit
+typExpr = (bracket typTerm) +++ typVar +++ typUnit +++ typRec
 
 -- parser for term variables
 termVar = do
@@ -161,10 +179,10 @@ app = chainl1 expr $ do
   return $ App 
 
 -- records
-record = do
+termRec = do
   symb "{"
-  x  <- many1 field
-  xs <- many (do {symb ","; (x,t) <- field; return (x,t)})
+  x  <- many1 termRecField
+  xs <- many (do {symb ","; (x,t) <- termRecField; return (x,t)})
   if ((nub . fst $ unzip (x++xs)) == (fst $ unzip (x++xs)))
   then do -- checks if each record is unique
     symb "}"
@@ -172,21 +190,21 @@ record = do
   else zerop
 
 --individual record fields
-field = do
+termRecField = do
   x <- nat
   symb "="
   t <- spaces expr
   return (x, t)
 
 --projection
-projection = do
-  r <- record 
+termProj = do
+  r <- termRec +++ termVar 
   symb "."
   x <- nat
   return $ App r (Proj x)
 
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ record +++ projection 
+expr = (bracket term) +++ termRec +++ termProj 
   +++ termVar +++ termUnit
 
 -- top level of CFG Grammar

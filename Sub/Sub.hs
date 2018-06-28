@@ -9,42 +9,16 @@ import Control.Monad             (guard)
 -- Unit/Top is used as the final type, meant to represent Object
 -- records are lists of variables and types (todo make this Set)
 data T 
-  = TVar Int
+  = TVar Char
   | TArr T T
   | TUnit 
   | TRec [(Int,T)]
-  deriving Ord
-
--- does syntactic type equality on type trees
-instance Eq T where
-  t1 == t2 = typeEquality (t1, t2) (M.empty, M.empty) 0
-
--- test for syntactic type equality on types
--- very similar to equality on first-order terms ie STLC equality
--- type equality on records is not mutual/nested
-typeEquality :: (T, T) 
-  -> (Map (Either Int Int) Int, Map (Either Int Int) Int) 
-  -> Int 
-  -> Bool
-typeEquality (TVar x, TVar y) (m1, m2) s = case M.lookup (Right x) m1 of
-  Just a -> case M.lookup (Right y) m2 of
-    Just b -> a == b
-    _ -> False
-  _ -> x == y
-typeEquality (TArr a1 b1, TArr a2 b2) c s = 
-  typeEquality (a1, a2) c s && typeEquality (b1, b2) c s
-typeEquality (TRec l1, TRec l2) c s = length l1 == length l2
-  && any (==0) counts && length counts == length l1
-  where
-    counts = map length . group . sort $
-      [v1 | (v1,t1) <- l1, (v2,t2) <- l2, typeEquality (t1, t2) c s]
-typeEquality (TUnit, TUnit) _ _ = True
-typeEquality _ _ _ = False
+  deriving (Eq, Ord)
 
 -- show implementation, uses Unicode for Unit
 -- uses bracketing convention for types
 instance Show T where
-  show (TVar c)    = show c
+  show (TVar x)   = x:""
   show (TArr a b)  = paren (isArr a) (show a) ++ "->" ++ show b
   show (TUnit)   = "\x22A4"
   show (TRec xs) = wparen . concat $ 
@@ -132,7 +106,7 @@ subtype t1 t2 = t1 == t2 ||
 -- uses bracketing convention for terms
 instance Show STerm where
   show (Var x)      = show x
-  show (App t1@(Rec l1) (Proj x)) = show l1 ++ "." ++ show x
+  show (App l1 (Proj x)) = show l1 ++ "." ++ show x
   show (Rec xs) = wparen . concat $ 
     intersperse ", " $ map (\(v,t)->show v ++ ":" ++ show t) xs
   show (App t1 t2)  = 
@@ -156,19 +130,24 @@ type Context = M.Map Int T
 -- Just T denotes successful type derivation 
 -- Nothing denotes failure to type the term (not in \->+Sub)
 typeof :: STerm -> Context -> Maybe T
+typeof (Unit) ctx = Just TUnit
 typeof (Var v) ctx = M.lookup v ctx
 typeof l@(Abs x t l1) ctx = do 
   t' <- typeof l1 (M.insert x t ctx)
   return $ TArr t t'
-typeof l@(App (Rec l1) (Proj x)) ctx = 
+typeof l@(App (Rec l1) (Proj x)) ctx = -- projecting from a record directly
   case L.lookup x l1 of
     Just t -> typeof t ctx
+    _ -> Nothing
+typeof l@(App (Var v) (Proj x)) ctx = do -- projecting from a variable
+  case M.lookup v ctx of
+    Just (TRec l1) -> L.lookup x l1
     _ -> Nothing
 typeof l@(App l1 l2) ctx = do
   t1 <- typeof l2 ctx
   case typeof l1 ctx of
     Just (TArr t2 t3) -> do 
-      guard (subtype t1 t2)
+      guard (subtype t2 t1)
       return t3
     _ -> Nothing
 typeof l@(Rec l1) ctx = do
@@ -176,7 +155,7 @@ typeof l@(Rec l1) ctx = do
     Just t' -> Just (v,t')
     _ -> Nothing) l1
   return $ TRec tl1
-typeof _ _ = Nothing 
+typeof _ _ = error "na" 
 
 -- top level typing function providing empty context
 typeof' l = typeof l M.empty
@@ -261,7 +240,9 @@ reduce1 l@(Abs x t s) = do
   Just $ Abs x t s'
 reduce1 l@(App (Abs x t l') l2) = 
   Just $ substitute l' (Var x, l2)  --beta conversion
-reduce1 l@(App (Rec l1) (Proj x)) = L.lookup x l1
+reduce1 l@(App l1 (Proj x)) = case l1 of
+  Rec xs ->  L.lookup x xs
+  _ -> Nothing
 reduce1 l@(App l1 l2) = do
   case reduce1 l1 of 
     Just l' -> Just $ App l' l2
@@ -277,6 +258,7 @@ reduce1 l@(Rec l1)
     f ((x, t):xs) = case reduce1 t of
       Just t' -> (x,t'):xs
       Nothing -> (x,t) :f xs 
+reduce1 l@(Unit) = Nothing
 
 -- multi-step reduction relation 
 -- NOT GUARANTEED TO TERMINATE if it doesn't type check
