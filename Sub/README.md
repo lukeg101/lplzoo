@@ -28,9 +28,9 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
--TODO
--TODO
--TODO 
+- TODO
+- TODO
+- TODO 
 
 The parser is smart enough to recognise λ; so you can copy and paste from the output:
 ```

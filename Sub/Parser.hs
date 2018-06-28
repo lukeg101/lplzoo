@@ -123,16 +123,26 @@ typeArr = (do
   y <- typTerm
   return $ TArr x y) +++ typExpr
 
+-- units are simply 1
+typUnit = do
+  spaces $ identifier ['1','⊤']
+  return $ TUnit
+
 -- top level CFG for arrow types are "(X -> Y)" packaged up
 typTerm = typeArr
 
 -- second level of CFG for types
-typExpr = (bracket typTerm) +++ typVar
+typExpr = (bracket typTerm) +++ typVar +++ typUnit
 
 -- parser for term variables
 termVar = do
   x <- nat
   return $ Var x
+
+-- unit terms are simply ()
+termUnit = do
+  spaces $ symb "()"
+  return Unit
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
@@ -165,13 +175,21 @@ record = do
 field = do
   x <- nat
   symb "="
-  t <- spaces term
+  t <- spaces expr
   return (x, t)
 
--- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ record +++ termVar
+--projection
+projection = do
+  r <- record 
+  symb "."
+  x <- nat
+  return $ App r (Proj x)
 
--- top level of CFG Gramma
+-- expression follows CFG form with bracketing convention
+expr = (bracket term) +++ record +++ projection 
+  +++ termVar +++ termUnit
+
+-- top level of CFG Grammar
 term = app +++ lam
 
 -- identifies key words
