@@ -1,0 +1,28 @@
+bnf
+
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \{\upsilon= \tau,...\} \\ &|&\tau . \upsilon\\ &|&  ()\\ \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & {\tt A,B,C,...}\\ & | & \sigma \rightarrow \sigma\\ &|& \top\\ &|& \{\mathbf{\upsilon}\tt{:}\sigma,...\} \end{matrix}
+
+
+
+
+
+semantics
+
+\overline{S < S}
+
+\overline{S <  \top}
+
+\frac{A < B\quad B < C}{A < C}
+
+\frac{T_1 < S_1 \quad S_2 < T_2}{S_1 \rightarrow S_2 < T_1 \rightarrow T_2}
+
+\overline{\Gamma \vdash x:T},\quad \mbox{(if $x:T \in \Gamma$)}
+
+\frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}
+
+\frac{\Gamma \vdash t:A\quad A < B}{\Gamma \vdash t:B }
+
+\frac{\forall i .\,\Gamma \vdash t_i : T_i}{\forall i.\,\Gamma \vdash \{l_i=t_i \}:\{l_i:T_i\}}
+
+	
+

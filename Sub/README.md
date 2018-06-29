@@ -60,7 +60,7 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 
 We base the language on the BNF for the typed calculus, with the addition of generalised records, record projections (using the record names as projections), the unit, and types for these terms:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \{\upsilon= \tau,...\} \\ &|&\tau . \upsilon\\ \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & {\tt A,B,C,...}\\ & | & \sigma \rightarrow \sigma\\ &|& \top\\ &|& \{\mathbf{\upsilon}\tt{:}\sigma,...\} \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;()\\&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;()\\&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \{\upsilon= \tau,...\} \\ &|&\tau . \upsilon\\ &|& ()\\ \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & {\tt A,B,C,...}\\ & | & \sigma \rightarrow \sigma\\ &|& \top\\ &|& \{\mathbf{\upsilon}\tt{:}\sigma,...\} \end{matrix}" /></a>
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar for terms as follows:
 
@@ -89,32 +89,51 @@ The semantics implements beta-reduction on terms and alpha-equivalence as the `E
 
 We have typing rules for the Unit type (otherwise known as Top):
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma\vdash&space;()&space;:&space;\top}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma\vdash&space;()&space;:&space;\top}" title="\overline{\Gamma\vdash () : \top}" /></a>
 
 The subtyping relation is a reflexive and transitive relation `<` defined as follows:
 
-These rules denote reflexivity, transitivity, that `()` is the _supertype_ of all types, and the arrow-subtyping rule for functions. The standard typing rules from STLC are then influenced by this:
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{S&space;<&space;S}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{S&space;<&space;S}" title="\overline{S < S}" /></a>
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{A&space;<&space;B\quad&space;B&space;<&space;C}{A&space;<&space;C}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{A&space;<&space;B\quad&space;B&space;<&space;C}{A&space;<&space;C}" title="\frac{A < B\quad B < C}{A < C}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{S&space;<&space;\top}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{S&space;<&space;\top}" title="\overline{S < \top}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{T_1&space;<&space;S_1&space;\quad&space;S_2&space;<&space;T_2}{S_1&space;\rightarrow&space;S_2&space;<&space;T_1&space;\rightarrow&space;T_2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{T_1&space;<&space;S_1&space;\quad&space;S_2&space;<&space;T_2}{S_1&space;\rightarrow&space;S_2&space;<&space;T_1&space;\rightarrow&space;T_2}" title="\frac{T_1 < S_1 \quad S_2 < T_2}{S_1 \rightarrow S_2 < T_1 \rightarrow T_2}" /></a>
+
+These rules denote reflexivity, transitivity, that `()` is the _supertype_ of all types, and the arrow-subtyping rule for functions. The standard typing rules from STLC are then influenced by this, but structurally are the same beyond a type substitution rule:
+
+Variables:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" title="\overline{\Gamma \vdash x:T},\quad \mbox{(if $x:T \in \Gamma$)}" /></a>
 
 for abstractions:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" title="\frac{\Gamma ,x:A \vdash t:B}{\Gamma \vdash (\lambda x : A. t) : B }" /></a>
 
 for application:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" title="\frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}" /></a>
+
+the subtyping substitution rule (implicit in typing, not explicitly used):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;t:A\quad&space;A&space;<&space;B}{\Gamma&space;\vdash&space;t:B&space;}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;t:A\quad&space;A&space;<&space;B}{\Gamma&space;\vdash&space;t:B&space;}" title="\frac{\Gamma \vdash t:A\quad A < B}{\Gamma \vdash t:B }" /></a>
 
 and the reduction relation (adopted from STLC):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)N \rightsquigarrow M [x := N]" /></a>
 
-and special introduction, elimination, and reduction rules for records:
+Next, there is a special elimination rule for records:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t_i&space;:&space;T_i}{\forall&space;i.\,\Gamma&space;\vdash&space;\{l_i=t_i&space;\}:\{l_i:T_i\}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t_i&space;:&space;T_i}{\forall&space;i.\,\Gamma&space;\vdash&space;\{l_i=t_i&space;\}:\{l_i:T_i\}}" title="\frac{\forall i .\,\Gamma \vdash t_i : T_i}{\forall i.\,\Gamma \vdash \{l_i=t_i \}:\{l_i:T_i\}}" /></a>
+
+with sensible structural (internal) reduction rules for terms inside records. Lastly we have rules for record projections:
+
+TODO 
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Sub.hs). The variable convention is adopted for both types and terms.
-- Reductions include the one-step reduction (see `reduce1` in Sub.hs), the many-step reduction (see `reduce` in Sub.hs). 
+- Reductions include the one-step reduction (see `reduce1` in Sub.hs), the many-step reduction (see `reduce` in Sub.hs).
+- TODO reduction info 
 
 ## Other Implementation Details
 - Sub.hs contains the Haskell implementation of the calculus, including substitution, subtyping, reduction, and other useful things.
