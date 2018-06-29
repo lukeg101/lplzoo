@@ -29,12 +29,17 @@ Compile it using GHC if you need this.
 ## Examples 
 Where you can then have some fun, try these examples:
 - TODO
-- TODO
+- `\1:{2:A, 3:B}.1` this is the identity function for records
 - TODO 
 
 The parser is smart enough to recognise λ; so you can copy and paste from the output:
 ```
-TODO
+Welcome to the Sub REPL
+Type some terms or press Enter to leave.
+> \1:{2:A, 3:B}.1
+λ1:{2:A, 3:B}.1
+> λ1:{2:A, 3:B}.1
+λ1:{2:A, 3:B}.1
 ```
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
@@ -43,7 +48,10 @@ TODO
 ```
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
-TODO
+> t\1:{2:A, 3:B}.1.3
+{2:A, 3:B}->B
+> t\1:{2:A, 3:B}.1.5
+Cannot Type Term: \1:{2:A, 3:B}.1.5
 ```
 
 Note: if you provide a non-normalizing term, the type checker will fail and reduction will not occur.
@@ -69,9 +77,9 @@ TODO
 Some notes about the syntax:
 
 - Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:1.x`).
-- Types are also positive integers for the same reasons. Type variables should be distinct from term variables, although it is not prohibited: The term `TODO` is valid but less readable due to the dual use of `1`.
-- Types are either type variables, abstractions, or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. 
-- Nested terms don't need brackets: `\1:3.\2:3. 2` unless enforcing application on the right. Whitespace does not matter `TODO` unless it is between application where you need at least one space.
+- Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, the unit type `()`, and generalised record types `{1:A,2:B->A,...,8:C}`.
+- Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. 
+- Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `\1:{2:A, 3:B}.    1` unless it is between application where you need at least one space.
 - TODO subtyping
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 

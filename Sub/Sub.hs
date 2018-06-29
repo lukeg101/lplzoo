@@ -85,23 +85,6 @@ termEquality (Unit, Unit) _ _ = True
 termEquality (Proj x, Proj y) c s = x == y
 termEquality _ _ _ = False
 
--- function performs width subtyping on types
--- such that T < Top, T < T
--- if T1 < S1 and S2 < T2 then S1 -> S2 < T1 -> T2
--- records have width subtyping on record names
-subtype :: T -> T -> Bool
-subtype t1 t2 = t1 == t2 ||
-  case (t1, t2) of
-    (_, TUnit) -> True
-    (TRec l1, TRec l2) -> and $ map 
-      (\(v,t1) -> case L.lookup v l1 of
-        Just t2 -> subtype t2 t1
-        _ -> False) 
-      l2
-    (TArr t1a t1b, TArr t2a t2b) 
-      -> subtype t2a t1a && subtype t1b t2b
-    (_, _)     -> False
-
 -- show implementation for sub terms
 -- uses bracketing convention for terms
 instance Show STerm where
@@ -140,14 +123,14 @@ typeof l@(App (Rec l1) (Proj x)) ctx = -- projecting from a record directly
     Just t -> typeof t ctx
     _ -> Nothing
 typeof l@(App (Var v) (Proj x)) ctx = do -- projecting from a variable
-  case M.lookup v ctx of
+  case M.lookup v ctx of -- we view a record as a function to an element inside
     Just (TRec l1) -> L.lookup x l1
     _ -> Nothing
 typeof l@(App l1 l2) ctx = do
   t1 <- typeof l2 ctx
   case typeof l1 ctx of
     Just (TArr t2 t3) -> do 
-      guard (subtype t2 t1)
+      guard (subtype t1 t2)
       return t3
     _ -> Nothing
 typeof l@(Rec l1) ctx = do
@@ -155,10 +138,26 @@ typeof l@(Rec l1) ctx = do
     Just t' -> Just (v,t')
     _ -> Nothing) l1
   return $ TRec tl1
-typeof _ _ = error "na" 
 
 -- top level typing function providing empty context
 typeof' l = typeof l M.empty
+
+-- function performs width subtyping on types
+-- such that T < Top, T < T
+-- if T1 < S1 and S2 < T2 then S1 -> S2 < T1 -> T2
+-- records have width subtyping on record names
+subtype :: T -> T -> Bool
+subtype t1 t2 = t1 == t2 ||
+  case (t1, t2) of
+    (_, TUnit) -> True
+    (TRec l1, TRec l2) -> and $ map 
+      (\(v,t1) -> case L.lookup v l1 of
+        Just t2 -> subtype t2 t1
+        _ -> False) 
+      l2
+    (TArr t1a t1b, TArr t2a t2b) 
+      -> subtype t2a t1a && subtype t1b t2b
+    (_, _)     -> False
 
 --bound variables of a term
 bound :: STerm -> Set Int
@@ -241,8 +240,8 @@ reduce1 l@(Abs x t s) = do
 reduce1 l@(App (Abs x t l') l2) = 
   Just $ substitute l' (Var x, l2)  --beta conversion
 reduce1 l@(App l1 (Proj x)) = case l1 of
-  Rec xs ->  L.lookup x xs
-  _ -> Nothing
+  Rec l2 -> L.lookup x l2
+  _ -> Nothing 
 reduce1 l@(App l1 l2) = do
   case reduce1 l1 of 
     Just l' -> Just $ App l' l2
@@ -250,8 +249,8 @@ reduce1 l@(App l1 l2) = do
       Just l' -> Just $ App l1 l'
       _ -> Nothing
 reduce1 l@(Rec l1) 
-  | l1' == l1 = Just $ Rec $ l1'
-  | otherwise = Nothing
+  | l1' == l1 = Nothing
+  | otherwise = Just $ Rec $ l1'
   where
     l1' = f l1
     f [] = []

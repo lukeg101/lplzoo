@@ -114,7 +114,7 @@ bracket p = do
 
 -- type vars are uppercase alphabetical terms packaged up 
 typVar = do
-  x <- sat (\x -> isUpper x && isAlpha x && x /= '1')
+  x <- sat (\x -> isUpper x && isAlpha x && (not $ elem x ['1','=']))
   return $ TVar x
 
 typeArr = (do
@@ -191,9 +191,9 @@ termRec = do
 
 --individual record fields
 termRecField = do
-  x <- nat
+  x <- spaces nat
   symb "="
-  t <- spaces expr
+  t <- spaces term
   return (x, t)
 
 --projection
@@ -204,11 +204,11 @@ termProj = do
   return $ App r (Proj x)
 
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termRec +++ termProj 
+expr = (bracket term) +++ termProj
   +++ termVar +++ termUnit
 
 -- top level of CFG Grammar
-term = app +++ lam
+term = app +++ lam +++ termRec 
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
