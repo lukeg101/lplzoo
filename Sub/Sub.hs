@@ -156,7 +156,7 @@ subtype t1 t2 = t1 == t2 ||
         _ -> False) 
       l2
     (TArr t1a t1b, TArr t2a t2b) 
-      -> subtype t2a t1a && subtype t1b t2b
+      -> subtype t1a t2a && subtype t1b t2b
     (TVar x, TVar y) -> False --base types are at the same level
     (_, _) -> False
 
@@ -219,6 +219,7 @@ rename (Proj x) c = Proj x
 --substitute one term for another in a term
 --does capture avoiding substitution
 substitute :: STerm -> (STerm, STerm) -> STerm
+substitute l1@(Unit) c = l1
 substitute l1@(Var c1) (Var c2, l2) 
   | c1 == c2 = l2 
   | otherwise = l1 

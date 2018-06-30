@@ -159,7 +159,7 @@ termVar = do
 
 -- unit terms are simply ()
 termUnit = do
-  spaces $ symb "()"
+  symb "()"
   return Unit
 
 -- abstraction allows escaped backslash or lambda
@@ -204,7 +204,7 @@ termProj = do
   return $ App r (Proj x)
 
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termProj +++ termRec
+expr = (bracket term) +++ termProj +++ termRec 
   +++ termVar +++ termUnit
 
 -- top level of CFG Grammar

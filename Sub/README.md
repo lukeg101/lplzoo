@@ -32,21 +32,28 @@ Where you can then have some fun, try these examples:
 - `\1:{2:A, 3:B}.1` this is the identity function for 2 element records containing an `A` and a `B`.
 - `(\1:{2:1}.1) {2={3=()}}` identity function for a singleton-record `{2:1}`, which due to subtyping will accept `{2={3=()}}`.
 - `\1:{2:B}.1.2` a function taking a record `{2:B}` and projecting out the label `2` (submit a PR with a less confusing syntax).
+- `(\1:1->1.1) (\2:A->A.2)` subtyping with arrow types.
 
-The parser is smart enough to recognise λ; so you can copy and paste from the output:
+The parser is smart enough to recognise λ and ⊤; so you can copy and paste from the output:
 ```
 Welcome to the Sub REPL
 Type some terms or press Enter to leave.
-> \1:{2:A, 3:B}.1
-λ1:{2:A, 3:B}.1
-> λ1:{2:A, 3:B}.1
-λ1:{2:A, 3:B}.1
+> \1:{2:1}.1
+λ1:{2:⊤}.1
+> λ1:{2:⊤}.1
+λ1:{2:⊤}.1
 ```
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
+
 ```
-TODO
+> '(\1:1.\2:1 -> 1.2 {2=\1:A.1, 3=1}) () (\1:{3:1, 2:A->1}.1.3)
+(λ2:⊤->⊤.2 {2=λ1:A.1, 3=()}) (λ1:{3:⊤, 2:A->⊤}.1.3)
+(λ1:{3:⊤, 2:A->⊤}.1.3) {2=λ1:A.1, 3=()}
+{2=λ1:A.1, 3=()}.3
+()
 ```
+
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
 > t\1:{2:A, 3:B}.1.3
@@ -140,17 +147,17 @@ with [width](https://www.cs.cornell.edu/courses/cs4110/2012fa/lectures/lecture24
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n&plus;k}&space;\}&space;<&space;\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n}&space;\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n&plus;k}&space;\}&space;<&space;\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n}&space;\}" title="\{ l_i : T_i^{\forall i \in 1..n+k} \} < \{ l_i : T_i^{\forall i \in 1..n} \}" /></a>
 
-Which we extend width record depth subtyping in which common records in fields need to match on labels but their types need only to form the subtyping relation, rather than stricter width subtyping above:
+Which we extend width record depth subtyping in which common fields in records need to match on labels but their types need only to form the subtyping relation, rather than stricter width subtyping above:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\forall&space;i.&space;S_i&space;<&space;T_i}{\{l_i:S_i\}&space;<&space;\{l_i&space;:&space;T_i\}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\forall&space;i.&space;S_i&space;<&space;T_i}{\{l_i:S_i\}&space;<&space;\{l_i&space;:&space;T_i\}}" title="\frac{\forall i. S_i < T_i}{\{l_i:S_i\} < \{l_i : T_i\}}" /></a>
 
 - Field ordering in records does not matter, enabling _permutation_ subtyping.
+- The subtyping relation is not explicit in the language but rather done at typechecking time and so any terms using `<` are for demonstration and are not parsable in Sub.
 - Records are typeable only if all of their subterms are typeable and all of the labels are unique. We leverage the STLC typing rules and the subtyping relation to ensure record fields are typeable.
 - Projections are typeable only if it is applied to a term which is a well-typed record and the projection label (`1` in `{1=()}.1`) explicitly matches a label in that record.
-- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`). These are considered to be equivalent to _Object_ in conventional object-oriented languages and hence a function taking a `()` will take anything, as everything is a subtype of Object: `(\1:1.1) (\2:A.2)`. We should mention that languages like Java might include additional baggage like [hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html), our treatment is simpler as we don't need this to demonstrate how subtyping works. 
-
-TODO subtyping desc
- 
+- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`). These are considered to be equivalent to _Object_ in conventional object-oriented languages and hence a function taking a `()` will take anything, as everything is a subtype of Object: `(\1:1.1) (\2:A.2)`. We should mention that languages like Java might include additional baggage like [hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html), our treatment is simpler as we don't need this to demonstrate how subtyping works. The subtyping relation therefore states that all types are subtypes of units `():1`.
+- All base types are on the same level and hence `A < B` for arbitrary `A != B` is false but `A < A` is true (due to the reflexivity `<`).
+- For arrow types `f:S1 -> S2` and `g:T1 -> T2` we require that `T1 < S1` and `S2 < T2` if `f < g`. The first is needed as `g` expects a type `T1` and `f` provides a type `S1` with a domain (input space) that may supercede `T1`. The second is because the codomain (result) of `f` should be a subtype of `g` if we are going to use `S2` anywhere `T2` would be expected. This is demonstrated by the term `(\1:1->1.1) (\2:A->A.2)`
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Sub.hs). The variable convention is adopted for both types and terms.
 - Reductions include the one-step reduction (see `reduce1` in Sub.hs), the many-step reduction (see `reduce` in Sub.hs).
 
