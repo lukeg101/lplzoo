@@ -28,5 +28,7 @@ semantics
 
 \frac{t \rightsquigarrow t'}{t.l \rightsquigarrow t'.l}
 
+\{l_i=t_i\}.l \rightsquigarrow t_i
+
 
 

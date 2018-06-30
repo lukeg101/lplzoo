@@ -29,8 +29,8 @@ Compile it using GHC if you need this.
 ## Examples 
 Where you can then have some fun, try these examples:
 - TODO
-- `\1:{2:A, 3:B}.1` this is the identity function for records
-- TODO 
+- `\1:{2:A, 3:B}.1` this is the identity function for 2-records
+- `(\1:{2:1}.1) {2={3=()}}` identity function for a singleton-record `{2:1}`, which due to subtyping will accept `{2={3=()}}`.
 
 The parser is smart enough to recognise λ; so you can copy and paste from the output:
 ```
@@ -135,9 +135,21 @@ with sensible structural (internal) reduction rules for terms inside records. La
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\{l_i=t_i\}.l&space;\rightsquigarrow&space;t_i" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\{l_i=t_i\}.l&space;\rightsquigarrow&space;t_i" title="\{l_i=t_i\}.l \rightsquigarrow t_i" /></a>
 
+with [width](https://www.cs.cornell.edu/courses/cs4110/2012fa/lectures/lecture24.pdf) subtyping rules for records the subtype record can have more fields than its supertype record as long as the common fields match on label and type):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n&plus;k}&space;\}&space;<&space;\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n}&space;\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n&plus;k}&space;\}&space;<&space;\{&space;l_i&space;:&space;T_i^{\forall&space;i&space;\in&space;1..n}&space;\}" title="\{ l_i : T_i^{\forall i \in 1..n+k} \} < \{ l_i : T_i^{\forall i \in 1..n} \}" /></a>
+
+Which we extend width record depth subtyping in which common records in fields need to match on labels but their types need only to form the subtyping relation, rather than stricter width subtyping above:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\forall&space;i.&space;S_i&space;<&space;T_i}{\{l_i:S_i\}&space;<&space;\{l_i&space;:&space;T_i\}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\forall&space;i.&space;S_i&space;<&space;T_i}{\{l_i:S_i\}&space;<&space;\{l_i&space;:&space;T_i\}}" title="\frac{\forall i. S_i < T_i}{\{l_i:S_i\} < \{l_i : T_i\}}" /></a>
+
+- Field ordering in records does not matter, enabling _permutation_ subtyping.
+- Records are typeable only if all of their subterms are typeable and all of the labels are unique. We leverage the STLC typing rules and the subtyping relation to ensure record fields are typeable.
+- Projections are typeable only if it is applied to a term which is a well-typed record and the projection label (`1` in `{1=()}.1`) explicitly matches a label in that record.
+- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`).
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Sub.hs). The variable convention is adopted for both types and terms.
 - Reductions include the one-step reduction (see `reduce1` in Sub.hs), the many-step reduction (see `reduce` in Sub.hs).
-- TODO reduction info 
+- TODO subtyping info 
 
 ## Other Implementation Details
 - Sub.hs contains the Haskell implementation of the calculus, including substitution, subtyping, reduction, and other useful things.

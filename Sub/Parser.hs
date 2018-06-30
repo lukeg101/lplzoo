@@ -204,11 +204,11 @@ termProj = do
   return $ App r (Proj x)
 
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termProj
+expr = (bracket term) +++ termProj +++ termRec
   +++ termVar +++ termUnit
 
 -- top level of CFG Grammar
-term = app +++ lam +++ termRec 
+term = app +++ lam +++ termRec +++ termProj
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
