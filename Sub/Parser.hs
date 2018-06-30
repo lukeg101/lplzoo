@@ -4,7 +4,7 @@ import Sub
 import Control.Applicative (Applicative(..))
 import Control.Monad       (liftM, ap, guard)
 import Data.Char
-import Data.List           (nub)
+import Data.List           (group, sort)
 
 {-
 Implementation based on ideas in Monadic Parser Combinators paper
@@ -131,13 +131,14 @@ typUnit = do
 -- record types are simply tuples of types with  ":"
 typRec = do
   symb "{"
-  t  <- many1 typRecField
+  t  <- typRecField
   ts <- many (do {spaces $ symb ","; (x,t) <- typRecField; return (x,t)})
-  if ((nub . fst $ unzip (t++ts)) == (fst $ unzip (t++ts)))
+  if uniqs (t:ts)
   then do -- checks if each record is unique
     symb "}"
-    return $ TRec $ t ++ ts
+    return $ TRec $ t:ts
   else zerop
+    where uniqs = all (null . tail) . group . sort . map fst
 
 -- parser for the fields in each type record
 typRecField = do
@@ -173,21 +174,22 @@ lam = do
   e <- spaces term
   return $ Abs x t e
 
--- app has zero or more spaces
-app = chainl1 expr $ do
+-- app has one or more spaces
+app = (chainl1 expr $ do
   space1
-  return $ App 
+  return $ App) +++ expr 
 
 -- records
 termRec = do
   symb "{"
-  x  <- many1 termRecField
+  x  <- termRecField
   xs <- many (do {symb ","; (x,t) <- termRecField; return (x,t)})
-  if ((nub . fst $ unzip (x++xs)) == (fst $ unzip (x++xs)))
+  if uniqs (x:xs) 
   then do -- checks if each record is unique
     symb "}"
-    return $ Rec $ x ++ xs
+    return $ Rec $ x:xs
   else zerop
+    where uniqs = all (null . tail) . group . sort . map fst
 
 --individual record fields
 termRecField = do
@@ -208,7 +210,7 @@ expr = (bracket term) +++ termProj +++ termRec
   +++ termVar +++ termUnit
 
 -- top level of CFG Grammar
-term = app +++ lam +++ termRec +++ termProj
+term = app +++ lam
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
