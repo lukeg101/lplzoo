@@ -82,11 +82,14 @@ and types:
 
 Some notes about the syntax:
 
+- The syntax is identical to STLC but with the addition of the Units, records, and projections.
+- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`).
+- Records are generalised products formed as comma-separated sequence of assignments of terms to labels `t=v`, nested inside curly braces `{1=(), 2=\1:A.1}`. Record types are comma-separated assignments of typings to labels `t:v`, nested inside curly braces (such as `{1:⊤, 2:A->A}`).
+- Despite using subtyping, the subtyping relation is not part of the syntax or language itself but rather a feature used during typechecking. As such it is not featured in the grammars.
 - Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:1.x`).
 - Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, the unit type `()`, and generalised record types `{1:A,2:B->A,...,8:C}`.
 - Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. 
 - Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `\1:{2:A, 3:B}.    1` unless it is between application where you need at least one space.
-- TODO subtyping
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
@@ -154,7 +157,7 @@ Which we extend width record depth subtyping in which common fields in records n
 - The subtyping relation is not explicit in the language but rather done at typechecking time and so any terms using `<` are for demonstration and are not parsable in Sub.
 - Records are typeable only if all of their subterms are typeable and all of the labels are unique. We leverage the STLC typing rules and the subtyping relation to ensure record fields are typeable.
 - Projections are typeable only if it is applied to a term which is a well-typed record and the projection label (`1` in `{1=()}.1`) explicitly matches a label in that record.
-- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`). These are considered to be equivalent to _Object_ in conventional object-oriented languages and hence a function taking a `()` will take anything, as everything is a subtype of Object: `(\1:1.1) (\2:A.2)`. We should mention that languages like Java might include additional baggage like [hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html), our treatment is simpler as we don't need this to demonstrate how subtyping works. The subtyping relation therefore states that all types are subtypes of units `():1`.
+- Units are considered to be equivalent to _Object_ in conventional object-oriented languages and hence a function taking a `()` will take anything, as everything is a subtype of Object: `(\1:1.1) (\2:A.2)`. We should mention that languages like Java might include additional baggage like [hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html), our treatment is simpler as we don't need this to demonstrate how subtyping works. The subtyping relation therefore states that all types are subtypes of units `():1`.
 - All base types are on the same level and hence `A < B` for arbitrary `A != B` is false but `A < A` is true (due to the reflexivity of `<`).
 - For arrow types `f:S1 -> S2` and `g:T1 -> T2` we require that `T1 < S1` and `S2 < T2` if `f < g`. The first is needed as `g` expects a type `T1` and `f` provides a type `S1` with a domain (input space) that may supercede `T1`. The second is because the codomain (result) of `f` should be a subtype of `g` if we are going to use `S2` anywhere `T2` would be expected. This is demonstrated by the term `(\1:1->1.1) (\2:A->A.2)`
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Sub.hs). The variable convention is adopted for both types and terms.
