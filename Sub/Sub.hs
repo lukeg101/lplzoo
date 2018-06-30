@@ -77,7 +77,7 @@ termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s =
 termEquality (App a1 b1, App a2 b2) c s =
   termEquality (a1, a2) c s && termEquality (b1, b2) c s
 termEquality (Rec l1, Rec l2) c s = length l1 == length l2
-  && any (==0) counts && length counts == length l1
+  && all (>0) counts && length counts == length l1
   where
     counts = map length . group . sort $
       [v1 | (v1,t1) <- l1, (v2,t2) <- l2, termEquality (t1, t2) c s]
@@ -91,7 +91,7 @@ instance Show STerm where
   show (Var x)      = show x
   show (App l1 (Proj x)) = show l1 ++ "." ++ show x
   show (Rec xs) = wparen . concat $ 
-    intersperse ", " $ map (\(v,t)->show v ++ ":" ++ show t) xs
+    intersperse ", " $ map (\(v,t)->show v ++ "=" ++ show t) xs
   show (App t1 t2)  = 
     paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) = "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
@@ -129,7 +129,7 @@ typeof l@(App (Var v) (Proj x)) ctx = do -- projecting from a variable
 typeof l@(App l1 l2) ctx = do
   t1 <- typeof l2 ctx
   case typeof l1 ctx of
-    Just (TArr t2 t3) -> do 
+    Just (TArr t2 t3) -> do
       guard (subtype t1 t2)
       return t3
     _ -> Nothing
@@ -157,7 +157,8 @@ subtype t1 t2 = t1 == t2 ||
       l2
     (TArr t1a t1b, TArr t2a t2b) 
       -> subtype t2a t1a && subtype t1b t2b
-    (_, _)     -> False
+    (TVar x, TVar y) -> False --base types are at the same level
+    (_, _) -> False
 
 --bound variables of a term
 bound :: STerm -> Set Int
@@ -250,7 +251,7 @@ reduce1 l@(App l1 l2) = do
       _ -> Nothing
 reduce1 l@(Rec l1) 
   | l1' == l1 = Nothing
-  | otherwise = Just $ Rec $ l1'
+  | otherwise = Just $ Rec l1'
   where
     l1' = f l1
     f [] = []

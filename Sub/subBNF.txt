@@ -30,5 +30,9 @@ semantics
 
 \{l_i=t_i\}.l \rightsquigarrow t_i
 
+\frac{\forall i. S_i < T_i}{\{l_i:S_i\} < \{l_i : T_i\}}
+
+\{ l_i : T_i^{\forall i \in 1..n+k} \} < \{ l_i : T_i^{\forall i \in 1..n} \}
+
 
 

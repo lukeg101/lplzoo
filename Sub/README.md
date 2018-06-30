@@ -28,9 +28,10 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- TODO
-- `\1:{2:A, 3:B}.1` this is the identity function for 2-records
+- `{1=(), 2=\1:A.1}` a record containing a unit `()` and the identity function for type `A` assigned to labels `1` and `2` respectively. 
+- `\1:{2:A, 3:B}.1` this is the identity function for 2 element records containing an `A` and a `B`.
 - `(\1:{2:1}.1) {2={3=()}}` identity function for a singleton-record `{2:1}`, which due to subtyping will accept `{2={3=()}}`.
+- `\1:{2:B}.1.2` a function taking a record `{2:B}` and projecting out the label `2` (submit a PR with a less confusing syntax).
 
 The parser is smart enough to recognise λ; so you can copy and paste from the output:
 ```
@@ -146,10 +147,12 @@ Which we extend width record depth subtyping in which common records in fields n
 - Field ordering in records does not matter, enabling _permutation_ subtyping.
 - Records are typeable only if all of their subterms are typeable and all of the labels are unique. We leverage the STLC typing rules and the subtyping relation to ensure record fields are typeable.
 - Projections are typeable only if it is applied to a term which is a well-typed record and the projection label (`1` in `{1=()}.1`) explicitly matches a label in that record.
-- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`).
+- Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`). These are considered to be equivalent to _Object_ in conventional object-oriented languages and hence a function taking a `()` will take anything, as everything is a subtype of Object: `(\1:1.1) (\2:A.2)`. We should mention that languages like Java might include additional baggage like [hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html), our treatment is simpler as we don't need this to demonstrate how subtyping works. 
+
+TODO subtyping desc
+ 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Sub.hs). The variable convention is adopted for both types and terms.
 - Reductions include the one-step reduction (see `reduce1` in Sub.hs), the many-step reduction (see `reduce` in Sub.hs).
-- TODO subtyping info 
 
 ## Other Implementation Details
 - Sub.hs contains the Haskell implementation of the calculus, including substitution, subtyping, reduction, and other useful things.
