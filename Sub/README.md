@@ -129,7 +129,11 @@ Next, there is a special elimination rule for records:
 
 with sensible structural (internal) reduction rules for terms inside records. Lastly we have rules for record projections:
 
-TODO 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t&space;:&space;\{l_i:T_i\}}{\forall&space;i.\,\Gamma&space;\vdash&space;t.l_i&space;:&space;T_i}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t&space;:&space;\{l_i:T_i\}}{\forall&space;i.\,\Gamma&space;\vdash&space;t.l_i&space;:&space;T_i}" title="\frac{\forall i .\,\Gamma \vdash t : \{l_i:T_i\}}{\forall i.\,\Gamma \vdash t.l_i : T_i}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{t&space;\rightsquigarrow&space;t'}{t.l&space;\rightsquigarrow&space;t'.l}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{t&space;\rightsquigarrow&space;t'}{t.l&space;\rightsquigarrow&space;t'.l}" title="\frac{t \rightsquigarrow t'}{t.l \rightsquigarrow t'.l}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\{l_i=t_i\}.l&space;\rightsquigarrow&space;t_i" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\{l_i=t_i\}.l&space;\rightsquigarrow&space;t_i" title="\{l_i=t_i\}.l \rightsquigarrow t_i" /></a>
 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Sub.hs). The variable convention is adopted for both types and terms.
 - Reductions include the one-step reduction (see `reduce1` in Sub.hs), the many-step reduction (see `reduce` in Sub.hs).

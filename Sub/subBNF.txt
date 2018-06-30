@@ -24,5 +24,9 @@ semantics
 
 \frac{\forall i .\,\Gamma \vdash t_i : T_i}{\forall i.\,\Gamma \vdash \{l_i=t_i \}:\{l_i:T_i\}}
 
-	
+\frac{\forall i .\,\Gamma \vdash t : \{l_i:T_i\}}{\forall i.\,\Gamma \vdash t.l_i : T_i} 
+
+\frac{t \rightsquigarrow t'}{t.l \rightsquigarrow t'.l}
+
+
 
