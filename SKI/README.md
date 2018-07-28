@@ -61,7 +61,7 @@ S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S
 ```
 Note: the above computes 2^2 in Church Numeral format
 
-Note: if you provide a non-normalizing term (e.g. with `(S I I (S I I))` which is the same as `(\1.1 1)(\1.1 1)` in ULC), reductions will not terminate. Use STLC for termination guarantees.
+Note: if you provide a non-normalizing term (e.g. with `(S I I (S I I))` which is the same as `(\x.x x)(\x.x x)` in ULC), reductions will not terminate. Use STLC for termination guarantees.
 
 ## Syntax 
 
@@ -75,7 +75,7 @@ However we adopt the standard bracketing conventions to eliminate ambiguity in t
 
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me to implement. This is isomorphic to a whiteboard treatment using characters. Some treatments of the SKI calculus omit variables, but as long as there is no notion of binding it should be ok.
+- Symbols of SKI are the characters `S`, `K`, or `I`. This is isomorphic to a whiteboard treatment using characters. Some treatments of the SKI calculus omit variables, but as long as there is no notion of binding it should be ok.
 - Nested terms may not require brackets and follows the convention of application being left associative where `S K K 1` is the same as `((S K) K) 1`, but not `S (K (K 1))`.
 - Whitespace does not matter, except in between application where a minimumum of one space is needed. 
 - Non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations.
