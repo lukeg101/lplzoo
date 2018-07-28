@@ -28,26 +28,28 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- `1`
+- `x`
 - `\x.x`
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
 Welcome to the Untyped λ-calculus REPL
 Type some terms or press Enter to leave.
-> x
-x
-> \x.x
-λx.x
-> λx.x
-λx.x
+>   x
+=   x
+>   \x.x
+=   λx.x
+>   λx.x
+=   λx.x
+>
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`). 
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> '(\x.x) (\y.y) z
-(λy.y) z
-z
+>   '(\x.x) (\y.y) z
+~>  (λy.y) z
+~>  z
 ```
 Note: if you provide a non-normalizing term, reductions will not terminate. Use STLC for termination guarantees.
 
