@@ -113,14 +113,14 @@ bracket p = do
 
 -- vars are nats packaged up
 var = do
-  x <- nat
+  x <- many1 $ sat isLower
   return (Var x)
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
 lam = do 
   spaces $ identifier lambdas
-  x <- spaces nat
+  x <- spaces $ many1 $ sat isLower
   symb "."
   e <- spaces term
   return $ Abs x e

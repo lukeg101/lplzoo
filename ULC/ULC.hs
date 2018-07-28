@@ -5,8 +5,8 @@ import Data.Map.Lazy as M
 
 --untyped lambda calculus - variables are numbers now as it's easier for renaming
 data Term
-  = Var Int
-  | Abs Int Term
+  = Var String
+  | Abs String Term
   | App Term Term
   deriving Ord
 
@@ -21,7 +21,7 @@ instance Eq Term where
 -- if neither is bound, check literal equality
 -- if bound t1 XOR bound t2 == true then False
 -- application recursively checks both the LHS and RHS
-termEquality :: (Term, Term) -> (Map Int Int, Map Int Int) -> Int -> Bool
+termEquality :: (Term, Term) -> (Map String Int, Map String Int) -> Int -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
   Just a -> case M.lookup y m2 of
     Just b -> a == b
@@ -38,9 +38,9 @@ termEquality _ _ _ = False
 
   --Show instance
 instance Show Term where
-  show (Var x)      = show x
+  show (Var x)      = x
   show (App t1 t2)  = paren (isAbs t1) (show t1) ++ " " ++ paren (isAbs t2 || isApp t2) (show t2)
-  show (Abs x t1)   = "\x03bb" ++ show x ++ "." ++ show t1
+  show (Abs x t1)   = "\x03bb" ++ x ++ "." ++ show t1
 
 paren :: Bool -> String -> String
 paren True  x = "(" ++ x ++ ")"
@@ -55,13 +55,13 @@ isApp (App _ _) = True
 isApp _         = False
 
 --bound variables of a term
-bound :: Term -> Set Int
+bound :: Term -> Set String
 bound (Var n)      = S.empty
 bound (Abs n t)    = S.insert n $ bound t
 bound (App t1 t2)  = S.union (bound t1) (bound t2)
 
 --free variables of a term
-free :: Term -> Set Int
+free :: Term -> Set String
 free (Var n)      = S.singleton n
 free (Abs n t)    = S.delete n (free t)
 free (App t1 t2)  = S.union (free t1) (free t2)
@@ -77,21 +77,32 @@ sub t@(Abs c t')   = S.insert t $ sub t'
 sub t@(App t1 t2)  = S.insert t $ S.union (sub t1) (sub t2)
 
 --element is bound in a term
-notfree :: Int -> Term -> Bool
+notfree :: String -> Term -> Bool
 notfree x = not . S.member x . free
 
 --set of variables in a term
-vars :: Term -> Set Int
+vars :: Term -> Set String
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t1)   = S.insert x $ vars t1
 
 --generates a fresh variable name for a term
-newlabel :: Term -> Int
-newlabel = (+1) . maximum . vars
+newlabel :: Term -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
 
 --rename t (x,y): renames free occurences of x in t to y
-rename :: Term -> (Int, Int) -> Term
+rename :: Term -> (String, String) -> Term
 rename (Var a) (x,y) = if a == x then Var y else Var a
 rename t@(Abs a t') (x,y) = if a == x then t else Abs a $ rename t' (x, y)
 rename (App t1 t2) (x,y) = App (rename t1 (x,y)) (rename t2 (x,y))
@@ -150,24 +161,25 @@ reductions t = case reduce1 t of
     _       -> []
 
 --common combinators
-i = Abs 1 (Var 1)
-true = Abs 1 (Abs 2 (Var 1))
-false = Abs 1 (Abs 2 (Var 2))
+i = Abs "a" (Var "a")
+true = Abs "a" (Abs "b" (Var "a"))
+false = Abs "a" (Abs "b" (Var "b"))
 zero = false
-xx = Abs 1 (App (Var 1) (Var 1))
+xx = Abs "x" (App (Var "x") (Var "x"))
 omega = App xx xx
 _if = \c t f -> App (App c t) f
 _isZero = \n -> _if n false true
-_succ = Abs 0 $ Abs 1 $ Abs 2 $ App (Var 1) $ App (App (Var 0) (Var 1)) (Var 2)
+_succ = Abs "x" $ Abs "y" 
+  $ Abs "z" $ App (Var "y") $ App (App (Var "x") (Var "y")) (Var "z")
 appsucc = App _succ
 
 -- function from Haskell Int to Church Numeral
 toChurch :: Int -> Term
-toChurch n = Abs 0 (Abs 1 (toChurch' n))
+toChurch n = Abs "x" (Abs "f" (toChurch' n))
   where
-    toChurch' 0 = Var 1
-    toChurch' n = App (Var 0) (toChurch' (n-1))
+    toChurch' 0 = Var "x"
+    toChurch' n = App (Var "x") (toChurch' (n-1))
 
-test1 = App i (Abs 1 (App (Var 1) (Var 1)))
-test2 = App (App (Abs 1 (Abs 2 (Var 2))) (Var 2)) (Var 4)
-test3 = App (App (toChurch 3) (Abs 0 (App (Var 0) (toChurch 2)))) (toChurch 1)
+test1 = App i (Abs "x" (App (Var "x") (Var "x")))
+test2 = App (App (Abs "x" (Abs "y" (Var "y"))) (Var "y")) (Var "z")
+test3 = App (App (toChurch 3) (Abs "x" (App (Var "x") (toChurch 2)))) (toChurch 1)

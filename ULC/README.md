@@ -29,25 +29,25 @@ Compile it using GHC if you need this.
 ## Examples 
 Where you can then have some fun, try these examples:
 - `1`
-- `\1.1`
+- `\x.x`
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
 Welcome to the Untyped λ-calculus REPL
 Type some terms or press Enter to leave.
-> 1
-1
-> \1.1
-λ1.1
-> λ1.1
-λ1.1
+> x
+x
+> \x.x
+λx.x
+> λx.x
+λx.x
 ```
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> '(\1.1) (\2.2) 3
-(λ2.2) 3
-3
+> '(\x.x) (\y.y) z
+(λy.y) z
+z
 ```
 Note: if you provide a non-normalizing term, reductions will not terminate. Use STLC for termination guarantees.
 
@@ -55,18 +55,18 @@ Note: if you provide a non-normalizing term, reductions will not terminate. Use 
 
 We base the language on the BNF for the untyped calculus:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;\upsilon&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;\upsilon&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ & | & \tau\,{\tt space}\,\tau\\ & | & \upsilon &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;\upsilon&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;\upsilon&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ & | & \tau\,{\tt space}\,\tau\\ & | & \upsilon &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}" /></a>
 
-However we adopt the standard bracketing conventions to eliminate ambiguity in the parser. Concretly, the parser implements the non-ambiguous grammar as follows:
+However we adopt the standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}" /></a>
 
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy to for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x.x`).
-- Nested terms may not require brackets: `\1.1 1` and follows the convention of abstractions being left associative, application being right associative, and application having higher precedence than abstraction. 
-- Whitespace does not matter `(\1      .(1 1))`, except in between application where a minimumum of one space is needed. 
-- Non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interupt computations.
+- Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
+- Nested terms may not require brackets: `\x.x x` and follows the convention of abstractions being left associative, application being right associative, and application having higher precedence than abstraction. 
+- Whitespace does not matter `\x.(x    x)`, except in between application where a minimum of one space is needed. 
+- Non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interrupt computations.
 - This grammar left-recursive and non-ambiguous.
 
 ## Semantics

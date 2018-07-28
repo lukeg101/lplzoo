@@ -4,29 +4,12 @@ https://www.codecogs.com/latex/eqneditor.php
 used html rendering of gif in readme for syntax
 bnf
 
-\begin{matrix} 
-\mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ 
-& | & \tau\,{\tt space}\,\tau\\ 
-& | & \upsilon
-&&\\ 
-\upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... 
-\end{matrix}
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ & | & \tau\,{\tt space}\,\tau\\ & | & \upsilon &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}
 
 parser grammar
 
 
-\begin{matrix} &&\\
- \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ 
-& | & \alpha\\
-&&\\
-\alpha & ::= & \beta \\
-&| &\mathbf{\alpha\, \tt{space}\, \beta} \\
-&&\\
-\beta & ::= & \tt{(}\tau \tt{)}\\ 
-&|& \upsilon \\ 
-&&\\
-\upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... 
-\end{matrix}
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon} . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}
 
 semantics
 
