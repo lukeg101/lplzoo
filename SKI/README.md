@@ -61,7 +61,7 @@ S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S
 ```
 Note: the above computes 2^2 in Church Numeral format
 
-Note: if you provide a non-normalizing term (e.g. with `(S I I (S I I))` which is the same as `(\1.1 1)(\1.1 1)` in ULC), reductions will not terminate. Use STLC for termination guarantees.
+Note: if you provide a non-normalizing term (e.g. with `(S I I (S I I))` which is the same as `(\x.x x)(\x.x x)` in ULC), reductions will not terminate. Use STLC for termination guarantees.
 
 ## Syntax 
 
