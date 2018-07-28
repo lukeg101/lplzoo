@@ -21,7 +21,6 @@ In either case you get something like the following:
 Welcome to the Untyped λ-calculus REPL
 Type some terms or press Enter to leave.
 >
-
 ```
 Note: When run in GHCi, you don't have the luxury of escaped characters, backspace, delete etc...
 Compile it using GHC if you need this.
@@ -41,7 +40,6 @@ Type some terms or press Enter to leave.
 =   λx.x
 >   λx.x
 =   λx.x
->
 ```
 `>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`). 
 
