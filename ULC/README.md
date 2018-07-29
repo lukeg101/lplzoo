@@ -51,6 +51,19 @@ There is also a reduction tracer, which should print each reduction step. prefix
 ```
 Note: if you provide a non-normalizing term, reductions will not terminate. Use STLC for termination guarantees.
 
+You can save variables for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+```
+>   let x = y
+Saved: y
+>   x
+=   y
+>   \y.x
+=   λz.y
+```
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. 
+
+Note: We do capture avoiding substitution if a bound variable is the same as one we are substituting in. We rename the bound term to a new variable.
+
 ## Syntax 
 
 We base the language on the BNF for the untyped calculus:
@@ -63,6 +76,7 @@ However we adopt the standard bracketing conventions to eliminate ambiguity in t
 
 Some notes about the syntax:
 
+- The above syntax only covers the core calculus, and not the repl extensions (such as `let` bindings above). The extensions are simply added on in the repl. 
 - Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
 - Nested terms may not require brackets: `\x.x x` and follows the convention of abstractions being left associative, application being right associative, and application having higher precedence than abstraction. 
 - Whitespace does not matter `\x.(x    x)`, except in between application where a minimum of one space is needed. 

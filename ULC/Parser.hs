@@ -99,9 +99,11 @@ p `chainl1` op = do {a <- p; rest a}
       b <- p
       rest (f a b)) +++ return a
 
--- 1 or more digits
-nat :: Parser Int
-nat = fmap read (many1 (sat isDigit))
+-- 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat isLower
+  if elem s ["let", "="] then zerop else return s
 
 -- bracket parses away brackets as you'd expect
 bracket :: Parser a -> Parser a
@@ -111,16 +113,16 @@ bracket p = do
   symb ")"
   return x
 
--- vars are nats packaged up
+-- vars are strings packaged up
 var = do
-  x <- many1 $ sat isLower
+  x <- str
   return (Var x)
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
 lam = do 
   spaces $ identifier lambdas
-  x <- spaces $ many1 $ sat isLower
+  x <- spaces $ str
   symb "."
   e <- spaces term
   return $ Abs x e
@@ -130,10 +132,22 @@ app = chainl1 expr $ do
   space1
   return $ App 
 
+-- parser for let expressions
+pLet = do
+  spaces $ symb "let"
+  v <- str
+  spaces $ symb "="
+  t <- term 
+  return (v,t)
+
+pTerm = do
+  t <- term 
+  return ("", t)
+
 -- expression follows CFG form with bracketing convention
 expr = (bracket term) +++ var
 
--- top level of CFG Gramma
+-- top level of CFG Grammar
 term = lam +++ app
 
 -- identifies key words

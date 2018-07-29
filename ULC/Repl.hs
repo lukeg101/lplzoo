@@ -10,11 +10,14 @@ replMain :: IO ()
 replMain = do
   putStrLn "Welcome to the Untyped \x03bb-calculus REPL"
   putStrLn "Type some terms or press Enter to leave."
-  repl
+  repl []
+
+-- stores variables from let expressions at runtime
+type Context = [(String,Term)]
 
 -- REPL loop, takes input reduces and prints result, or exits out
-repl :: IO ()
-repl = do
+repl :: Context -> IO ()
+repl ctx = do
   putStr ">   "
   hFlush stdout
   s <- getLine
@@ -28,13 +31,24 @@ repl = do
         then mapM_ putStrLn . prependReductions (fst x) . reductions $ fst x
         else cannotParse s
       _ -> cannotParse s
-    else case apply term s of
-      (x:xs) -> do
-        if (null $ snd x)
-        then putStrLn . prependTerm (fst x) $ reduce $ fst x
-        else cannotParse s
-      _ -> cannotParse s
-    repl
+    else case apply (pLet +++ pTerm) s of
+      [(("",t),"")] -> do      -- reducing a term
+        putStrLn . prependTerm t' $ reduce t'
+        where t' = formatTerm t ctx 
+      [((v,t),"")] -> do       -- let expression
+        putStrLn $ "Saved: " ++ show t
+        repl ((v,t):ctx)
+      _ -> cannotParse s    
+  repl ctx
+
+-- takes a term and context and substitutes context terms
+-- all free occurrences in the term
+formatTerm :: Term -> Context -> Term
+formatTerm t1 [] = t1
+formatTerm t1 ((v,t2):xs) = if elem v vs 
+  then formatTerm (substitute t1 (Var v, t2)) xs
+  else formatTerm t1 xs
+    where vs = vars t1
 
 --function prepends ~> arrows or prints existing term if no reds occur
 prependReductions :: Term -> [Term] -> [String]
