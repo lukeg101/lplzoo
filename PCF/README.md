@@ -74,7 +74,7 @@ Saved: λn:Nat.s n
 >   plusone one
 ~>* s (s z)
 ```
-Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `Nat`, `z`, `s`, `p`, `if`, and `Y` are keywords in System T.
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `Nat`, `z`, `s`, `p`, `if`, and `Y` are keywords in PCF.
 
 ## Syntax 
 
