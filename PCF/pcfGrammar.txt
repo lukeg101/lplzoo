@@ -2,10 +2,7 @@ syntax
 
 pcf bnf
 
-\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\
-&|& p\,\tau \\ &|& s\,\tau\\ &|& if\,\tau\,\tau\,\tau\\ &|& z \\ &|& Y\,\tau\\
-
-&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& p\,\tau \\ &|& s\,\tau\\ &|& if\,\tau\,\tau\,\tau\\ &|& z \\ &|& Y\,\tau\\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}
 
 \begin{matrix} \sigma & ::= & {\tt O}\\ & | & \sigma \rightarrow \sigma \end{matrix}
 
