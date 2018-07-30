@@ -27,18 +27,18 @@ isArr _          = False
 -- variables are numbers as it's easier for renaming
 -- Abstractions carry the type Church style
 data STTerm
-  = Var Int
-  | Abs Int T STTerm
+  = Var String
+  | Abs String T STTerm
   | App STTerm STTerm
   deriving Ord
 
 -- Simple show instance for STLC, TODO Brackets Convention for terms
 instance Show STTerm where
-  show (Var x)    = show x
+  show (Var x)      = x
   show (App t1 t2)  = 
     paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) = 
-    "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
+    "\x03bb" ++ x ++ ":" ++ show t ++ "." ++ show l1
 
 isAbs :: STTerm -> Bool
 isAbs (Abs _ _ _) = True
@@ -61,7 +61,7 @@ instance Eq STTerm where
 -- if bound t1 XOR bound t2 == true then False 
 -- application recursively checks both the LHS and RHS
 termEquality :: (STTerm, STTerm) 
-  -> (Map Int Int, Map Int Int) 
+  -> (Map String Int, Map String Int) 
   -> Int 
   -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
@@ -79,7 +79,7 @@ termEquality (App a1 b1, App a2 b2) c s =
 termEquality _ _ _ = False
 
 -- Type context for t:T is Map v T where v is a variable name and T is it's supplied Type
-type Context = M.Map Int T
+type Context = M.Map String T
 
 -- typing derivation for a term in a given context
 -- Just T denotes successful type derivation 
@@ -99,13 +99,13 @@ typeof l@(App l1 l2) ctx = do
 typeof' l = typeof l M.empty
 
 --bound variables of a term
-bound :: STTerm -> Set Int
+bound :: STTerm -> Set String
 bound (Var n)      = S.empty
 bound (Abs n t l1) = S.insert n $ bound l1
 bound (App l1 l2)  = S.union (bound l1) (bound l2)
 
 --free variables of a term
-free :: STTerm -> Set Int
+free :: STTerm -> Set String
 free (Var n)      = S.singleton n
 free (Abs n t l1) = S.delete n (free l1)
 free (App l1 l2)  = S.union (free l1) (free l2)
@@ -121,21 +121,32 @@ sub l@(Abs c t l1) = S.insert l $ sub l1
 sub l@(App l1 l2)  = S.insert l $ S.union (sub l1) (sub l2)
 
 --element is bound in a term
-notfree :: Int -> STTerm -> Bool
+notfree :: String -> STTerm -> Bool
 notfree x = not . S.member x . free 
 
 --set of variables in a term
-vars :: STTerm -> Set Int
+vars :: STTerm -> Set String
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t l1) = S.insert x $ vars l1
 
 --generates a fresh variable name for a term
-newlabel :: STTerm -> Int
-newlabel = (+1) . maximum . vars
+newlabel :: STTerm -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
 
 --rename t (x,y): renames free occurences of x in t to y
-rename :: STTerm -> (Int, Int) -> STTerm
+rename :: STTerm -> (String, String) -> STTerm
 rename (Var a) (x,y) = if a == x then Var y else Var a
 rename l@(Abs a t l1) (x,y) = if a == x then l else Abs a t $ rename l1 (x, y)
 rename (App l1 l2) (x,y) = App (rename l1 (x,y)) (rename l2 (x,y))
@@ -178,27 +189,27 @@ reductions t = case reduce1 t of
     _       -> []
 
 --common combinators
-i = Abs 1 (TArr TVar TVar) (Var 1)
-true = Abs 1 TVar (Abs 2 TVar (Var 1))
-false = Abs 1 TVar (Abs 2 TVar (Var 2))
+i = Abs "a" (TArr TVar TVar) (Var "a")
+true = Abs "a" TVar (Abs "b" TVar (Var "a"))
+false = Abs "a" TVar (Abs "b" TVar (Var "b"))
 zero = false
-xx = Abs 1 (TArr TVar TVar) (App (Var 1) (Var 1)) --won't type check as expected
+xx = Abs "x" (TArr TVar TVar) (App (Var "x") (Var "x")) --won't type check as expected
 omega = App xx xx --won't type check, see above
 _if = \c t f -> App (App c t) f
 _isZero = \n -> _if n false true
 
 -- Haskell Int to Simply Typed Church Numeral
 toChurch :: Int -> STTerm
-toChurch n = Abs 0 (TArr TVar TVar)(Abs 1 TVar (toChurch' n))
+toChurch n = Abs "f" (TArr TVar TVar)(Abs "x" TVar (toChurch' n))
   where
-    toChurch' 0 = Var 1
-    toChurch' n = App (Var 0) (toChurch' (n-1))
+    toChurch' 0 = Var "x"
+    toChurch' n = App (Var "f") (toChurch' (n-1))
 
 -- test cases
-test1 = Abs 1 (TArr TVar TVar) $ Abs 2 TVar $ App (Var 1) (Var 2) -- \f x. f x
-test2 = Abs 1 (TArr TVar TVar) $ Abs 2 TVar $ App (App (Var 1) (Var 2)) (Var 1) -- \f x. (f x) f
-test3 = App i (Abs 1 (TArr TVar TVar) (App (Var 1) (Var 1))) -- i xx
-test4 = App (App (Abs 1 TVar (Abs 2 TVar (Var 2))) (Var 2)) (Var 4)
+test1 = Abs "f" (TArr TVar TVar) $ Abs "y" TVar $ App (Var "f") (Var "y") -- \f x. f x
+test2 = Abs "f" (TArr TVar TVar) $ Abs "x" TVar $ App (App (Var "f") (Var "x")) (Var "f") -- \f x. (f x) f
+test3 = App i (Abs "x" (TArr TVar TVar) (App (Var "x") (Var "x"))) -- i xx
+test4 = App (App (Abs "f" TVar (Abs "x" TVar (Var "x"))) (Var "x")) (Var "y")
 
 
 
