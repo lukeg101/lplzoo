@@ -94,7 +94,7 @@ apply p = parse (do {space; p})
 str :: Parser String
 str = do 
   s <- many1 $ sat isLower
-  if elem s ["let", "=", "O", ":", "Nat", "rec"
+  if elem s ["let", "=", "O", ":", "Nat"
     , "z", "s", "p", "if", "Y"] then zerop else return s
 
 -- left recursion 

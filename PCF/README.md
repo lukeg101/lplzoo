@@ -40,6 +40,7 @@ The parser is also smart enough to recognise λ, so you can copy and paste from 
 >   λx:Nat.x
 =   λx:Nat.x
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
@@ -73,6 +74,7 @@ Saved: λn:Nat.s n
 >   plusone one
 ~>* s (s z)
 ```
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `Nat`, `z`, `s`, `p`, `if`, and `Y` are keywords in System T.
 
 ## Syntax 
 
