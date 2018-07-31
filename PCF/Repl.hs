@@ -22,7 +22,6 @@ repl ctx = do
   putStr ">   "
   hFlush stdout
   s <- getLine
-  return ()
   if Prelude.null s 
   then putStrLn "Goodbye."
   else do
@@ -77,7 +76,6 @@ prependReductions x xs = if null xs then ["=   "++show x] else
 --function prepends reduction ops for one multi-step reduction
 prependTerm :: PCFTerm -> PCFTerm -> String
 prependTerm x y = if x == y then "=   " ++ show x else "~>* " ++ show y
-
 
 cannotParse :: String -> IO ()
 cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
