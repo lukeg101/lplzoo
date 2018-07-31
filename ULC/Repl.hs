@@ -4,20 +4,21 @@ import ULC
 import Parser
 
 import System.IO           (hFlush, stdout)
+import qualified Data.Map.Lazy as M 
 
 -- top level repl function
 replMain :: IO ()
 replMain = do
   putStrLn "Welcome to the Untyped \x03bb-calculus REPL"
   putStrLn "Type some terms or press Enter to leave."
-  repl []
+  repl M.empty
 
 -- stores variables from let expressions at runtime
-type Context = [(String,Term)]
+type Environment = M.Map String Term
 
 -- REPL loop, takes input reduces and prints result, or exits out
-repl :: Context -> IO ()
-repl ctx = do
+repl :: Environment -> IO ()
+repl env = do
   putStr ">   "
   hFlush stdout
   s <- getLine
@@ -34,21 +35,23 @@ repl ctx = do
     else case apply (pLet +++ pTerm) s of
       [(("",t),"")] -> do      -- reducing a term
         putStrLn . prependTerm t' $ reduce t'
-        where t' = formatTerm t ctx 
+        where t' = formatTerm t env 
       [((v,t),"")] -> do       -- let expression
-        putStrLn $ "Saved: " ++ show t
-        repl ((v,t):ctx)
+        putStrLn $ "Saved: " ++ show t'
+        repl $ M.insert v t' env
+        where t' = formatTerm t env
       _ -> cannotParse s    
-  repl ctx
+  repl env
 
--- takes a term and context and substitutes context terms
+
+-- takes a term and context and substitutes env terms
 -- all free occurrences in the term
-formatTerm :: Term -> Context -> Term
-formatTerm t1 [] = t1
-formatTerm t1 ((v,t2):xs) = if elem v vs 
-  then formatTerm (substitute t1 (Var v, t2)) xs
-  else formatTerm t1 xs
-    where vs = vars t1
+formatTerm :: Term -> Environment -> Term
+formatTerm t1 env = foldl 
+  (\t (v,t2) -> 
+    if elem v (vars t1) 
+    then substitute t (Var v, t2) 
+    else t) t1 $ M.assocs env
 
 --function prepends ~> arrows or prints existing term if no reds occur
 prependReductions :: Term -> [Term] -> [String]
