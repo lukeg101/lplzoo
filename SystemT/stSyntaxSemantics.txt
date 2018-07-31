@@ -14,6 +14,8 @@ st parser grammar
 \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\, |\, \tt{Nat} 
 \end{matrix}
 
+\begin{matrix} \sigma & ::= & {\tt Nat}\\ & | & \sigma \rightarrow \sigma \end{matrix}
+
 st semantics
 
 see semantics for STLC
