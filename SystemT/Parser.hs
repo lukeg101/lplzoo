@@ -90,9 +90,12 @@ symb = string
 apply :: Parser a -> String -> [(a,String)]
 apply p = parse (do {space; p})
 
--- 1 or more digits
-nat :: Parser Int
-nat = fmap read (many1 (sat isDigit))
+-- 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat isLower
+  if elem s ["let", "=", ":", "Nat"
+    , "z", "s", "rec"] then zerop else return s
 
 -- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
@@ -128,24 +131,36 @@ typExpr = (bracket typTerm) +++ typVar
 
 -- parser for term variables
 termVar = do
-  x <- nat
+  x <- str
   return $ Var x
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
-lam = app +++ (do 
+lam = do 
   spaces $ identifier lambdas
-  x <- nat
+  x <- str
   spaces (symb ":")
   t <- typTerm
   spaces (symb ".")
   e <- spaces term
-  return $ Abs x t e)
+  return $ Abs x t e
 
 -- app has zero or more spaces
 app = (chainl1 expr $ do
   space1
   return $ App) 
+
+-- parser for let expressions
+pLet = do
+  spaces $ symb "let"
+  v <- str
+  spaces $ symb "="
+  t <- term 
+  return (v,t)
+
+pTerm = do
+  t <- term 
+  return ("", t)
 
 zero = do 
   char 'z'

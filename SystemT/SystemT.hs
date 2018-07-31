@@ -1,4 +1,4 @@
- module SystemT where
+module SystemT where
 
 import Data.Map as M
 import Data.Set as S
@@ -30,8 +30,8 @@ instance Show T where
 -- Zero is a value in the language
 -- Succ n is an function that takes a term and makes a term
 data STTerm
-  = Var Int
-  | Abs Int T STTerm
+  = Var String
+  | Abs String T STTerm
   | App STTerm STTerm
   | Zero
   | Succ -- Succ n is acheived with App Succ n 
@@ -59,7 +59,7 @@ instance Eq STTerm where
 -- if bound t1 XOR bound t2 == true then False 
 -- application recursively checks both the LHS and RHS
 termEquality :: (STTerm, STTerm) 
-  -> (Map Int Int, Map Int Int) 
+  -> (Map String Int, Map String Int) 
   -> Int 
   -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
@@ -84,12 +84,12 @@ instance Show STTerm where
   show Zero    = "z"
   show Succ    = "s"
   show RecNat  = "rec"
-  show (Var x) = show x
+  show (Var x) = x
   show (App t1 t2)  = 
     paren (isAbs t1) (show t1) ++ ' ' 
       : paren (isAbs t2 || isApp t2 || isSucc t2) (show t2)
   show (Abs x t l1) = 
-    "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
+    "\x03bb" ++ x ++ ":" ++ show t ++ "." ++ show l1
 
 isSucc :: STTerm -> Bool
 isSucc Succ = True
@@ -104,7 +104,7 @@ isApp (App _ _) = True
 isApp _         = False
 
 -- type context is a mapping from variable name to type T
-type Context = M.Map Int T
+type Context = M.Map String T
 
 -- typing derivation for a term in a given context
 -- Just T denotes successful type derivation 
@@ -140,7 +140,7 @@ typeof _ _ = Nothing
 typeof' l = typeof l M.empty
 
 --bound variables of a term
-bound :: STTerm -> Set Int
+bound :: STTerm -> Set String
 bound Zero         = S.empty
 bound Succ         = S.empty
 bound RecNat       = S.empty
@@ -149,7 +149,7 @@ bound (Abs n t l1) = S.insert n $ bound l1
 bound (App l1 l2)  = S.union (bound l1) (bound l2)
 
 --free variables of a term
-free :: STTerm -> Set Int
+free :: STTerm -> Set String
 free Zero         = S.empty
 free Succ         = S.empty
 free RecNat       = S.empty
@@ -171,11 +171,11 @@ sub l@(Abs c t l1) = S.insert l $ sub l1
 sub l@(App l1 l2)  = S.insert l $ S.union (sub l1) (sub l2)
 
 --element is bound in a term
-notfree :: Int -> STTerm -> Bool
+notfree :: String -> STTerm -> Bool
 notfree x = not . S.member x . free 
 
 --set of variables in a term
-vars :: STTerm -> Set Int
+vars :: STTerm -> Set String
 vars Zero         = S.empty
 vars Succ         = S.empty
 vars RecNat       = S.empty
@@ -184,11 +184,23 @@ vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t l1) = S.insert x $ vars l1
 
 --generates a fresh variable name for a term
-newlabel :: STTerm -> Int
-newlabel = (+1) . maximum . vars
+newlabel :: STTerm -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
+
 
 --rename t (x,y): renames free occurences of x in t to y
-rename :: STTerm -> (Int, Int) -> STTerm
+rename :: STTerm -> (String, String) -> STTerm
 rename Zero c = Zero
 rename Succ c = Succ
 rename RecNat c = RecNat
@@ -247,10 +259,10 @@ reductions t = case reduce1 t of
   _       -> []
 
 --common combinators
-i_Nat t = Abs 1 t (Var 1)
-true t f = Abs 1 t (Abs 2 f (Var 1))
-false t f= Abs 1 t (Abs 2 f (Var 2))
-xx = Abs 1 (TArr TNat TNat) (App (Var 1) (Var 1)) --won't type check as expected
+i_Nat t = Abs "x" t (Var "x")
+true t f = Abs "x" t (Abs "y" f (Var "x"))
+false t f= Abs "x" t (Abs "y" f (Var "y"))
+xx = Abs "x" (TArr TNat TNat) (App (Var "x") (Var "x")) --won't type check as expected
 omega = App xx xx --won't type check, see above
 _if = \c t f -> App (App c t) f
 isZero Zero = true
@@ -267,8 +279,8 @@ toInt (App Succ n) = 1 + toInt n
 toInt _ = error "Not Nat"
 
 --test cases
-test1 = Abs 1 (TArr TNat TNat) $ Abs 2 TNat $ App (Var 1) (Var 2) -- \f x. f x
-test2 = Abs 1 (TArr TNat TNat) $ Abs 2 TNat $ App (App (Var 1) (Var 2)) (Var 1) -- \f x. (f x) f
-test3 = App (App (Abs 1 TNat (Abs 2 TNat (Var 2))) (Var 2)) (Var 4)
+test1 = Abs "f" (TArr TNat TNat) $ Abs "x" TNat $ App (Var "f") (Var "x") -- \f x. f x
+test2 = Abs "f" (TArr TNat TNat) $ Abs "x" TNat $ App (App (Var "f") (Var "x")) (Var "f") -- \f x. (f x) f
+test3 = App (App (Abs "x" TNat (Abs "y" TNat (Var "y"))) (Var "y")) (Var "z")
 
 

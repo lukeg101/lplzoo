@@ -28,44 +28,58 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- `\1:Nat.1`
+- `\x:Nat.x`
 - `s (s z)`
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
-> \1:Nat.1
-λ1:Nat.1
-> λ1:Nat.1
-λ1:Nat.1
+Welcome to the System T REPL
+Type some terms or press Enter to leave.
+>   \x:Nat.x
+=   λx:Nat.x
+>   λx:Nat.x
+=   λx:Nat.x
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> '(λ1:Nat.λ2:Nat.rec (λ3:Nat.λ4:Nat.s 4) 1 2) z (s z)
-(λ2:Nat.rec (λ3:Nat.λ4:Nat.s 4) z 2) (s z)
-rec (λ3:Nat.λ4:Nat.s 4) z (s z)
-(λ3:Nat.λ4:Nat.s 4) z (rec (λ3:Nat.λ4:Nat.s 4) z z)
-(λ4:Nat.s 4) (rec (λ3:Nat.λ4:Nat.s 4) z z)
-s (rec (λ3:Nat.λ4:Nat.s 4) z z)
-s z
+>   '(λa:Nat.λb:Nat.rec (λc:Nat.λd:Nat.s d) a b) z (s z)
+~>  (λb:Nat.rec (λc:Nat.λd:Nat.s d) z b) (s z)
+~>  rec (λc:Nat.λd:Nat.s d) z (s z)
+~>  (λc:Nat.λd:Nat.s d) z (rec (λc:Nat.λd:Nat.s d) z z)
+~>  (λd:Nat.s d) (rec (λc:Nat.λd:Nat.s d) z z)
+~>  s (rec (λc:Nat.λd:Nat.s d) z z)
+~>  s z
 ```
 Note: The above adds zero to one.
 
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
-> t(λ1:Nat.λ2:Nat.rec (λ3:Nat.λ4:Nat.s 4) 1 2) z (s z)
+>   t(λx:Nat.λy:Nat.rec (λa:Nat.λb:Nat.s b) x y) z (s z)
 Nat
-> \1:Nat. 1 1
-Cannot Type Term: \1:Nat. 1 1
+>   t\x:Nat. x x
+Cannot Type Term: \x:Nat. x x
 ```
 
 Note: if you provide a non-normalizing term, the type checker will fail and reduction will not occur.
+
+You can save variables for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+```
+>   let one = s z
+Saved: s z
+>   let plus = λa:Nat.λb:Nat.rec (λc:Nat.λd:Nat.s d) a b
+Saved: λa:Nat.λb:Nat.rec (λc:Nat.λd:Nat.s d) a b
+>   plus one one
+~>* s (s z)
+
+```
 
 ## Syntax 
 
 We base the language on the BNF for System T:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;s\,\tau\\&space;&|&&space;z&space;\\&space;&|&&space;rec\,\tau\,\tau\,\tau\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;s\,\tau\\&space;&|&&space;z&space;\\&space;&|&&space;rec\,\tau\,\tau\,\tau\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& s\,\tau\\ &|& z \\ &|& rec\,\tau\,\tau\,\tau\\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;s\,\tau\\&space;&|&&space;z&space;\\&space;&|&&space;rec\,\tau\,\tau\,\tau\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;s\,\tau\\&space;&|&&space;z&space;\\&space;&|&&space;rec\,\tau\,\tau\,\tau\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& s\,\tau\\ &|& z \\ &|& rec\,\tau\,\tau\,\tau\\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;O}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;O}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & {\tt O}\\ & | & \sigma \rightarrow \sigma \end{matrix}" /></a>
 
@@ -73,15 +87,16 @@ However we adopt standard bracketing conventions to eliminate ambiguity in the p
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&\tt{z}\\&space;&|&\tt{s}\\&space;&|&\tt{rec}\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&\tt{z}\\&space;&|&\tt{s}\\&space;&|&\tt{rec}\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|&\tt{z}\\ &|&\tt{s}\\ &|&\tt{rec}\\ &&\\ \end{matrix}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\" target="_blank"><img src="https://latex.codecogs.com/gif.latex?&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\" title="&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\" target="_blank"><img src="https://latex.codecogs.com/gif.latex?&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\" title="&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\,&space;|\,&space;\tt{Nat}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\,&space;|\,&space;\tt{Nat}&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\, |\, \tt{Nat} \end{matrix}" /></a>
 
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:Nat.x`).
+- The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
+- Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
 - Types are either literal `Nat` base types or nested arrow types: `T -> T`. Arrows associate to the right so that `Nat -> Nat -> Nat` is the same as `Nat -> (Nat -> Nat)` but not `((Nat -> Nat) -> Nat)`.
-- Nested terms don't need brackets: `\1:Nat.\2:Nat. 2` unless enforcing application on the right. Whitespace does not matter `(\1:Nat.          1)` unless it is between application where you need at least one space.
+- Nested terms don't need brackets: `\x:Nat.\y:Nat. x` unless enforcing application on the right. Whitespace does not matter `(\x:Nat.          x)` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
