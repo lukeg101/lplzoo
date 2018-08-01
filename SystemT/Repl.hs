@@ -4,20 +4,21 @@ import SystemT
 import Parser
 
 import System.IO           (hFlush, stdout)
+import qualified Data.Map.Lazy as M 
 
 -- top level repl function
 replMain :: IO ()
 replMain = do
   putStrLn "Welcome to the System T REPL"
   putStrLn "Type some terms or press Enter to leave."
-  repl []
+  repl M.empty
 
 -- stores variables from let expressions at runtime
-type Environment = [(String, STTerm)]
+type Environment = M.Map String STTerm
 
 -- REPL loop, takes input reduces and prints result, or exits out
 repl :: Environment -> IO ()
-repl ctx = do
+repl env = do
   putStr ">   "
   hFlush stdout
   s <- getLine
@@ -32,7 +33,7 @@ repl ctx = do
           Just y -> mapM_ putStrLn . prependReductions x' $ reductions x'
           _ -> cannotType $ tail s
         else cannotParse s
-          where x' = formatTerm (fst x) ctx
+          where x' = formatTerm (fst x) env
       _ -> cannotParse s
     else if head s == 't'
     then case apply term $ tail s of
@@ -48,24 +49,25 @@ repl ctx = do
         case typeof' t' of
           Just y -> putStrLn . prependTerm t' $ reduce t'
           _ -> cannotType s
-          where t' = formatTerm t ctx 
+          where t' = formatTerm t env 
       [((v,t),"")] -> do       -- let expression
         case typeof' t of
           Just y -> do 
             putStrLn $ "Saved: " ++ show t
-            repl ((v,t):ctx)
+            repl $ M.insert v t' env
+            where t' = formatTerm t env
           _ -> cannotType s
       _ -> cannotParse s
-    repl ctx
+    repl env
 
--- takes a term and context and substitutes context terms
+-- takes a term and context and substitutes env terms
 -- all free occurrences in the term
 formatTerm :: STTerm -> Environment -> STTerm
-formatTerm t1 [] = t1
-formatTerm t1 ((v,t2):xs) = if elem v vs 
-  then formatTerm (substitute t1 (Var v, t2)) xs
-  else formatTerm t1 xs
-    where vs = vars t1
+formatTerm t1 env = foldl 
+  (\t (v,t2) -> 
+    if elem v (vars t1) 
+    then substitute t (Var v, t2) 
+    else t) t1 $ M.assocs env
 
 --function prepends ~> arrows or prints existing term if no reds occur
 prependReductions :: STTerm -> [STTerm] -> [String]
