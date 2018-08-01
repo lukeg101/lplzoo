@@ -33,7 +33,7 @@ repl env = do
           Just y -> mapM_ putStrLn . prependReductions x' $ reductions x'
           _ -> cannotType $ tail s
         else cannotParse s
-          where x' = formatTerm (fst x) env
+          where x' = formatTerm (fst x) ctx
       _ -> cannotParse s
     else if head s == 't'
     then case apply term $ tail s of
@@ -51,9 +51,9 @@ repl env = do
           _ -> cannotType s
           where t' = formatTerm t env 
       [((v,t),"")] -> do       -- let expression
-        case typeof' t of
+        case typeof' t' of
           Just y -> do 
-            putStrLn $ "Saved: " ++ show t
+            putStrLn $ "Saved: " ++ show t'
             repl $ M.insert v t' env
             where t' = formatTerm t env
           _ -> cannotType s

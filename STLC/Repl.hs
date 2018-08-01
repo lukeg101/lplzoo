@@ -51,9 +51,9 @@ repl env = do
           _ -> cannotType s
           where t' = formatTerm t env 
       [((v,t),"")] -> do       -- let expression
-        case typeof' t of
+        case typeof' t' of
           Just y -> do 
-            putStrLn $ "Saved: " ++ show t
+            putStrLn $ "Saved: " ++ show t'
             repl $ M.insert v t' env
             where t' = formatTerm t env
           _ -> cannotType s
