@@ -3,29 +3,26 @@ syntax
 
 bnf 
 
-\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \upsilon.\tau\\ &|& [\sigma] &&\\&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \upsilon.\tau\\ &|& [\sigma] &&\\&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}
 
-\begin{matrix} \sigma & ::= & {\tt \upsilon}\\ & | & \sigma \rightarrow \sigma\\
-&|& \Pi \upsilon . \sigma\end{matrix}
+\begin{matrix} \sigma & ::= & {\tt \mu }\\ & | & \sigma \rightarrow \sigma\\ &|& \Pi \mu . \sigma\\ \\
+\mu & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\
+\end{matrix}
 
 parser grammar
 
-\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ 
-&|& \Lambda\upsilon.\tau \\
-& | & \alpha\\ 
-&&\\ \alpha & ::= & \beta \\ 
-&| &\mathbf{\alpha\, \tt{space}\, \beta} \\
-&|& \[ \sigma\] \\
- &&\\ 
-\beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \end{matrix}
-
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ &|& \Lambda\mu.\tau \\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &|& \[ \sigma\] \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \end{matrix}
 \begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ 
 &|& \Pi\upsilon.\sigma\\
 &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\\
 & |&\, \upsilon
  \end{matrix}
 
- \begin{matrix} &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ...\end{matrix}
+\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &|& \Pi\mu.\sigma\\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\\ & |&\, \mu \end{matrix}
+
+\upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\
+
+\begin{matrix} \upsilon & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... \\\end{matrix}
 
 semantics
 

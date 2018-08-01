@@ -28,70 +28,88 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- `L1.\2:1.2` where `L` stands for second-order abstraction.
-- `(L2.\3:2->2.\4:2.4)` this is _zero_.
-- `λ1:Π2.(2->2)->2->2.Λ2.λ3:2->2.λ4:2.3 (1 [2] 3 4)` this is _succ_
-- `(L1. \2:1.2) [P3.(3->3)->3->3]`
+- `LX.\x:X.x` where `L` stands for second-order abstraction.
+- `(LX. \x:X.x) [PX.(X->X)->X->X]`
+- `LX.\f:X->X.\x:X.x` this is _zero_.
 
-Note: `Π` is the second-order product type, `Λ` is second-order abstraction and `[2]` is the type variable `2`. Alternatively typed as `P`, `L`, and `[2]` respectively.
+- `λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)` this is _succ_
+
+Note: `Π` is the second-order product type, `Λ` is second-order abstraction and `[X]` is the type variable `X`. Alternatively typed as `P`, `L`, and `[X]` respectively.
 
 The parser is smart enough to recognise λ, Π ,and Λ; so you can copy and paste from the output:
 ```
 Welcome to the System F REPL
 Type some terms or press Enter to leave.
-> L1.\2:1.2
-Λ1.λ2:1.2
-> Λ1.λ2:1.2
-Λ1.λ2:1.2
+>   LX.\x:X.x
+=   ΛX.λx:X.x
+>   ΛX.λx:X.x
+=   ΛX.λx:X.x
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> '(λ1:Π2.(2->2)->2->2.Λ2.λ3:2->2.λ4:2.3 (1 [2] 3 4)) (L2.\3:2->2.\4:2.4)
-Λ2.λ3:2->2.λ4:2.3 ((Λ2.λ3:2->2.λ4:2.4) [2] 3 4)
-Λ2.λ3:2->2.λ4:2.3 ((λ3:2->2.λ4:2.4) 3 4)
-Λ2.λ3:2->2.λ4:2.3 ((λ4:2.4) 4)
-Λ2.λ3:2->2.λ4:2.3 4
+>   '(λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)) (LX.\f:X->X.\x:X.x)
+~>  ΛY.λf:Y->Y.λy:Y.f ((ΛX.λf:X->X.λx:X.x) [Y] f y)
+~>  ΛY.λf:Y->Y.λy:Y.f ((λf:Y->Y.λx:Y.x) f y)
+~>  ΛY.λf:Y->Y.λy:Y.f ((λx:Y.x) y)
+~>  ΛY.λf:Y->Y.λy:Y.f y
 ```
-Note: this is succ zero in Church Numeral format
+Note: this is succ zero (or one) in Church Numeral format
 
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
-> t(λ1:Π2.(2->2)->2->2.Λ2.λ3:2->2.λ4:2.3 (1 [2] 3 4)) (L2.\3:2->2.\4:2.4)
-Π2.(2->2)->2->2
-> tL1.\2:1. 2 2
-Cannot Type Term: L1.\2:1. 2 2
+>   t(λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)) (LX.\f:X->X.\x:X.x)
+ΠY.(Y->Y)->Y->Y
+>   tLX.\x:X. x x
+Cannot Type Term: LX.\x:X. x x
 ```
-where `Π2.(2->2)->2->2` is the System F type for Nats
+where `ΠY.(Y->Y)->Y->Y` is the System F type for Nats
 
 Note: if you provide a non-normalizing term, the type checker will fail and reduction will not occur.
+
+You can save terms for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+```
+>   let zero = LX.\f:X->X.\x:X.x
+Saved: ΛX.λf:X->X.λx:X.x
+>   let succ = λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)
+Saved: λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)
+>   succ zero
+~>* ΛY.λf:Y->Y.λy:Y.f y
+```
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `L`, `[`, `]`, and `P` are keywords in System F.
 
 ## Syntax 
 
 We base the language on the BNF for the typed calculus:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\upsilon.\tau\\&space;&|&&space;[\sigma]&space;&&\\&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\upsilon.\tau\\&space;&|&&space;[\sigma]&space;&&\\&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \upsilon.\tau\\ &|& [\sigma] &&\\&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\upsilon.\tau\\&space;&|&&space;[\sigma]&space;&&\\&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\upsilon.\tau\\&space;&|&&space;[\sigma]&space;&&\\&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \upsilon.\tau\\ &|& [\sigma] &&\\&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\upsilon}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\Pi&space;\upsilon&space;.&space;\sigma\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\upsilon}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\Pi&space;\upsilon&space;.&space;\sigma\end{matrix}" title="\begin{matrix} \sigma & ::= & {\tt \upsilon}\\ & | & \sigma \rightarrow \sigma\\ &|& \Pi \upsilon . \sigma\end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\mu&space;}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\Pi&space;\mu&space;.&space;\sigma\\&space;\\&space;\mu&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\mu&space;}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\Pi&space;\mu&space;.&space;\sigma\\&space;\\&space;\mu&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & {\tt \mu }\\ & | & \sigma \rightarrow \sigma\\ &|& \Pi \mu . \sigma\\ \\ \mu & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\ \end{matrix}" /></a>
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar for terms as follows:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&|&&space;\Lambda\upsilon.\tau&space;\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&|&&space;\[&space;\sigma\]&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&|&&space;\Lambda\upsilon.\tau&space;\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&|&&space;\[&space;\sigma\]&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ &|& \Lambda\upsilon.\tau \\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &|& \[ \sigma\] \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&|&&space;\Lambda\mu.\tau&space;\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&|&&space;\[&space;\sigma\]&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&|&&space;\Lambda\mu.\tau&space;\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&|&&space;\[&space;\sigma\]&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ &|& \Lambda\mu.\tau \\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &|& \[ \sigma\] \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \end{matrix}" /></a>
 
 and types:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&|&&space;\Pi\upsilon.\sigma\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&&space;|&\,&space;\upsilon&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&|&&space;\Pi\upsilon.\sigma\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&&space;|&\,&space;\upsilon&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &|& \Pi\upsilon.\sigma\\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\\ & |&\, \upsilon \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&|&&space;\Pi\mu.\sigma\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&&space;|&\,&space;\mu&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma&space;\tt{\rightarrow}&space;\sigma&space;\\&space;&|&&space;\Pi\mu.\sigma\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&&space;|&\,&space;\mu&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & \gamma \\ & | & \gamma \tt{\rightarrow} \sigma \\ &|& \Pi\mu.\sigma\\ &&\\ \gamma & ::=& \tt{(} \sigma \tt{)}\\ & |&\, \mu \end{matrix}" /></a>
 
-with variables:
+with term variables:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...\end{matrix}" title="\begin{matrix} &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ...\end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\\end{matrix}" title="\begin{matrix} \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\\end{matrix}" /></a>
+
+and type variables:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;\\\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;\\\end{matrix}" title="\begin{matrix} \upsilon & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... \\\end{matrix}" /></a>
 
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:1.x`).
-- Types are also positive integers for the same reasons. Type variables should be distinct from term variables, although it is not prohibited: The term `(L1.\1:1.1) [P2.(2->2)->2->2]` is valid but less readable due to the dual use of `1`.
-- Types are either type variables, abstractions, or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. The product binds weaker than arrows, so `Π2.2->2` is the same as `Π2.(2->2)`. 
-- Nested terms don't need brackets: `\1:3.\2:3. 2` unless enforcing application on the right. Whitespace does not matter `L2.\1:2.          1` unless it is between application where you need at least one space.
+- The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
+- Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
+- Types are uppercase strings for the same reasons. Type variables must be distinct from term variables.
+- Types are either type variables, abstractions, or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. The product binds weaker than arrows, so `ΠX.X->X` is the same as `ΠX.(X->X)`. 
+- Nested terms don't need brackets: `LX.LY.\x:X.\y:Y. y` unless enforcing application on the right. Whitespace does not matter `LX.\x:X.          x` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics

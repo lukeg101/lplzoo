@@ -1,15 +1,15 @@
- module SystemF where
+module SystemF where
 
 import Data.Map.Lazy as M
 import Data.Set as S
 import Control.Monad (guard)
 
--- SF Terms, of the form, both term and type variables are ints as it's easy to rename
+-- SF Types, of the form, both term and type variables are ints as it's easy to rename
 -- The Pi type take types a type variable and type T. 
 data T 
-  = TVar Int
+  = TVar String
   | TArr T T
-  | Pi Int T
+  | Pi String T
   deriving Ord
 
 -- does syntactic type equality on types
@@ -19,7 +19,7 @@ instance Eq T where
 -- test for syntactic type equality on types
 -- very similar to equality on first-order terms ie STLC equality
 typeEquality :: (T, T) 
-  -> (Map (Either Int Int) Int, Map (Either Int Int) Int) 
+  -> (Map (Either String String) Int, Map (Either String String) Int) 
   -> Int 
   -> Bool
 typeEquality (TVar x, TVar y) (m1, m2) s = case M.lookup (Right x) m1 of
@@ -39,9 +39,9 @@ typeEquality _ _ _ = False
 -- show implementation, uses Unicode for Pi type
 -- uses bracketing convention for types
 instance Show T where
-  show (TVar c)    = show c
+  show (TVar c)    = c
   show (TArr a b)  = paren (isArr a || isPi a) (show a) ++ "->" ++ show b
-  show (Pi t1 t2)  = "\x3a0" ++ show t1 ++ "." ++ show t2
+  show (Pi t1 t2)  = "\x3a0" ++ t1 ++ "." ++ show t2
 
 paren :: Bool -> String -> String
 paren True  x = "(" ++ x ++ ")"
@@ -60,11 +60,11 @@ isPi _        = False
 -- Abstractions carry the type Church style
 -- Second order abstractions carry term variables as ints
 data SFTerm
-  = Var Int
+  = Var String
   | Typ T
-  | Abs Int T SFTerm
+  | Abs String T SFTerm
   | App SFTerm SFTerm
-  | PiAbs Int SFTerm 
+  | PiAbs String SFTerm 
   deriving Ord
 
 -- alpha termEqualityalence of terms uses
@@ -83,7 +83,7 @@ instance Eq SFTerm where
 -- application recursively checks both the LHS and RHS
 -- Type equality is called for types
 termEquality :: (SFTerm, SFTerm) 
-  -> (Map (Either Int Int) Int, Map (Either Int Int) Int) 
+  -> (Map (Either String String) Int, Map (Either String String) Int) 
   -> Int 
   -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup (Left x) m1 of
@@ -110,12 +110,12 @@ termEquality _ _ _ = False
 -- show implementation for System F terms
 -- uses bracketing convention for terms
 instance Show SFTerm where
-  show (Var x)      = show x
+  show (Var x)      = x
   show (Typ t)      = "[" ++ show t ++"]"
   show (App t1 t2)  = 
     paren (isAbs t1 || isPiAbs t1 ) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
-  show (Abs x t l1) = "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
-  show (PiAbs t l1) = "\x39b" ++ show t ++ "." ++ show l1
+  show (Abs x t l1) = "\x03bb" ++ x ++ ":" ++ show t ++ "." ++ show l1
+  show (PiAbs t l1) = "\x39b" ++ t ++ "." ++ show l1
 
 isAbs :: SFTerm -> Bool
 isAbs (Abs _ _ _) = True
@@ -133,7 +133,7 @@ isPiAbs _           = False
 --input term or type variable as an Int
 --if the input is a term variable, return Just its type
 --if the input is a type variable, return Nothing (isomorphic to 'Type')
-type Context = M.Map Int (Maybe T)
+type Context = M.Map String (Maybe T)
 
 -- typing derivation for a term in a given context
 -- Just T denotes successful type derivation 
@@ -178,33 +178,34 @@ typeSub l@(Pi x t) c@(TVar y, z)
   where n = max (newTLabel t) (newTLabel z)
 
 -- type-level 'bound' function
-notfreeT :: Int -> T -> Bool
+notfreeT :: String -> T -> Bool
 notfreeT x = not . S.member x . freeTVars
 
 -- type level free variables
-freeTVars :: T -> Set Int
+freeTVars :: T -> Set String
 freeTVars (TVar c) = S.singleton c
 freeTVars (TArr t1 t2) = S.union (freeTVars t1) (freeTVars t2) 
 freeTVars (Pi x t1) = S.delete x (freeTVars t1)
 
 --set of variables in a type
-typeVars :: T -> Set Int
+typeVars :: T -> Set String
 typeVars (TVar x)     = S.singleton x
 typeVars (TArr t1 t2) = S.union (typeVars t1) (typeVars t2)
 typeVars (Pi x t)     = S.insert x $ typeVars t
 
 --generates a fresh variable name for a type
-newTLabel :: T -> Int
-newTLabel = (*10) . maximum . typeVars
+newTLabel :: T -> String
+newTLabel x = head . dropWhile (`elem` typeVars x) 
+  $ iterate genVar $  S.foldr biggest "" $ typeVars x
 
 --rename t (x,y): renames free occurences of type variables x in t to y
-renameT :: T -> (Int, Int) -> T
+renameT :: T -> (String, String) -> T
 renameT (TVar a) (x,y) = TVar $ if a == x then y else a
 renameT l@(Pi a t) c@(x,y) = if a == x then l else Pi a $ renameT t c
 renameT (TArr t1 t2) c = TArr (renameT t1 c) (renameT t2 c)
 
 --bound variables of a term
-bound :: SFTerm -> Set Int
+bound :: SFTerm -> Set String
 bound (Var n)      = S.empty
 bound (Abs n t l1) = S.insert n $ bound l1
 bound (App l1 l2)  = S.union (bound l1) (bound l2)
@@ -212,7 +213,7 @@ bound (Typ t)      = S.empty
 bound (PiAbs x t)  = bound t
 
 --free variables of a term
-free :: SFTerm -> Set Int
+free :: SFTerm -> Set String
 free (Var n)      = S.singleton n
 free (Abs n t l1) = S.delete n (free l1)
 free (App l1 l2)  = S.union (free l1) (free l2)
@@ -232,11 +233,11 @@ sub l@(Typ t)      = S.singleton l
 sub l@(PiAbs x t)  = S.insert l $ sub t
 
 --element is bound in a term
-notfree :: Int -> SFTerm -> Bool
+notfree :: String -> SFTerm -> Bool
 notfree x = not . S.member x . free 
 
 --set of variables in a term
-vars :: SFTerm -> Set Int
+vars :: SFTerm -> Set String
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t l1) = S.insert x $ vars l1
@@ -244,11 +245,22 @@ vars (Typ t)      = S.empty
 vars (PiAbs x t)  = vars t
 
 --generates a fresh variable name for a term
-newlabel :: SFTerm -> Int
-newlabel = (+1) . maximum . vars
+newlabel :: SFTerm -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
 
 --rename t (x,y): renames free occurences of term variable x in t to y
-rename :: SFTerm -> (Int, Int) -> SFTerm
+rename :: SFTerm -> (String, String) -> SFTerm
 rename (Var a) (x,y) = if a == x then Var y else Var a
 rename l@(Abs a t l1) (x,y) = if a == x then l else Abs a t $ rename l1 (x, y)
 rename (App l1 l2) (x,y) = App (rename l1 (x,y)) (rename l2 (x,y))
@@ -319,45 +331,11 @@ reductions t = case reduce1 t of
     _       -> []
 
 --common combinators
-ident = PiAbs 0 (Abs 1 (TVar 0) (Var 1))
-natType = Pi 2 (TArr (TArr (TVar 2) (TVar 2)) (TArr (TVar 2) (TVar 2)))
-zero = PiAbs 2 (Abs 4 (TArr (TVar 2) (TVar 2)) (Abs 5 (TVar 2) (Var 5)))
-xx = Abs 1 (TArr natType natType) (App (Var 1) (Var 1)) --won't type check as expected
-succ = Abs 1 natType $ PiAbs 2 $ Abs 3 (TArr (TVar 2) (TVar 2)) 
-  $ Abs 4 (TVar 2) (App (Var 3) (App (App (App (Var 1) (Typ (TVar 2))) (Var 3)) (Var 4)))
+ident = PiAbs "X" (Abs "x" (TVar "X") (Var "x"))
+natType = Pi "X" (TArr (TArr (TVar "X") (TVar "X")) (TArr (TVar "X") (TVar "X")))
+zero = PiAbs "X" (Abs "x" (TArr (TVar "X") (TVar "X")) (Abs "y" (TVar "X") (Var "y")))
+xx = Abs "x" (TArr natType natType) (App (Var "x") (Var "x")) --won't type check as expected
 
-{-
-TODO Implement examples 
-
-true t f = Abs 1 t (Abs 2 f (Var 1))
-false t f= Abs 1 t (Abs 2 f (Var 2))
-
-omega = App xx xx --won't type check, see above
-_if = \c t f -> App (App c t) f
-isZero Zero = true
-plus = Abs 1 TNat $ Abs 2 TNat $ RecNat (Abs 3 TNat $ Abs 4 TNat (Succ (Var 4))) (Var 1) (Var 2)
-plusApp n m = App (App plus n) m
--}
-
---i = PiAbs 1 $ Abs 2 (TVar 1) (Var 2)
---zero = PiAbs 1 $ Abs 2 (TArr (TVar 1) (TVar 1)) $ Abs 3 (TVar 1) (Var 3)
-{-
-toChurch :: Int -> SFTerm
-toChurch 0 = zero
-toChurch n = Abs 1  (toChurch (n-1))
-
-toInt :: SFTerm -> Int
-toInt Zero = zero
-toInt (Succ n) = 1 + toInt n
-toInt _ = error "Not Nat"
-
-test1 = Abs 1 (TArr TNat TNat) $ Abs 2 TNat $ App (Var 1) (Var 2) -- \f x. f x
-test2 = Abs 1 (TArr TNat TNat) $ Abs 2 TNat $ App (App (Var 1) (Var 2)) (Var 1) -- \f x. (f x) f
-test3 = App (App (Abs 1 TNat (Abs 2 TNat (Var 2))) (Var 2)) (Var 4)
-test4 = plusApp (toChurch 3) (toChurch 2)
---toInt $ reduce (plusApp (toChurch 3) (toChurch 2)) --> 5
-
--}
 
 
 

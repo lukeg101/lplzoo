@@ -90,9 +90,18 @@ symb = string
 apply :: Parser a -> String -> [(a,String)]
 apply p = parse (do {space; p})
 
--- 1 or more digits
-nat :: Parser Int
-nat = fmap read (many1 (sat isDigit))
+-- 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat isLower
+  if elem s ["let", "=", ".", ":","L", "[", "]", "P"] then zerop else return s
+
+-- 1 or more chars
+strT :: Parser String
+strT = do 
+  s <- many1 $ sat isUpper
+  if elem s ["let", "=", ".", ":","L", "[", "]", "P"] then zerop else return s
+
 
 -- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
@@ -121,12 +130,12 @@ sqbracket p = do
 
 -- type vars are nats packaged up 
 typVar = do
-  x <- nat
+  x <- strT
   return $ TVar x
 
 typAbs = do
   spaces $ identifier ['\x3a0', 'P']
-  x <- nat
+  x <- strT
   spaces (symb ".")
   t <- typTerm
   return $ Pi x t
@@ -145,7 +154,7 @@ typExpr = (bracket typTerm) +++ typVar
 
 -- parser for term variables
 termVar = do
-  x <- nat
+  x <- str
   return $ Var x
 
 termTyp = do
@@ -156,7 +165,7 @@ termTyp = do
 lambdas = ['\x03bb','\\']
 lam = do 
   spaces $ identifier lambdas
-  x <- nat
+  x <- str
   spaces (symb ":")
   t <- typTerm
   spaces (symb ".")
@@ -166,7 +175,7 @@ lam = do
 -- second order abstraction for types
 lam2 = do
   spaces $ identifier ['\x39b','L']
-  x <- nat
+  x <- strT
   spaces (symb ".")
   e <- term
   return $ PiAbs x e
@@ -176,11 +185,25 @@ app = chainl1 expr $ do
   space1
   return $ App 
 
+-- parser for let expressions
+pLet = do
+  space
+  symb "let"
+  space1
+  v <- str
+  spaces $ symb "="
+  t <- term 
+  return (v,t)
+
+pTerm = do
+  t <- term 
+  return ("", t)
+
 -- expression follows CFG form with bracketing convention
 expr = (bracket term) +++ termVar +++ termTyp
 
 -- top level of CFG Gramma
-term = app +++ lam +++ lam2
+term = lam +++ lam2 +++ app
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
