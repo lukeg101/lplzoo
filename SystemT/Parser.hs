@@ -152,7 +152,9 @@ app = (chainl1 expr $ do
 
 -- parser for let expressions
 pLet = do
-  spaces $ symb "let"
+  space
+  symb "let"
+  space1
   v <- str
   spaces $ symb "="
   t <- term 
