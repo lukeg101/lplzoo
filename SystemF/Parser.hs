@@ -94,14 +94,13 @@ apply p = parse (do {space; p})
 str :: Parser String
 str = do 
   s <- many1 $ sat isLower
-  if elem s ["let", "=", ".", ":","L", "[", "]", "P"] then zerop else return s
+  if elem s ["let", "lett", "=", ".", ":","L", "[", "]", "P"] then zerop else return s
 
 -- 1 or more chars
 strT :: Parser String
 strT = do 
   s <- many1 $ sat isUpper
-  if elem s ["let", "=", ".", ":","L", "[", "]", "P"] then zerop else return s
-
+  if elem s ["let", "lett", "=", ".", ":","L", "[", "]", "P"] then zerop else return s
 
 -- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
@@ -193,11 +192,21 @@ pLet = do
   v <- str
   spaces $ symb "="
   t <- term 
-  return (v,t)
+  return (v,Left t) --left signifies terms
+
+-- parser for type let expressions
+pTypeLet = do
+  space
+  symb "lett"
+  space1
+  v <- strT
+  spaces $ symb "="
+  t <- typTerm 
+  return (v,Right t) --right signify type let
 
 pTerm = do
   t <- term 
-  return ("", t)
+  return ("", Left t)
 
 -- expression follows CFG form with bracketing convention
 expr = (bracket term) +++ termVar +++ termTyp

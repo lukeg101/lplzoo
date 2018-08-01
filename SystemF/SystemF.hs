@@ -193,6 +193,14 @@ typeVars (TVar x)     = S.singleton x
 typeVars (TArr t1 t2) = S.union (typeVars t1) (typeVars t2)
 typeVars (Pi x t)     = S.insert x $ typeVars t
 
+--type vars in a term
+typeVarsInTerm :: SFTerm -> Set String
+typeVarsInTerm l@(Var x)      = S.empty
+typeVarsInTerm l@(Abs c t l1) = S.union (typeVars t) $ typeVarsInTerm l1
+typeVarsInTerm l@(App l1 l2)  = S.union (typeVarsInTerm l1) (typeVarsInTerm l2)
+typeVarsInTerm l@(Typ t)      = typeVars t
+typeVarsInTerm l@(PiAbs x t)  = S.insert x $ typeVarsInTerm t
+
 --generates a fresh variable name for a type
 newTLabel :: T -> String
 newTLabel x = head . dropWhile (`elem` typeVars x) 

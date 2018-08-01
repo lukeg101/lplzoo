@@ -29,7 +29,7 @@ Compile it using GHC if you need this.
 ## Examples 
 Where you can then have some fun, try these examples:
 - `LX.\x:X.x` where `L` stands for second-order abstraction.
-- `(LX. \x:X.x) [PX.(X->X)->X->X]`
+- `(LX. \x:X.x) [PX.(X->X)->X->X]` the identity function for natural numbers. 
 - `LX.\f:X->X.\x:X.x` this is _zero_.
 
 - `λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)` this is _succ_
@@ -71,13 +71,26 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 You can save terms for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
 ```
 >   let zero = LX.\f:X->X.\x:X.x
-Saved: ΛX.λf:X->X.λx:X.x
+Saved term: ΛX.λf:X->X.λx:X.x
 >   let succ = λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)
-Saved: λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)
+Saved term: λn:ΠX.(X->X)->X->X.ΛY.λf:Y->Y.λy:Y.f (n [Y] f y)
 >   succ zero
 ~>* ΛY.λf:Y->Y.λy:Y.f y
 ```
 Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `L`, `[`, `]`, and `P` are keywords in System F.
+
+Additionally we have type level `lett` statements that allow you to define and use types:
+```
+>   let zero = LX.\f:X->X.\x:X.x
+Saved term: ΛX.λf:X->X.λx:X.x
+>   lett NAT = PX.(X->X)->X->X
+Saved type: ΠX.(X->X)->X->X
+>   let succ = \n:NAT.LX.\f:X->X.\x:X.f (n [X] f x)
+Saved term: λn:ΠX.(X->X)->X->X.ΛX.λf:X->X.λx:X.f (n [X] f x)
+>   succ zero
+~>* ΛX.λf:X->X.λx:X.f x
+```
+This makes it easier to define both terms and types, but does not allow type level application (See Omega). `lett` is also a keyword.
 
 ## Syntax 
 

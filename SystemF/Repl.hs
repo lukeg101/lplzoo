@@ -14,7 +14,9 @@ replMain = do
   repl M.empty
 
 -- stores variables from let expressions at runtime
-type Environment = M.Map String SFTerm
+-- terms are stored in left 
+-- types are stored in right
+type Environment = M.Map String (Either SFTerm T)
 
 -- REPL loop, takes input reduces and prints result, or exits out
 repl :: Environment -> IO ()
@@ -44,19 +46,23 @@ repl env = do
           _ -> cannotType $ tail s
         else cannotParse s
       _ -> cannotParse s
-    else case apply (pLet +++ pTerm) s of
-      [(("",t),"")] -> do      -- reducing a term
+    else case apply (pLet +++ pTypeLet +++ pTerm) s of
+      [(("", Left t),"")] -> do      -- reducing a term
         case typeof' t' of
           Just y -> putStrLn . prependTerm t' $ reduce t'
-          _ -> cannotType s
+          _ -> cannotType $ show t'
           where t' = formatTerm t env 
-      [((v,t),"")] -> do       -- let expression
+      [((v,Left t),"")] -> do       -- let expression
         case typeof' t' of
           Just y -> do 
-            putStrLn $ "Saved: " ++ show t'
-            repl $ M.insert v t' env
+            putStrLn $ "Saved term: " ++ show t'
+            repl $ M.insert v (Left t') env
           _ -> cannotType s
           where t' = formatTerm t env
+      [((v,Right t),"")] -> do       -- let expression
+        putStrLn $ "Saved type: " ++ show t'
+        repl $ M.insert v (Right t') env
+        where t' = formatType t env
       _ -> cannotParse s 
     repl env
 
@@ -64,10 +70,25 @@ repl env = do
 -- all free occurrences in the term
 formatTerm :: SFTerm -> Environment -> SFTerm
 formatTerm t1 env = foldl 
-  (\t (v,t2) -> 
-    if elem v (vars t1) 
-    then substitute t (Var v, t2) 
-    else t) t1 $ M.assocs env
+  (\t (v,t2) -> case t2 of 
+    Left t2 ->  
+      if elem v (vars t) 
+      then substitute t (Var v, t2) 
+      else t
+    Right t2 -> 
+      if elem v (typeVarsInTerm t)
+      then tSubUnder t (TVar v, t2)
+      else t) t1 $ M.assocs env
+
+-- takes a type and context and substitutes env terms
+-- all free occurrences in the term
+formatType :: T -> Environment -> T
+formatType t1 env = foldl 
+  (\t (v,t2) -> case t2 of 
+    Right t2 -> if elem v (typeVars t1) 
+      then typeSub t (TVar v, t2) 
+      else t
+    _ -> t) t1 $ M.assocs env
 
 --function prepends ~> arrows or prints existing term if no reds occur
 prependReductions :: SFTerm -> [SFTerm] -> [String]
