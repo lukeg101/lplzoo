@@ -6,7 +6,7 @@ import Control.Monad (guard)
 
 -- Cata, of the form C or 'T -> T' or a mix of both
 data T
-  = TVar Char
+  = TVar String
   | TArr T T
   | TUnit
   | TProd T T
@@ -22,7 +22,7 @@ data T
 -- Simple show instance
 instance Show T where
   show X          = "X"
-  show (TVar x)   = x:""
+  show (TVar x)   = x
   show (TArr a b) = paren (isArr a) (show a) ++ "->" ++ show b
   show (TUnit)    = "\x22A4"
   show (TMu t)  = "\x03bc" ++ paren True (show t)
@@ -51,8 +51,8 @@ isMu _       = False
 -- variables are numbers as it's easier for renaming
 -- Abstractions carry the type Church style
 data CataTerm
-  = Var Int
-  | Abs Int T CataTerm
+  = Var String
+  | Abs String T CataTerm
   | App CataTerm CataTerm
   | In T  --inductive type wrapper
   | Cata T --Catamorphism on inductive type
@@ -67,7 +67,7 @@ data CataTerm
 
 -- Simple show instance for Cata, adheres to bracketing convention
 instance Show CataTerm where
-  show (Var x)      = show x
+  show (Var x)      = x
   show (App (App (Prod) a) b) = paren True (show a ++ ", " ++ show b)
   show (App (Inl t) a) = "inl " ++
     paren (isAbs a || isApp a || isSum a || isProd a) (show a) ++ ":" ++ show t
@@ -86,7 +86,7 @@ instance Show CataTerm where
   show (App t1 t2)  =
     paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) =
-    "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
+    "\x03bb" ++ x ++ ":" ++ show t ++ "." ++ show l1
   show (In t)       = "in " --above case should handle this
   show (Cata t)     = "cata"--above case should handle this
   show (Inl t)      = "inl" --above should handle this case
@@ -126,7 +126,7 @@ instance Eq CataTerm where
 -- if bound t1 XOR bound t2 == true then False
 -- application recursively checks both the LHS and RHS
 termEquality :: (CataTerm, CataTerm)
-  -> (Map Int Int, Map Int Int)
+  -> (Map String Int, Map String Int)
   -> Int
   -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
@@ -148,7 +148,7 @@ termEquality (Cata t1, Cata t2) c s = t1 == t2
 termEquality (x, y) c s = x == y
 
 -- Type context for t:T is Map v T where v is a variable name and T is it's supplied Type
-type Context = M.Map Int T
+type Context = M.Map String T
 
 -- typing derivation for a term in a given context
 -- Just T denotes successful type derivation
@@ -226,19 +226,18 @@ typeSub (TSum t1 t2) c = TSum (typeSub t1 c) (typeSub t2 c)
 applMu :: T -> T
 applMu t = typeSub t (X, TMu t)
 
-
 -- top level typing function providing empty context
 typeof' l = typeof l M.empty
 
 --bound variables of a term
-bound :: CataTerm -> Set Int
+bound :: CataTerm -> Set String
 bound (Var n) = S.empty
 bound (Abs n t l1) = S.insert n $ bound l1
 bound (App l1 l2)  = S.union (bound l1) (bound l2)
 bound _      = S.empty
 
 --free variables of a term
-free :: CataTerm -> Set Int
+free :: CataTerm -> Set String
 free (Var n)      = S.singleton n
 free (Abs n t l1) = S.delete n (free l1)
 free (App l1 l2)  = S.union (free l1) (free l2)
@@ -256,22 +255,65 @@ sub l@(App l1 l2)  = S.insert l $ S.union (sub l1) (sub l2)
 sub l    = S.singleton l
 
 --element is bound in a term
-notfree :: Int -> CataTerm -> Bool
+notfree :: String -> CataTerm -> Bool
 notfree x = not . S.member x . free
 
 --set of variables in a term
-vars :: CataTerm -> Set Int
+vars :: CataTerm -> Set String
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t l1) = S.insert x $ vars l1
 vars l = S.empty
 
+--set of variables in a type
+typeVars :: T -> Set String
+typeVars (TVar x)     = S.singleton x
+typeVars (TArr t1 t2) = S.union (typeVars t1) (typeVars t2)
+typeVars (TUnit)      = S.empty
+typeVars (TProd t1 t2)= S.union (typeVars t1) (typeVars t2)
+typeVars (TSum t1 t2) = S.union (typeVars t1) (typeVars t2)
+typeVars (TMu t1)     = typeVars t1
+typeVars (X)          = S.empty
+
+--type vars in a term
+typeVarsInTerm :: CataTerm -> Set String
+typeVarsInTerm l@(Var x)      = S.singleton x
+typeVarsInTerm l@(Abs c t l1) = S.union (typeVars t) $ typeVarsInTerm l1
+typeVarsInTerm l@(App l1 l2)  = S.union (typeVarsInTerm l1) (typeVarsInTerm l2)
+typeVarsInTerm l@(In t)       = typeVars t
+typeVarsInTerm l@(Cata t)     = typeVars t
+typeVarsInTerm l@(Inl t)      = typeVars t
+typeVarsInTerm l@(Inr t)      = typeVars t
+typeVarsInTerm l              = S.empty
+
+-- function used to do type substitution on types in a term
+tSubUnder :: CataTerm -> (T,T) -> CataTerm
+tSubUnder l@(Var x) c      = l
+tSubUnder l@(Abs x t l2) c = Abs x (typeSub t c) $ tSubUnder l2 c
+tSubUnder l@(App l1 l2) c  = App (tSubUnder l1 c) (tSubUnder l2 c)
+tSubUnder l@(In t) c       = In $ typeSub t c
+tSubUnder l@(Cata t) c     = Cata $ typeSub t c
+tSubUnder l@(Inl t) c      = Inl $ typeSub t c
+tSubUnder l@(Inr t) c      = Inr $ typeSub t c
+tSubUnder l c              = l
+
 --generates a fresh variable name for a term
-newlabel :: CataTerm -> Int
-newlabel = (+1) . maximum . vars
+newlabel :: CataTerm -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
 
 --rename t (x,y): renames free occurences of x in t to y
-rename :: CataTerm -> (Int, Int) -> CataTerm
+rename :: CataTerm -> (String, String) -> CataTerm
 rename (Var a) (x,y) = if a == x then Var y else Var a
 rename l@(Abs a t l1) (x,y) = if a == x then l else Abs a t $ rename l1 (x, y)
 rename (App l1 l2) (x,y) = App (rename l1 (x,y)) (rename l2 (x,y))
@@ -344,16 +386,16 @@ reduce1 (App l1 l2) = do -- reduce under app
 
 findFmap :: T -> CataTerm -> CataTerm
 findFmap X f               = f
-findFmap t@(TArr  t1 t2) f = Abs 0 t $ Abs 1 t1 $ App (findFmap t2 f) $ App (Var 0) (Var 1)
-findFmap t@(TProd t1 t2) f = Abs 0 t $ App (App Prod left) right
+findFmap t@(TArr  t1 t2) f = Abs "x" t $ Abs "y" t1 $ App (findFmap t2 f) $ App (Var "x") (Var "y")
+findFmap t@(TProd t1 t2) f = Abs "x" t $ App (App Prod left) right
   where
-    left  = App (findFmap t1 f) $ App Prj1 (Var 0)
-    right = App (findFmap t2 f) $ App Prj2 (Var 0)
-findFmap t@(TSum  t1 t2) f = Abs 0 t $ App (App (App Case (Var 0)) inl) inr
+    left  = App (findFmap t1 f) $ App Prj1 (Var "x")
+    right = App (findFmap t2 f) $ App Prj2 (Var "x")
+findFmap t@(TSum  t1 t2) f = Abs "x" t $ App (App (App Case (Var "x")) inl) inr
   where
-    inl = Abs 1 t1 (App (Inl t) (App (findFmap t1 f) (Var 1)))
-    inr = Abs 1 t1 (App (Inr t) (App (findFmap t2 f) (Var 1)))
-findFmap t f               = Abs 0 t (Var 0)
+    inl = Abs "y" t1 (App (Inl t) (App (findFmap t1 f) (Var "y")))
+    inr = Abs "y" t1 (App (Inr t) (App (findFmap t2 f) (Var "y")))
+findFmap t f               = Abs "x" t (Var "x")
 
 -- multi-step reduction relation
 -- NOT GUARANTEED TO TERMINATE IF typeof' FAILS
@@ -371,20 +413,17 @@ reductions t = case reduce1 t of
 
 
 --common combinators
-i = Abs 1 (TVar 'A') (Var 1)
-true = Abs 1 (TVar 'A') (Abs 2 (TVar 'B') (Var 1))
-false = Abs 1 (TVar 'A') (Abs 2 (TVar 'B') (Var 2))
+i = Abs "x" (TVar "A") (Var "x")
+true = Abs "x" (TVar "A") (Abs "y" (TVar "B") (Var "x"))
+false = Abs "x" (TVar "A") (Abs "y" (TVar "B") (Var "y"))
 typeNat = TSum TUnit X
 zero = App (In typeNat) $ App (Inl typeNat) Unit
 one = App (In $ applMu typeNat) (App (Inr $ applMu typeNat) zero)
-succ = Abs 1 (applMu typeNat) $ App (In $ applMu typeNat) (App (Inr $ applMu typeNat) (Var 1))
-succApp n = App Cata.succ n
-typeTree = TSum TUnit (TProd (TVar 'A') X) --list type
+succ_ = Abs "x" (applMu typeNat) $ App (In $ applMu typeNat) (App (Inr $ applMu typeNat) (Var "x"))
+succApp n = App succ_ n
+typeTree = TSum TUnit (TProd (TVar "A") X) --list type
 nil = App (In typeTree) $ App (Inl typeTree) Unit
-{-cons = Abs 1 (TVar 'A')
-  $ Abs 2 (TVar 'A') $ App (In (applMu typeTree))
-  $ App (Inr (applMu typeTree)) $ App (App Prod (Var 1)) (Var 2)-}
-xx = Abs 1 (TArr (TVar 'A') (TVar 'A')) (App (Var 1) (Var 1)) --won't type check as expected
+xx = Abs "x" (TArr (TVar "A") (TVar "A")) (App (Var "x") (Var "x")) --won't type check as expected
 omega = App xx xx --won't type check, see above
 
 -- Haskell Int to Cataterm in Church Numeral style
@@ -393,8 +432,8 @@ toChurch 0 = zero
 toChurch n = succApp (toChurch (n-1))
 
 -- test cases - TODO interesting test cases with inductive types
-test1 = Abs 1 (TArr (TVar 'A') (TVar 'B')) $ Abs 2 (TVar 'A') $ App (Var 1) (Var 2) -- \f x. f x
-test2 = Abs 1 (TArr (TVar 'A') (TVar 'B')) $ Abs 2 (TVar 'A') $ App (App (Var 1) (Var 2)) (Var 1) -- \f x. (f x) f
+test1 = Abs "x" (TArr (TVar "A") (TVar "B")) $ Abs "y" (TVar "A") $ App (Var "x") (Var "y") -- \f x. f x
+test2 = Abs "x" (TArr (TVar "A") (TVar "B")) $ Abs "y" (TVar "A") $ App (App (Var "x") (Var "y")) (Var "x") -- \f x. (f x) f
 test3 = App i xx -- i xx
 
 

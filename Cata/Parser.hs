@@ -90,9 +90,19 @@ symb = string
 apply :: Parser a -> String -> [(a,String)]
 apply p = parse (do {space; p})
 
--- 1 or more digits
-nat :: Parser Int
-nat = fmap read (many1 (sat isDigit))
+keywords = ["X", "\x03C0"++"1", "\x03C0"++"2","\x03bc","\x22A4","let", "lett", "=", ".", ":", "in", "cata", "inl", "inr", "case", "()", "fst", "snd"] 
+
+-- 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat isLower
+  if elem s keywords then zerop else return s
+
+-- 1 or more chars
+strT :: Parser String
+strT = do 
+  s <- many1 $ sat (\x -> isUpper x && isAlpha x && not (elem x ['X','M']))
+  if elem s keywords then zerop else return s
 
 -- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
@@ -113,7 +123,7 @@ bracket p = do
 
 -- type vars are uppercase alphabetical terms packaged up 
 typVar = do
-  x <- sat (\x -> isUpper x && isAlpha x && not (elem x ['X','M']))
+  x <- strT
   return $ TVar x
 
 -- units are simply 1
@@ -127,11 +137,11 @@ typX = do
   return X
 
 --arrow type, lowest op precedence
-typArr = (do
+typArr = do
   x <- typExpr
   spaces (symb "->")
   y <- typTerm
-  return $ TArr x y) 
+  return $ TArr x y
 
 --sum type second lowest
 typSum = do
@@ -161,7 +171,7 @@ typExpr3 = (bracket typTerm) +++ typVar +++ typX +++ typUnit +++ typMu
 
 -- parser for term variables
 termVar = do
-  x <- nat
+  x <- str
   return $ Var x
 
 termUnit = do
@@ -211,31 +221,54 @@ termIn = do
   t1 <- typTerm
   return $ App (In t1) l1
 
-
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
 lam = do 
   spaces $ identifier lambdas
-  x <- nat
+  x <- str
   spaces (symb ":")
   t <- typTerm
   spaces (symb ".")
   e <- spaces term
   return $ Abs x t e
 
--- app has zero or more spaces
+-- app has one or more spaces
 app = chainl1 expr $ do
   space1
   return $ App 
 
+-- parser for let expressions
+pLet = do
+  space
+  symb "let"
+  space1
+  v <- str
+  spaces $ symb "="
+  t <- term 
+  return (v,Left t) --left signifies terms
+
+-- parser for type let expressions
+pTypeLet = do
+  space
+  symb "lett"
+  space1
+  v <- strT
+  spaces $ symb "="
+  t <- typTerm 
+  return (v,Right t) --right signify type let
+
+pTerm = do
+  t <- term 
+  return ("", Left t)
+
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termVar +++ termUnit 
+expr = termUnit +++ (bracket term) +++ termVar
   +++ termInl +++ termInr +++ termCase
   +++ termProd +++ termPrj1 +++ termPrj2
-  +++ termCata +++ termIn
+  +++ termCata +++ termIn 
 
 -- top level of CFG Gramma
-term = app +++ lam
+term = lam +++ app
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
