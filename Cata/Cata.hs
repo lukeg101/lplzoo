@@ -145,7 +145,12 @@ termEquality (In t1, In t2) c s = t1 == t2
 termEquality (Inl t1, Inl t2) c s = t1 == t2
 termEquality (Inr t1, Inr t2) c s = t1 == t2
 termEquality (Cata t1, Cata t2) c s = t1 == t2
-termEquality (x, y) c s = x == y
+termEquality (Unit, Unit) c s = True
+termEquality (Case, Case) c s = True
+termEquality (Prod, Prod) c s = True
+termEquality (Prj1, Prj1) c s = True
+termEquality (Prj2, Prj2) c s = True
+termEquality _ _ _ = False
 
 -- Type context for t:T is Map v T where v is a variable name and T is it's supplied Type
 type Context = M.Map String T
@@ -214,7 +219,9 @@ typeof _ _ = Nothing
 
 -- similar to type substitution but at the type level
 typeSub :: T -> (T, T) -> T
-typeSub l@(TVar x) c = l
+typeSub l@(TVar x) (TVar y, t) 
+  | x == y    = t
+  | otherwise = l
 typeSub X (_,z) = z
 typeSub l@(TArr t1 t2) c = TArr (typeSub t1 c) (typeSub t2 c)
 typeSub l@(TMu t1) c = l

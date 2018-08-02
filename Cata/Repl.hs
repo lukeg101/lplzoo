@@ -85,7 +85,7 @@ formatTerm t1 env = foldl
 formatType :: T -> Environment -> T
 formatType t1 env = foldl 
   (\t (v,t2) -> case t2 of 
-    Right t2 -> if elem v (typeVars t1) 
+    Right t2 -> if elem v (typeVars t) 
       then typeSub t (TVar v, t2) 
       else t
     _ -> t) t1 $ M.assocs env

@@ -28,53 +28,78 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- `\1:A.1`
+- `\x:A.x`
 - `in (inl ():1+M(1+X)):M(1+X)` (the encoding of [peano](https://wiki.haskell.org/Peano_numbers) style _zero_)
-- `\1:M(1+((1*X)*X)).1` (the identity function for a binary tree, with nil leaves and elements stored internally)
-- `case (inl () : 1 + A) (\1:1.1) (\2:A.())` (performs case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
-- `\1:A.\2:B.snd (1,2)`.
-- `\0:M(1+X).in (inr 0:1+M(1+X)):M(1+X)` the successor function for inductively defined nats.
-- `\0:M(1+X). cata (\1:1+M(1+X). case 1 (\2:1.0) (\2:M(1+X).in (inr 2:1+M(1+X)):M(1+X))):M(1+X) -> M(1+X)` add for inductively defined nats
+- `\x:M(1+((1*X)*X)).x` (the identity function for a binary tree, with nil leaves and elements stored internally)
+- `case (inl () : 1 + A) (\x:1.x) (\y:A.())` (performs case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
+- `\x:A.\y:B.snd (x,y)`.
+- `\n:M(1+X).in (inr n:1+M(1+X)):M(1+X)` the successor function for inductively defined nats.
+- `\m:M(1+X). cata (\x:1+M(1+X). case x (\u:1.m) (\n:M(1+X).in (inr n:1+M(1+X)):M(1+X))):M(1+X) -> M(1+X)` add for inductively defined nats
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
-> \1:A.1
-λ1:A.1
-> λ1:A.1
-λ1:A.1
+>   \x:A.x
+=   λx:A.x
+>   λx:A.x
+=   λx:A.x
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
+
 Note: see syntax below for a description of what the various symbols mean.
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> '(\0:M(1+X). cata (\1:1+M(1+X). case 1 (\2:1.0) (\2:M(1+X).in (inr 2:1+M(1+X)):M(1+X))):M(1+X) -> M(1+X)) (in (inr (in (inl ():1+M(1+X)):M(1+X)):1+M(1+X)):M(1+X)) (in (inr (in (inl ():1+M(1+X)):M(1+X)):1+M(1+X)):M(1+X))
-cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X))
-(λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))) ((λ0:⊤ + X.case 0 (λ1:⊤.inl ((λ0:⊤.0) 1):⊤ + X) (λ1:⊤.inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) 1):⊤ + X)) (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)))
-case ((λ0:⊤ + X.case 0 (λ1:⊤.inl ((λ0:⊤.0) 1):⊤ + X) (λ1:⊤.inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) 1):⊤ + X)) (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X))) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))
-case (case (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)) (λ1:⊤.inl ((λ0:⊤.0) 1):⊤ + X) (λ1:⊤.inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) 1):⊤ + X)) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))
-case ((λ1:⊤.inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) 1):⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X))) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))
-case (inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + X) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))
-(λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X)) (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)))
-in (inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
-in (inr ((λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))) ((λ0:⊤ + X.case 0 (λ1:⊤.inl ((λ0:⊤.0) 1):⊤ + X) (λ1:⊤.inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) 1):⊤ + X)) (inl ():⊤ + μ(⊤ + X)))):⊤ + μ(⊤ + X)):μ(⊤ + X)
-in (inr (case ((λ0:⊤ + X.case 0 (λ1:⊤.inl ((λ0:⊤.0) 1):⊤ + X) (λ1:⊤.inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) 1):⊤ + X)) (inl ():⊤ + μ(⊤ + X))) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
-in (inr (case (case (inl ():⊤ + μ(⊤ + X)) (λ1:⊤.inl ((λ0:⊤.0) 1):⊤ + X) (λ1:⊤.inr (cata (λ1:⊤ + μ(⊤ + X).case 1 (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) 1):⊤ + X)) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
-in (inr (case ((λ1:⊤.inl ((λ0:⊤.0) 1):⊤ + X) ()) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
-in (inr (case (inl ((λ0:⊤.0) ()):⊤ + X) (λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λ2:μ(⊤ + X).in (inr 2:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
-in (inr ((λ2:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) ((λ0:⊤.0) ())):⊤ + μ(⊤ + X)):μ(⊤ + X)
-in (inr (in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)
+>   '(\m:M(1+X). cata (\x:1+M(1+X). case x (\u:1.m) (\n:M(1+X).in (inr n:1+M(1+X)):M(1+X))):M(1+X) -> M(1+X)) (in (inr (in (inl ():1+M(1+X)):M(1+X)):1+M(1+X)):M(1+X)) (in (inr (in (inl ():1+M(1+X)):M(1+X)):1+M(1+X)):M(1+X))
+~>  cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X))
+~>  (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))) ((λx:⊤ + X.case x (λy:⊤.inl ((λx:⊤.x) y):⊤ + X) (λy:⊤.inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) y):⊤ + X)) (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)))
+~>  case ((λx:⊤ + X.case x (λy:⊤.inl ((λx:⊤.x) y):⊤ + X) (λy:⊤.inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) y):⊤ + X)) (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X))) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))
+~>  case (case (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)) (λy:⊤.inl ((λx:⊤.x) y):⊤ + X) (λy:⊤.inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) y):⊤ + X)) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))
+~>  case ((λy:⊤.inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) y):⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X))) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))
+~>  case (inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + X) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))
+~>  (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X)) (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)))
+~>  in (inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
+~>  in (inr ((λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))) ((λx:⊤ + X.case x (λy:⊤.inl ((λx:⊤.x) y):⊤ + X) (λy:⊤.inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) y):⊤ + X)) (inl ():⊤ + μ(⊤ + X)))):⊤ + μ(⊤ + X)):μ(⊤ + X)
+~>  in (inr (case ((λx:⊤ + X.case x (λy:⊤.inl ((λx:⊤.x) y):⊤ + X) (λy:⊤.inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) y):⊤ + X)) (inl ():⊤ + μ(⊤ + X))) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
+~>  in (inr (case (case (inl ():⊤ + μ(⊤ + X)) (λy:⊤.inl ((λx:⊤.x) y):⊤ + X) (λy:⊤.inr (cata (λx:⊤ + μ(⊤ + X).case x (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):μ(⊤ + X)->μ(⊤ + X) y):⊤ + X)) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
+~>  in (inr (case ((λy:⊤.inl ((λx:⊤.x) y):⊤ + X) ()) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
+~>  in (inr (case (inl ((λx:⊤.x) ()):⊤ + X) (λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) (λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X))):⊤ + μ(⊤ + X)):μ(⊤ + X)
+~>  in (inr ((λu:⊤.in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)) ((λx:⊤.x) ())):⊤ + μ(⊤ + X)):μ(⊤ + X)
+~>  in (inr (in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)
 ```
 Note the above computes 1+1, (Submit a PR with a better parser to prevent the need for all these type annotations!)
 
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
-> t(\0:1+M(1+X). in (inr 0:1+M(1+X)):1+M(1+X)) (in (inl (): 1 + M (1+X)):1+M(1+X))
-⊤ + μ(⊤ + X)
-> t\0:A -> A. 0 0
-Cannot Type Term: \0:A -> A. 0 0
->
+>   t(\n:M(1+X).in (inr n:1+M(1+X)):M(1+X)) (in (inl ():1+M(1+X)):M(1+X))
+μ(⊤ + X)
+>   t\x:X. x x
 ```
 Note: The above terms denote _succ 0_ and self-application respectively. If you provide a un-typeable term, the type checker will fail and reduction will not occur.
+
+You can save terms for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+```
+>   let zero = in (inl ():1+M(1+X)):M(1+X)
+Saved term: in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)
+>   let succ = (\n:M(1+X).in (inr n:1+M(1+X)):M(1+X))
+Saved term: λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X)
+>   succ zero
+~>* in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)
+
+```
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `inl`, `inr`, `cata`, `in`, `case`, `fst`, `snd`, and `X` are keywords in Cata.
+
+Additionally we have type level `lett` statements that allow you to define and use types:
+```
+>   lett NAT = M(1+X)
+Saved type: μ(⊤ + X)
+>   let zero = in (inl ():1+NAT):NAT
+Saved term: in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)
+>   let succ = \n:NAT.in (inr n:1+NAT):NAT
+Saved term: λn:μ(⊤ + X).in (inr n:⊤ + μ(⊤ + X)):μ(⊤ + X)
+>   succ zero
+~>* in (inr (in (inl ():⊤ + μ(⊤ + X)):μ(⊤ + X)):⊤ + μ(⊤ + X)):μ(⊤ + X)
+```
+This makes it easier to define both terms and types, but does not allow type level application (See Omega). `lett` is also a keyword.
 
 ## Syntax 
 
@@ -82,13 +107,11 @@ We base the language on the BNF for Cata:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;in\,\tau:\sigma\\&space;&|&&space;cata\,\tau:\sigma\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;()&space;\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;in\,\tau:\sigma\\&space;&|&&space;cata\,\tau:\sigma\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;()&space;\\&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& in\,\tau:\sigma\\ &|& cata\,\tau:\sigma\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case\,\tau\,\tau\,\tau\\ &|& (\tau, \tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& () \\ \end{matrix}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
-
-
+<a href="https://www.codecogs.com/eqnedit.php?latex=\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\" title="\upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;A,B,C,...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\\&space;&|&&space;\top\\&space;&|&&space;\sigma&space;\times&space;\sigma\\&space;&|&&space;\sigma&space;&plus;&space;\sigma\\&space;&|&&space;\mu\,&space;\sigma\\&space;&|&&space;{\tt&space;X}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;A,B,C,...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\\&space;&|&&space;\top\\&space;&|&&space;\sigma&space;\times&space;\sigma\\&space;&|&&space;\sigma&space;&plus;&space;\sigma\\&space;&|&&space;\mu\,&space;\sigma\\&space;&|&&space;{\tt&space;X}&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & A,B,C,...\\ & | & \sigma \rightarrow \sigma \\ &|& \top\\ &|& \sigma \times \sigma\\ &|& \sigma + \sigma\\ &|& \mu\, \sigma\\ &|& {\tt X} \end{matrix}" /></a>
 
-However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
+However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:- The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \end{matrix}" /></a>
 
@@ -100,14 +123,14 @@ and types:
 
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:A.x`).
+- Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
 - `X` is a reserved `μ` variable and is interpreted as such in a term. _μ-less_ terms that use `X` won't act differently than STLC but introducing `μ` will change the semantics. Best to avoid unless using `μ`. 
 - Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, product types `A * B` (or `×`), sum types `A + B`, unit types `1` (or `⊤`), a special Mu type `μ(T)` (or `M(T)`), and Mu type variable `X`.  
 - Arrows associate to the right so that `A -> A -> A` is the same as `A -> (A -> A)` but not `((A -> A) -> A)`. Similar rules follow for the other types.
 - Products have the highest precedence, followed by sums, arrows, and then all other types. 
-- Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `(\1:A.          1)` unless it is between application where you need at least one space.
-- Products are 2-element pairs like in Haskell. You form products like `(1, 2)` and access each element using `fst` (or `π1`) and `snd` (or `π2`).
-- Sums are 2-element co-pairs, formed with either `inl 1:A` or `inr 2:B` (assuming either `1:A` or `2:B` is in scope). `case s f g` does case analysis on `s`, passing the result to the function `f` if s was `inl` or `g` if `inr`.
+- Nested terms don't need brackets: `\x:A.\y:B. y` unless enforcing application on the right. Whitespace does not matter `(\x:A.          x)` unless it is between application where you need at least one space.
+- Products are 2-element pairs like in Haskell. You form products like `(x, y)` and access each element using `fst` (or `π1`) and `snd` (or `π2`).
+- Sums are 2-element co-pairs, formed with either `inl x:A` or `inr y:B` (assuming either `x:A` or `y:B` is in scope). `case s f g` does case analysis on `s`, passing the result to the function `f` if s was `inl` or `g` if `inr`.
 - Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`).
 - To construct terms using `cata` or `case`, use _space_ to apply arguments. for instance, `case s f c` applies `s` to `case`, which then applies `f` to the `case s` and `g` to `case s f` etc...
 - Inductive types are formed by prefixing a term with `in` and a type with `M` (or `μ`). Concretely, an inductive term looks like `in x:t` where `x` is the term and `t` is its type. Similarly, an inductive type looks like `μ(T)` where `T` is the type we insist is inductive. For example, peano nats have type `1+ μ(1+X)` where `1` is zero, and `X` is a μ variable capturing the subterm of type `1+μ(1+X)` (also a nat). The example term zero captures this idea above. See the semantics for a description of what these constructions mean.
@@ -173,12 +196,12 @@ with the obvious rules for reduction inside each term that has a subterm. Finall
 with reduction inside terms like above.
 
 - The rules for variables, abstraction and application follow directly from STLC; the rules for products, sums, and units are largely standard in the literature. μ types in the [literature](https://www.cis.upenn.edu/~bcpierce/tapl/) are typically written as `μX.T` where T is a type that contains X. Since we only use one μ variable, we just write `T` (submit a PR with the more general form!)
-- We adopt the categorical notation of a [functor](https://en.wikipedia.org/wiki/Functor), which expresses a mapping from terms to terms and types to types. For example, given the functor type `F X = 1 + X`, and type `Y = B`, then `F Y = 1 + Y = 1 + B`. similarly if we had a term `inl _ : F _`, then `inl b: F B` for some `b:B`. This idea translates directly into Cata, however we don't do type-level application, and so you must apply these types yourself before using them. Concretely, you might provide `F Y` as the type `1 + B` in Cata.
+- We adopt the categorical notation of a [functor](https://en.wikipedia.org/wiki/Functor), which expresses a mapping from terms to terms and types to types. For example, given the functor type `F X = 1 + X`, and type `Y = B`, then `F Y = 1 + Y = 1 + B`. similarly if we had a term `inl _ : F _`, then `inl b: F B` for some `b:B`. This idea translates into Cata, however we don't do type-level application, and so you must apply these types yourself before using them. Concretely, you might provide `F Y` as the type `1 + B` in Cata.
 - We can construct functors using `+`, `*`, `->`. A functor is _strictly positive_ if it contains only constant variables `A,B,C,...`, μ variable `X`, `+`, `*`, and `->` such that `X` only occurs on the right of arrows. For every _s.p._ functor F, we can define an inductive type `μF`. A strictly positive check has not been implemented yet, behaviour for non-s.p functors is thus undefined (submit a PR, as it's an easy fix). 
 - For instance, Peano numbers have the shape `F X = 1 + X` where 1 is zero and X is the inductive case (like _succ n_). An F-shaped term could be `inl ():1+X` and hence an inductive nat is `in (inl ():1+X): F (μF)`, however we must now unify `1+X` and `F (μF)`. Here `X` must be `μF`, where `F X = 1 + X` and so the final type is `1+μ(1+X)`, where zero is `in (inl ():1+μ(1+X)):1+μ(1+X)` in Cata. Unification is not implemented, so you must derive and input this type yourself (or submit a PR!).
-- We can implement functions on functors too, supposing `F X = 1 + X`, then a function `F X -> X` might [reduce](https://www.schoolofhaskell.com/user/bartosz/understanding-algebras) F-shaped terms into a simpler form `X`. For instance, `\0:1+X.case 0 (\1:1.()) (\2:X.())` reduces terms of type `1+X` to `()`; in languages with useful types (like booleans), we might use this to implement more powerful constructs (like conditionals). 
+- We can implement functions on functors too, supposing `F X = 1 + X`, then a function `F X -> X` might [reduce](https://www.schoolofhaskell.com/user/bartosz/understanding-algebras) F-shaped terms into a simpler form `X`. For instance, `\x:1+X.case x (\x:1.()) (\x:X.())` reduces terms of type `1+X` to `()`; in languages with useful types (like booleans), we might use this to implement more powerful constructs (like conditionals). 
 - We can extend the notation of typed reduction by _lifting_ it to the inductive level, that is given `f:F X -> X`, we get `cata f:μF X -> X`. This forms the elimination rule for inductive types and is known as the _catamorphism_ of F.
-- We combine our knowledge of catamorphisms and inductive types and get folds (finally!). Intuitively this can be understood as a way to de-construct inductive types into simpler ones (e.g. summing up a list of numbers). The reduction rule states that applying a catamorphism `cata f` to an inductive term `in t` will first lift the cataterm to a term `F (cata f)` of type `F (μF) -> F X` which is then applied to `t:F (μF)` so that `F (cata f) t` has type `F X`. We apply the result to `f` to get a term of type `X` which is the simplest form. The implementation of `F` is handled for you, run the reduction tracer to see what it does!
+- We combine our knowledge of catamorphisms and inductive types and get folds (finally!). Intuitively this can be understood as a way to deconstruct inductive types into simpler ones (e.g. summing up a list of numbers). The reduction rule states that applying a catamorphism `cata f` to an inductive term `in t` will first lift the cataterm to a term `F (cata f)` of type `F (μF) -> F X` which is then applied to `t:F (μF)` so that `F (cata f) t` has type `F X`. We apply the result to `f` to get a term of type `X` which is the simplest form. The implementation of `F` is handled for you, run the reduction tracer to see what it does!
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Cata.hs). 
 - Reductions include the one-step reduction (see `reduce1` in Cata.hs), the many-step reduction (see `reduce` in Cata.hs). 
 
