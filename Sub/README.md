@@ -56,6 +56,7 @@ There is also a reduction tracer, which should print each reduction step. prefix
 ```
 
 There is also a typing mechanism, which should display the type or fail as usual.
+```
 >   t\r:{a:A, b:B}.r.b
 {a:A, b:B}->B
 >   t\r:{a:A, b:B}.r.c
