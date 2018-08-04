@@ -28,7 +28,7 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- `S K K 1`
+- `S K K x`
 - `S (K S) K` (known as B)
 - `S (S (K (S (K S) K)) S) (K K)` (known as C)
 
@@ -36,11 +36,12 @@ You can copy and paste from the output:
 ```
 Welcome to the SKI combinator calculus REPL
 Type some terms or press Enter to leave.
-> S K K 1
-1
-> 1
-1
+>   S K K x
+~>* x
+>   x
+=   x
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
@@ -59,19 +60,28 @@ S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (I (S (S (
 S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
 S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) I)
 ```
-Note: the above computes 2^2 in Church Numeral format
+Note: the above computes 2^2 in Church Numeral format.
 
 Note: if you provide a non-normalizing term (e.g. with `(S I I (S I I))` which is the same as `(\x.x x)(\x.x x)` in ULC), reductions will not terminate. Use STLC for termination guarantees.
+
+You can save variables for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+```
+>   let two = S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))
+Saved: S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))
+>   two two
+~>* S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) I)
+```
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. 
 
 ## Syntax 
 
 We base the language on the BNF for the SKI calculus:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;S\,\tau\,\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;K\,&space;\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;I\,&space;\tau&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;S\,\tau\,\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;K\,&space;\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;I\,&space;\tau&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ & | & \tau\,{\tt space}\,\tau\\ & | & S\,\tau\,\tau\,\tau &&\\ & | & K\, \tau\,\tau &&\\ & | & I\, \tau&&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;S\,\tau\,\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;K\,&space;\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;I\,&space;\tau&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\mathbf{\upsilon}\\&space;&&space;|&space;&&space;\tau\,{\tt&space;space}\,\tau\\&space;&&space;|&space;&&space;S\,\tau\,\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;K\,&space;\tau\,\tau&space;&&\\&space;&&space;|&space;&&space;I\,&space;\tau&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \mathbf{\upsilon}\\ & | & \tau\,{\tt space}\,\tau\\ & | & S\,\tau\,\tau\,\tau &&\\ & | & K\, \tau\,\tau &&\\ & | & I\, \tau&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}" /></a>
 
 However we adopt the standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\tau&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\tau\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&\tt{S}\\&space;&|&\tt{K}\\&space;&|&\tt{I}\\&space;&&\\&space;\upsilon&::=&&space;{\tt&space;0}&space;|&space;{\tt&space;1}&space;|&space;{\tt&space;2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\tau&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\tau\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&\tt{S}\\&space;&|&\tt{K}\\&space;&|&\tt{I}\\&space;&&\\&space;\upsilon&::=&&space;{\tt&space;0}&space;|&space;{\tt&space;1}&space;|&space;{\tt&space;2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \tau & ::= & \beta \\ &| &\mathbf{\tau\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|&\tt{S}\\ &|&\tt{K}\\ &|&\tt{I}\\ &&\\ \upsilon&::=& {\tt 0} | {\tt 1} | {\tt 2} | ... \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\tau&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\tau\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&\tt{S}\\&space;&|&\tt{K}\\&space;&|&\tt{I}\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\tau&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\tau\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&\tt{S}\\&space;&|&\tt{K}\\&space;&|&\tt{I}\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \tau & ::= & \beta \\ &| &\mathbf{\tau\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|&\tt{S}\\ &|&\tt{K}\\ &|&\tt{I}\\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}" /></a>
 
 Some notes about the syntax:
 

@@ -5,7 +5,7 @@ import Data.Map.Lazy as M
 
 --untyped lambda calculus - variables are numbers now as it's easier for renaming
 data SKTerm
-  = Var Int
+  = Var String
   | S
   | K
   | I
@@ -42,7 +42,7 @@ SKTermEquality _ _ _ = False
 
   --Show instance
 instance Show SKTerm where
-  show (Var x)      = show x
+  show (Var x)      = x
   show (App t1 t2)  = show t1 ++ " " ++ paren (isApp t2) (show t2)
   show S = "S"
   show K = "K"
@@ -57,7 +57,7 @@ isApp (App _ _) = True
 isApp _         = False
 
 --bound variables of an SKTerm
-bound :: SKTerm -> Set Int
+bound :: SKTerm -> Set String
 bound (Var n)      = S.empty
 bound S            = S.empty
 bound K            = S.empty
@@ -65,7 +65,7 @@ bound I            = S.empty
 bound (App t1 t2)  = S.union (bound t1) (bound t2)
 
 --free variables of an SKTerm
-free :: SKTerm -> Set Int
+free :: SKTerm -> Set String
 free (Var n)      = S.singleton n
 free S            = S.empty
 free K            = S.empty
@@ -85,20 +85,40 @@ sub I              = S.singleton I
 sub t@(App t1 t2)  = S.insert t $ S.union (sub t1) (sub t2)
 
 --element is bound in an SKTerm
-notfree :: Int -> SKTerm -> Bool
+notfree :: String -> SKTerm -> Bool
 notfree x = not . S.member x . free
 
 --set of variables in an SKTerm
-vars :: SKTerm -> Set Int
+vars :: SKTerm -> Set String
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars S            = S.empty
 vars K            = S.empty
 vars I            = S.empty
 
---generates a fresh variable name for an SKTerm
-newlabel :: SKTerm -> Int
-newlabel = (+1) . maximum . vars
+--generates a fresh variable name for a term
+newlabel :: SKTerm -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
+
+--substitute one term for another in a term
+--does capture avoiding substitution (Berenregt)
+substitute :: SKTerm -> (SKTerm, SKTerm) -> SKTerm
+substitute t1@(Var c1) (Var c2, t2)
+  = if c1 == c2 then t2 else t1
+substitute (App t1 t2) c
+  = App (substitute t1 c) (substitute t2 c)
+substitute t1 c = t1
 
 --one-step reduction relation
 reduce1 :: SKTerm -> Maybe SKTerm

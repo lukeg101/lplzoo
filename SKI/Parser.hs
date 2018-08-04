@@ -98,10 +98,12 @@ p `chainl1` op = do {a <- p; rest a}
       f <- op
       b <- p
       rest (f a b)) +++ return a
-
--- 1 or more digits
-nat :: Parser Int
-nat = fmap read (many1 (sat isDigit))
+    
+-- 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat isLower
+  if elem s ["let", "=", "S", "K", "I"] then zerop else return s
 
 -- bracket parses away brackets as you'd expect
 bracket :: Parser a -> Parser a
@@ -113,7 +115,7 @@ bracket p = do
 
 -- vars are nats packaged up
 var = do
-  x <- nat
+  x <- str
   return (Var x)
 
 s = do 
@@ -132,6 +134,20 @@ i = do
 app = chainl1 expr $ do
   space1
   return $ App 
+
+-- parser for let expressions
+pLet = do
+  space
+  symb "let"
+  space1
+  v <- str
+  spaces $ symb "="
+  t <- spaces $ term 
+  return (v,t)
+
+pTerm = do
+  t <- term 
+  return ("", t)
 
 -- expression follows CFG form with bracketing convention
 expr = (bracket term) +++ var +++ s +++ k +++ Parser.i
