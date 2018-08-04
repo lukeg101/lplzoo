@@ -9,20 +9,20 @@ import Control.Monad             (guard)
 -- Unit/Top is used as the final type, meant to represent Object
 -- records are lists of variables and types (todo make this Set)
 data T 
-  = TVar Char
+  = TVar String
   | TArr T T
   | TUnit 
-  | TRec [(Int,T)]
+  | TRec [(String,T)]
   deriving (Eq, Ord)
 
 -- show implementation, uses Unicode for Unit
 -- uses bracketing convention for types
 instance Show T where
-  show (TVar x)   = x:""
+  show (TVar x)   = x
   show (TArr a b)  = paren (isArr a) (show a) ++ "->" ++ show b
   show (TUnit)   = "\x22A4"
   show (TRec xs) = wparen . concat $ 
-    intersperse ", " $ map (\(v,t)->show v ++ ":" ++ show t) xs
+    intersperse ", " $ map (\(v,t)->v ++ ":" ++ show t) xs
 
 paren :: Bool -> String -> String
 paren True  x = "(" ++ x ++ ")"
@@ -40,11 +40,11 @@ isArr _          = False
 -- Abstractions carry the type Church style\
 -- Records are sets of variable names and terms
 data STerm
-  = Var Int
-  | Abs Int T STerm
+  = Var String
+  | Abs String T STerm
   | App STerm STerm
-  | Rec [(Int ,STerm)]
-  | Proj Int
+  | Rec [(String ,STerm)]
+  | Proj String
   | Unit
   deriving Ord
 
@@ -61,7 +61,7 @@ instance Eq STerm where
 -- if bound t1 XOR bound t2 == true then False
 -- application recursively checks both the LHS and RHS
 termEquality :: (STerm, STerm)
-  -> (Map Int Int, Map Int Int)
+  -> (Map String Int, Map String Int)
   -> Int
   -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
@@ -88,13 +88,13 @@ termEquality _ _ _ = False
 -- show implementation for sub terms
 -- uses bracketing convention for terms
 instance Show STerm where
-  show (Var x)      = show x
-  show (App l1 (Proj x)) = show l1 ++ "." ++ show x
+  show (Var x)      = x
+  show (App l1 (Proj x)) = show l1 ++ "." ++ x
   show (Rec xs) = wparen . concat $ 
-    intersperse ", " $ map (\(v,t)->show v ++ "=" ++ show t) xs
+    intersperse ", " $ map (\(v,t)->v ++ "=" ++ show t) xs
   show (App t1 t2)  = 
     paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
-  show (Abs x t l1) = "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
+  show (Abs x t l1) = "\x03bb" ++ x ++ ":" ++ show t ++ "." ++ show l1
   show Unit = "()"
   show (Proj x) = error "should be handled by above case"
 
@@ -107,7 +107,7 @@ isApp (App _ _) = True
 isApp _         = False
 
 -- Type context for t:T is Map v T where v is a variable name and T is it's supplied Type
-type Context = M.Map Int T
+type Context = M.Map String T
 
 -- typing derivation for a term in a given context
 -- Just T denotes successful type derivation 
@@ -161,7 +161,7 @@ subtype t1 t2 = t1 == t2 ||
     (_, _) -> False
 
 --bound variables of a term
-bound :: STerm -> Set Int
+bound :: STerm -> Set String
 bound (Var n)      = S.empty
 bound (Abs n t l1) = S.insert n $ bound l1
 bound (App l1 l2)  = S.union (bound l1) (bound l2)
@@ -170,7 +170,7 @@ bound (Rec l1)     = S.unions $ map (bound . snd) l1
 bound (Proj x)     = S.empty
 
 --free variables of a term
-free :: STerm -> Set Int
+free :: STerm -> Set String
 free (Var n)      = S.singleton n
 free (Abs n t l1) = S.delete n (free l1)
 free (App l1 l2)  = S.union (free l1) (free l2)
@@ -192,11 +192,11 @@ sub l@(Rec l1)     = S.insert l $ S.unions $ map (sub . snd) l1
 sub l@(Proj x)     = S.empty
 
 --element is bound in a term
-notfree :: Int -> STerm -> Bool
+notfree :: String -> STerm -> Bool
 notfree x = not . S.member x . free 
 
 --set of variables in a term
-vars :: STerm -> Set Int
+vars :: STerm -> Set String
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t l1) = S.insert x $ vars l1
@@ -204,12 +204,55 @@ vars (Unit)       = S.empty
 vars (Rec l1)     = S.unions $ map (vars . snd) l1
 vars (Proj x)     = S.empty
 
+--set of variables in a type
+typeVars :: T -> Set String
+typeVars (TVar x)     = S.singleton x
+typeVars (TArr t1 t2) = S.union (typeVars t1) (typeVars t2)
+typeVars (TUnit)      = S.empty
+typeVars (TRec t1)    = S.unions $ map (typeVars.snd) t1
+
+--type vars in a term
+typeVarsInTerm :: STerm -> Set String
+typeVarsInTerm l@(Var x)      = S.singleton x
+typeVarsInTerm l@(Abs c t l1) = S.union (typeVars t) $ typeVarsInTerm l1
+typeVarsInTerm l@(App l1 l2)  = S.union (typeVarsInTerm l1) (typeVarsInTerm l2)
+typeVarsInTerm l@(Rec ls)     = S.unions $ map (typeVarsInTerm.snd) ls
+typeVarsInTerm l              = S.empty
+
+-- similar to type substitution but at the type level
+typeSub :: T -> (T, T) -> T
+typeSub l@(TVar x) (TVar y, t) 
+  | x == y            = t
+  | otherwise         = l
+typeSub l@(TArr t1 t2) c = TArr (typeSub t1 c) (typeSub t2 c)
+typeSub l@(TRec t1) c = TRec $ map (\(v,t) -> (v,typeSub t c)) t1
+typeSub TUnit c       = TUnit
+
+-- function used to do type substitution on types in a term
+tSubUnder :: STerm -> (T,T) -> STerm
+tSubUnder l@(Var x) c      = l
+tSubUnder l@(Abs x t l2) c = Abs x (typeSub t c) $ tSubUnder l2 c
+tSubUnder l@(App l1 l2) c  = App (tSubUnder l1 c) (tSubUnder l2 c)
+tSubUnder l@(Rec ls) c     = Rec $ map (\(v,l) -> (v, tSubUnder l c)) ls
+tSubUnder l c              = l
+
 --generates a fresh variable name for a term
-newlabel :: STerm -> Int
-newlabel = (+1) . maximum . vars
+newlabel :: STerm -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
 
 --rename t (x,y): renames free occurences of term variable x in t to y
-rename :: STerm -> (Int, Int) -> STerm
+rename :: STerm -> (String, String) -> STerm
 rename (Var a) (x,y) = if a == x then Var y else Var a
 rename l@(Abs a t l1) (x,y) = if a == x then l else Abs a t $ rename l1 (x, y)
 rename (App l1 l2) c = App (rename l1 c) (rename l2 c)

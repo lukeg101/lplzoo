@@ -28,51 +28,72 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- `{1=(), 2=\1:A.1}` a record containing a unit `()` and the identity function for type `A` assigned to labels `1` and `2` respectively. 
-- `\1:{2:A, 3:B}.1` this is the identity function for 2 element records containing an `A` and a `B`.
-- `(\1:{2:1}.1) {2={3=()}}` identity function for a singleton-record `{2:1}`, which due to subtyping will accept `{2={3=()}}`.
-- `\1:{2:B}.1.2` a function taking a record `{2:B}` and projecting out the label `2` (submit a PR with a less confusing syntax).
-- `(\1:1->1.1) (\2:A->A.2)` subtyping with arrow types.
+- `{x=(), id=\x:A.x}` a record containing a unit `()` and the identity function for type `A` assigned to labels `x` and `id` respectively. 
+- `\r:{a:A, b:B}.r` this is the identity function for 2 element records containing an `A` and a `B`.
+- `(\r:{u:1}.r) {u={u=()}}` identity function for a singleton-record `{u:1}`, which due to subtyping will accept `{u={u=()}}`.
+- `\r:{b:B}.r.b` a function taking a record `{b:B}` and projecting out the label `b` (submit a PR with a less confusing syntax).
+- `(\f:1->1.f) (\g:A->A.g)` subtyping with arrow types.
 
 The parser is smart enough to recognise λ and ⊤; so you can copy and paste from the output:
 ```
 Welcome to the Sub REPL
 Type some terms or press Enter to leave.
-> \1:{2:1}.1
-λ1:{2:⊤}.1
-> λ1:{2:⊤}.1
-λ1:{2:⊤}.1
+>   \r:{u:1}.r
+=   λr:{u:⊤}.r
+>   λr:{u:⊤}.r
+=   λr:{u:⊤}.r
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 
 ```
-> '(\1:1.\2:1 -> 1.2 {2=\1:A.1, 3=1}) () (\1:{3:1, 2:A->1}.1.3)
-(λ2:⊤->⊤.2 {2=λ1:A.1, 3=()}) (λ1:{3:⊤, 2:A->⊤}.1.3)
-(λ1:{3:⊤, 2:A->⊤}.1.3) {2=λ1:A.1, 3=()}
-{2=λ1:A.1, 3=()}.3
-()
+>   '(\x:1.\f:1->1.f {id=\a:A.a, u=x}) () (\r:{u:1, g:A->1}.r.u)
+~>  (λf:⊤->⊤.f {id=λa:A.a, u=()}) (λr:{u:⊤, g:A->⊤}.r.u)
+~>  (λr:{u:⊤, g:A->⊤}.r.u) {id=λa:A.a, u=()}
+~>  {id=λa:A.a, u=()}.u
+~>  ()
 ```
 
 There is also a typing mechanism, which should display the type or fail as usual.
-```
-> t\1:{2:A, 3:B}.1.3
-{2:A, 3:B}->B
-> t\1:{2:A, 3:B}.1.5
-Cannot Type Term: \1:{2:A, 3:B}.1.5
+>   t\r:{a:A, b:B}.r.b
+{a:A, b:B}->B
+>   t\r:{a:A, b:B}.r.c
+Cannot Type Term: \r:{a:A, b:B}.r.c
 ```
 
 Note: if you provide a non-normalizing term, the type checker will fail and reduction will not occur.
+
+You can save terms for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+```
+>   let f = (\x:1.\f:1->1.f {id=\a:A.a, u=x})
+Saved term: λx:⊤.λf:⊤->⊤.f {id=λa:A.a, u=x}
+>   let g = (\r:{u:1, g:A->1}.r.u)
+Saved term: λr:{u:⊤, g:A->⊤}.r.u
+>   f () g
+~>* ()
+```
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these.
+
+Additionally we have type level `lett` statements that allow you to define and use types:
+```
+>   lett RECORD = {a:A, b:B, f:A->A, g:B->B}
+Saved type: {a:A, b:B, f:A->A, g:B->B}
+>   \r:RECORD.r
+=   λr:{a:A, b:B, f:A->A, g:B->B}.r
+```
+
+This makes it easier to define both terms and types, but does not allow type level application (See Omega). `lett` is also a keyword.
 
 ## Syntax 
 
 We base the language on the BNF for the typed calculus, with the addition of generalised records, record projections (using the record names as projections), the unit, and types for these terms:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;()&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;()&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \{\upsilon= \tau,...\} \\ &|&\tau . \upsilon\\ &|& () \\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \sigma & ::= & {\tt A,B,C,...}\\ & | & \sigma \rightarrow \sigma\\ &|& \top\\ &|& \{\mathbf{\upsilon}\tt{:}\sigma,...\} \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;()&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;{\tt&space;space}\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;()&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\&space;&&\\&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;A,B,C,...}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\top\\&space;&|&&space;\{\mathbf{\upsilon}\tt{:}\sigma,...\}&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon \\ &|& \{\upsilon= \tau,...\} \\ &|&\tau . \upsilon\\ &|& () \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\ &&\\ \sigma & ::= & {\tt A,B,C,...}\\ & | & \sigma \rightarrow \sigma\\ &|& \top\\ &|& \{\mathbf{\upsilon}\tt{:}\sigma,...\} \end{matrix}" /></a>
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar for terms as follows:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;\{\eta\}\\&space;&|&&space;\upsilon.\upsilon\\&space;&|&&space;\{\eta\}.\upsilon\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;\{\eta\}\\&space;&|&&space;\upsilon.\upsilon\\&space;&|&&space;\{\eta\}.\upsilon\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& () \\ &|& \{\eta\}\\ &|& \upsilon.\upsilon\\ &|& \{\eta\}.\upsilon\\ &&\\ \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \\ &&\\ \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;\{\eta\}\\&space;&|&&space;\upsilon.\upsilon\\&space;&|&&space;\{\eta\}.\upsilon\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;\{\eta\}\\&space;&|&&space;\upsilon.\upsilon\\&space;&|&&space;\{\eta\}.\upsilon\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& () \\ &|& \{\eta\}\\ &|& \upsilon.\upsilon\\ &|& \{\eta\}.\upsilon\\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\\ &&\\ \end{matrix}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\eta&space;&&space;::=&space;&&space;\upsilon&space;=&space;\tau\\&space;&|&&space;\upsilon&space;=&space;\tau&space;,&space;\eta&space;\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\eta&space;&&space;::=&space;&&space;\upsilon&space;=&space;\tau\\&space;&|&&space;\upsilon&space;=&space;\tau&space;,&space;\eta&space;\\&space;\end{matrix}" title="\begin{matrix} \eta & ::= & \upsilon = \tau\\ &|& \upsilon = \tau , \eta \\ \end{matrix}" /></a>
 
@@ -82,14 +103,14 @@ and types:
 
 Some notes about the syntax:
 
-- The syntax is identical to STLC but with the addition of the Units, records, and projections.
+- The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
+- Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
 - Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`).
-- Records are generalised products formed as comma-separated sequence of assignments of terms to labels `t=v`, nested inside curly braces `{1=(), 2=\1:A.1}`. Record types are comma-separated assignments of typings to labels `t:v`, nested inside curly braces (such as `{1:⊤, 2:A->A}`).
+- Records are generalised products formed as comma-separated sequence of assignments of terms to labels `t=v`, nested inside curly braces `{u=(), ida=\a:A.a}`. Record types are comma-separated assignments of typings to labels `t:v`, nested inside curly braces (such as `{1:⊤, f:A->A}`).
 - Despite using subtyping, the subtyping relation is not part of the syntax or language itself but rather a feature used during typechecking. As such it is not featured in the grammars.
-- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:1.x`).
-- Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, the unit type `()`, and generalised record types `{1:A,2:B->A,...,8:C}`.
+- Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, the unit type `()`, and generalised record types `{a:A,f:B->A,...,c:C}`.
 - Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. 
-- Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `\1:{2:A, 3:B}.    1` unless it is between application where you need at least one space.
+- Nested terms don't need brackets: `\a:A.\b:B. b` unless enforcing application on the right. Whitespace does not matter `\r:{a:A, b:B}.    r` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
@@ -152,14 +173,14 @@ Which we extend width record depth subtyping in which common fields in records n
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\forall&space;i.&space;S_i&space;<&space;T_i}{\{l_i:S_i\}&space;<&space;\{l_i&space;:&space;T_i\}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\forall&space;i.&space;S_i&space;<&space;T_i}{\{l_i:S_i\}&space;<&space;\{l_i&space;:&space;T_i\}}" title="\frac{\forall i. S_i < T_i}{\{l_i:S_i\} < \{l_i : T_i\}}" /></a>
 
-- We do structural subtyping here so that the structure of a type determines whether it's a subtype of another type. The alternative is nominal subtyping where terms are subtypes when defined in a certain why (like how classes extend supertypes in Java).
+- We do structural subtyping here so that the structure of a type determines whether it's a subtype of another type. The alternative is nominal subtyping where terms are subtypes when defined in a certain way (like how classes extend supertypes in Java).
 - Field ordering in records does not matter, enabling _permutation_ subtyping.
 - The subtyping relation is not explicit in the language but rather done at typechecking time and so any terms using `<` are for demonstration and are not parsable in Sub.
 - Records are typeable only if all of their subterms are typeable and all of the labels are unique. We leverage the STLC typing rules and the subtyping relation to ensure record fields are typeable.
-- Projections are typeable only if it is applied to a term which is a well-typed record and the projection label (`1` in `{1=()}.1`) explicitly matches a label in that record.
-- Units are considered to be equivalent to _Object_ in conventional object-oriented languages and hence a function taking a `()` will take anything, as everything is a subtype of Object: `(\1:1.1) (\2:A.2)`. We should mention that languages like Java might include additional baggage like [hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html), our treatment is simpler as we don't need this to demonstrate how subtyping works. The subtyping relation therefore states that all types are subtypes of units `():1`.
+- Projections are typeable only if it is applied to a term which is a well-typed record and the projection label (`x` in `{x=()}.x`) explicitly matches a label in that record.
+- Units are considered to be equivalent to _Object_ in conventional object-oriented languages and hence a function taking a `()` will take anything, as everything is a subtype of Object: `(\x:1.x) (\a:A.a)`. We should mention that languages like Java might include additional baggage like [hashCode](https://docs.oracle.com/javase/7/docs/api/java/lang/Object.html), our treatment is simpler as we don't need this to demonstrate how subtyping works. The subtyping relation therefore states that all types are subtypes of units `():1`.
 - All base types are on the same level and hence `A < B` for arbitrary `A != B` is false but `A < A` is true (due to the reflexivity of `<`).
-- For arrow types `f:S1 -> S2` and `g:T1 -> T2` we require that `T1 < S1` and `S2 < T2` if `f < g`. The first is needed as `g` expects a type `T1` and `f` provides a type `S1` with a domain (input space) that may supercede `T1`. The second is because the codomain (result) of `f` should be a subtype of `g` if we are going to use `S2` anywhere `T2` would be expected. This is demonstrated by the term `(\1:1->1.1) (\2:A->A.2)`
+- For arrow types `f:S1 -> S2` and `g:T1 -> T2` we require that `T1 < S1` and `S2 < T2` if `f < g`. The first is needed as `g` expects a type `T1` and `f` provides a type `S1` with a domain (input space) that may supercede `T1`. The second is because the codomain (result) of `f` should be a subtype of `g` if we are going to use `S2` anywhere `T2` would be expected. This is demonstrated by the term `(\f:1->1.f) (\g:A->A.g)`
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Sub.hs). The variable convention is adopted for both types and terms.
 - Reductions include the one-step reduction (see `reduce1` in Sub.hs), the many-step reduction (see `reduce` in Sub.hs).
 

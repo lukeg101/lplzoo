@@ -87,13 +87,23 @@ spaces p = do
 symb :: String -> Parser String
 symb = string
 
+keywords = ["let", "lett", "=", ".", ":", "()"] 
+
 -- apply a parser to a string
 apply :: Parser a -> String -> [(a,String)]
 apply p = parse (do {space; p})
 
--- 1 or more digits
-nat :: Parser Int
-nat = fmap read (many1 (sat isDigit))
+-- 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat isLower
+  if elem s keywords then zerop else return s
+
+-- 1 or more chars
+strT :: Parser String
+strT = do 
+  s <- many1 $ sat (\x -> isUpper x && isAlpha x && not (elem x ['X','M']))
+  if elem s keywords then zerop else return s
 
 -- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
@@ -114,7 +124,7 @@ bracket p = do
 
 -- type vars are uppercase alphabetical terms packaged up 
 typVar = do
-  x <- sat (\x -> isUpper x && isAlpha x && (not $ elem x ['1','=']))
+  x <- strT
   return $ TVar x
 
 typeArr = (do
@@ -142,7 +152,7 @@ typRec = do
 
 -- parser for the fields in each type record
 typRecField = do
-  x <- spaces $ nat
+  x <- spaces str
   symb ":"
   t <- spaces typTerm
   return (x, t)
@@ -155,7 +165,7 @@ typExpr = (bracket typTerm) +++ typVar +++ typUnit +++ typRec
 
 -- parser for term variables
 termVar = do
-  x <- nat
+  x <- str
   return $ Var x
 
 -- unit terms are simply ()
@@ -167,7 +177,7 @@ termUnit = do
 lambdas = ['\x03bb','\\']
 lam = do 
   spaces $ identifier lambdas
-  x <- nat
+  x <- str
   spaces (symb ":")
   t <- typTerm
   spaces (symb ".")
@@ -175,9 +185,33 @@ lam = do
   return $ Abs x t e
 
 -- app has one or more spaces
-app = (chainl1 expr $ do
+app = chainl1 expr $ do
   space1
-  return $ App) +++ expr 
+  return $ App 
+
+-- parser for let expressions
+pLet = do
+  space
+  symb "let"
+  space1
+  v <- str
+  spaces $ symb "="
+  t <- term 
+  return (v,Left t) --left signifies terms
+
+-- parser for type let expressions
+pTypeLet = do
+  space
+  symb "lett"
+  space1
+  v <- strT
+  spaces $ symb "="
+  t <- typTerm 
+  return (v,Right t) --right signify type let
+
+pTerm = do
+  t <- term 
+  return ("", Left t)
 
 -- records
 termRec = do
@@ -193,7 +227,7 @@ termRec = do
 
 --individual record fields
 termRecField = do
-  x <- spaces nat
+  x <- spaces str
   symb "="
   t <- spaces term
   return (x, t)
@@ -202,7 +236,7 @@ termRecField = do
 termProj = do
   r <- termRec +++ termVar 
   symb "."
-  x <- nat
+  x <- str
   return $ App r (Proj x)
 
 -- expression follows CFG form with bracketing convention
@@ -210,7 +244,7 @@ expr = (bracket term) +++ termProj +++ termRec
   +++ termVar +++ termUnit
 
 -- top level of CFG Grammar
-term = app +++ lam
+term = lam +++ app
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 
