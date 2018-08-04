@@ -90,9 +90,19 @@ symb = string
 apply :: Parser a -> String -> [(a,String)]
 apply p = parse (do {space; p})
 
--- 1 or more digits
-nat :: Parser Int
-nat = fmap read (many1 (sat isDigit))
+keywords = ["X", "\x03C0"++"1", "\x03C0"++"2","\x03bc","\x22A4","let", "lett", "=", ".", ":", "out", "ana", "inl", "inr", "case", "()", "fst", "snd", "N"] 
+
+-- 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat isLower
+  if elem s keywords then zerop else return s
+
+-- 1 or more chars
+strT :: Parser String
+strT = do 
+  s <- many1 $ sat (\x -> isUpper x && isAlpha x && not (elem x ['X','M']))
+  if elem s keywords then zerop else return s
 
 -- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
@@ -113,7 +123,7 @@ bracket p = do
 
 -- type vars are uppercase alphabetical terms packaged up 
 typVar = do
-  x <- sat (\x -> isUpper x && isAlpha x && not (elem x ['X','N']))
+  x <- strT
   return $ TVar x
 
 -- units are simply 1
@@ -148,7 +158,7 @@ typProd = do
   return $ TProd t1 t2
 
 -- mu type
-typMu = do
+typNu = do
   identifier ['\x03BD', 'N']
   t1 <- spaces $ bracket typTerm
   return $ TNu t1
@@ -157,11 +167,11 @@ typMu = do
 typTerm  = typArr +++ typExpr
 typExpr  = typSum +++ typExpr2
 typExpr2 = typProd +++ typExpr3
-typExpr3 = (bracket typTerm) +++ typVar +++ typX +++ typUnit +++ typMu
+typExpr3 = (bracket typTerm) +++ typVar +++ typX +++ typUnit +++ typNu
 
 -- parser for term variables
 termVar = do
-  x <- nat
+  x <- str
   return $ Var x
 
 termUnit = do
@@ -197,20 +207,20 @@ termPrj1 = (string "fst") +++ (string "π1") >> return Prj1
 termPrj2 = (string "snd") +++ (string "π2") >> return Prj2  
 
 termAna = do 
-  spaces $ symb "ana" 
+  symb "ana" 
+  space1
   l1 <- term
   spaces $ symb ":"
   t1 <- typTerm
   return $ App (Ana t1) l1
 
-termOut = spaces $ symb "out" >> return Out
-
+termOut = symb "out" >> return Out
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
 lam = do 
   spaces $ identifier lambdas
-  x <- nat
+  x <- str
   spaces (symb ":")
   t <- typTerm
   spaces (symb ".")
@@ -222,14 +232,38 @@ app = chainl1 expr $ do
   space1
   return $ App 
 
+-- parser for let expressions
+pLet = do
+  space
+  symb "let"
+  space1
+  v <- str
+  spaces $ symb "="
+  t <- term 
+  return (v,Left t) --left signifies terms
+
+-- parser for type let expressions
+pTypeLet = do
+  space
+  symb "lett"
+  space1
+  v <- strT
+  spaces $ symb "="
+  t <- typTerm 
+  return (v,Right t) --right signify type let
+
+pTerm = do
+  t <- term 
+  return ("", Left t)
+
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termVar +++ termUnit 
+expr = (bracket term) +++ termVar 
   +++ termInl +++ termInr +++ termCase
   +++ termProd +++ termPrj1 +++ termPrj2
-  +++ termAna +++ termOut
+  +++ termAna +++ termOut +++ termUnit
 
 -- top level of CFG Gramma
-term = app +++ lam
+term = lam +++ app
 
 -- identifies key words
 identifier :: [Char] -> Parser Char 

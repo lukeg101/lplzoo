@@ -6,7 +6,7 @@ import Control.Monad (guard)
 
 -- Ana, of the form C or 'T -> T' or a mix of both
 data T
-  = TVar Char
+  = TVar String
   | TArr T T
   | TUnit
   | TProd T T
@@ -20,7 +20,7 @@ data T
 -- Simple show instance
 instance Show T where
   show X          = "X"
-  show (TVar x)   = x:""
+  show (TVar x)   = x
   show (TArr a b) = paren (isArr a) (show a) ++ "->" ++ show b
   show (TUnit)    = "\x22A4"
   show (TNu t)  = "\x03BD" ++ paren True (show t)
@@ -45,8 +45,8 @@ isTProd _           = False
 -- variables are numbers as it's easier for renaming
 -- Abstractions carry the type Church style
 data AnaTerm
-  = Var Int
-  | Abs Int T AnaTerm
+  = Var String
+  | Abs String T AnaTerm
   | App AnaTerm AnaTerm
   | Out    --coinductive type wrapper
   | Ana T --anamorphism on coinductive type - unfold
@@ -61,7 +61,7 @@ data AnaTerm
 
 -- Simple show instance for ana, adheres to bracketing convention
 instance Show AnaTerm where
-  show (Var x)      = show x
+  show (Var x)      =  x
   show (App (App (Prod) a) b) = paren True (show a ++ ", " ++ show b)
   show (App (Inl t) a) = "inl " ++
     paren (isAbs a || isApp a || isSum a || isProd a) (show a) ++ ":" ++ show t
@@ -77,7 +77,7 @@ instance Show AnaTerm where
   show (App t1 t2)  =
     paren (isAbs t1) (show t1) ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) =
-    "\x03bb" ++ show x ++ ":" ++ show t ++ "." ++ show l1
+    "\x03bb" ++ x ++ ":" ++ show t ++ "." ++ show l1
   show (Ana t)      = "ana"--above case should handle this
   show (Inl t)      = "inl" --above should handle this case
   show (Inr t)      = "inr" --above should handle this case
@@ -85,6 +85,8 @@ instance Show AnaTerm where
   show Prj1         = "\x03C0" ++ "1" --above should handle this case
   show Prj2         = "\x03C0" ++ "2" --above should handle this case
   show Case         = "case"
+  show Out          = "out"
+  show Prod         = "(,)" --above case should hand this
 
 isAbs :: AnaTerm -> Bool
 isAbs (Abs _ _ _) = True
@@ -116,7 +118,7 @@ instance Eq AnaTerm where
 -- if bound t1 XOR bound t2 == true then False
 -- application recursively checks both the LHS and RHS
 termEquality :: (AnaTerm, AnaTerm)
-  -> (Map Int Int, Map Int Int)
+  -> (Map String Int, Map String Int)
   -> Int
   -> Bool
 termEquality (Var x, Var y) (m1, m2) s = case M.lookup x m1 of
@@ -134,10 +136,10 @@ termEquality (App a1 b1, App a2 b2) c s =
 termEquality (Inl t1, Inl t2) c s = t1 == t2
 termEquality (Inr t1, Inr t2) c s = t1 == t2
 termEquality (Ana t1, Ana t2) c s = t1 == t2
-termEquality (x, y) c s = x == y
+termEquality _ _ _ = False
 
 -- Type context for t:T is Map v T where v is a variable name and T is it's supplied Type
-type Context = M.Map Int T
+type Context = M.Map String T
 
 -- typing derivation for a term in a given context
 -- Just T denotes successful type derivation
@@ -217,14 +219,14 @@ typeSub (TSum t1 t2) c = TSum (typeSub t1 c) (typeSub t2 c)
 typeof' l = typeof l M.empty
 
 --bound variables of a term
-bound :: AnaTerm -> Set Int
+bound :: AnaTerm -> Set String
 bound (Var n) = S.empty
 bound (Abs n t l1) = S.insert n $ bound l1
 bound (App l1 l2)  = S.union (bound l1) (bound l2)
 bound _      = S.empty
 
 --free variables of a term
-free :: AnaTerm -> Set Int
+free :: AnaTerm -> Set String
 free (Var n)      = S.singleton n
 free (Abs n t l1) = S.delete n (free l1)
 free (App l1 l2)  = S.union (free l1) (free l2)
@@ -242,22 +244,63 @@ sub l@(App l1 l2)  = S.insert l $ S.union (sub l1) (sub l2)
 sub l    = S.singleton l
 
 --element is bound in a term
-notfree :: Int -> AnaTerm -> Bool
+notfree :: String -> AnaTerm -> Bool
 notfree x = not . S.member x . free
 
 --set of variables in a term
-vars :: AnaTerm -> Set Int
+vars :: AnaTerm -> Set String
 vars (Var x)      = S.singleton x
 vars (App t1 t2)  = S.union (vars t1) (vars t2)
 vars (Abs x t l1) = S.insert x $ vars l1
 vars l = S.empty
 
+--set of variables in a type
+typeVars :: T -> Set String
+typeVars (TVar x)     = S.singleton x
+typeVars (TArr t1 t2) = S.union (typeVars t1) (typeVars t2)
+typeVars (TUnit)      = S.empty
+typeVars (TProd t1 t2)= S.union (typeVars t1) (typeVars t2)
+typeVars (TSum t1 t2) = S.union (typeVars t1) (typeVars t2)
+typeVars (TNu t1)     = typeVars t1
+typeVars (X)          = S.empty
+
+--type vars in a term
+typeVarsInTerm :: AnaTerm -> Set String
+typeVarsInTerm l@(Var x)      = S.singleton x
+typeVarsInTerm l@(Abs c t l1) = S.union (typeVars t) $ typeVarsInTerm l1
+typeVarsInTerm l@(App l1 l2)  = S.union (typeVarsInTerm l1) (typeVarsInTerm l2)
+typeVarsInTerm l@(Ana t)      = typeVars t
+typeVarsInTerm l@(Inl t)      = typeVars t
+typeVarsInTerm l@(Inr t)      = typeVars t
+typeVarsInTerm l              = S.empty
+
+-- function used to do type substitution on types in a term
+tSubUnder :: AnaTerm -> (T,T) -> AnaTerm
+tSubUnder l@(Var x) c      = l
+tSubUnder l@(Abs x t l2) c = Abs x (typeSub t c) $ tSubUnder l2 c
+tSubUnder l@(App l1 l2) c  = App (tSubUnder l1 c) (tSubUnder l2 c)
+tSubUnder l@(Ana t) c      = Ana $ typeSub t c
+tSubUnder l@(Inl t) c      = Inl $ typeSub t c
+tSubUnder l@(Inr t) c      = Inr $ typeSub t c
+tSubUnder l c              = l
+
 --generates a fresh variable name for a term
-newlabel :: AnaTerm -> Int
-newlabel = (+1) . maximum . vars
+newlabel :: AnaTerm -> String
+newlabel x = head . dropWhile (`elem` vars x) 
+  $ iterate genVar $  S.foldr biggest "" $ vars x
+
+--generates fresh variable names from a given variable
+genVar :: String -> String 
+genVar []       = "a"
+genVar ('z':xs) = 'a':genVar xs
+genVar ( x :xs) = succ x:xs
+
+--length-observing maximum function that falls back on lexicographic ordering
+biggest :: String -> String -> String 
+biggest xs ys = if length xs > length ys then xs else max xs ys
 
 --rename t (x,y): renames free occurences of x in t to y
-rename :: AnaTerm -> (Int, Int) -> AnaTerm
+rename :: AnaTerm -> (String, String) -> AnaTerm
 rename (Var a) (x,y) = if a == x then Var y else Var a
 rename l@(Abs a t l1) (x,y) = if a == x then l else Abs a t $ rename l1 (x, y)
 rename (App l1 l2) (x,y) = App (rename l1 (x,y)) (rename l2 (x,y))
@@ -330,16 +373,16 @@ reduce1 (App l1 l2) = do -- reduce under app
 
 findFmap :: T -> AnaTerm -> AnaTerm
 findFmap X f               = f
-findFmap t@(TArr  t1 t2) f = Abs 0 t $ Abs 1 t1 $ App (findFmap t2 f) $ App (Var 0) (Var 1)
-findFmap t@(TProd t1 t2) f = Abs 0 t $ App (App Prod left) right
+findFmap t@(TArr  t1 t2) f = Abs "x" t $ Abs "y" t1 $ App (findFmap t2 f) $ App (Var "x") (Var "y")
+findFmap t@(TProd t1 t2) f = Abs "x" t $ App (App Prod left) right
   where
-    left  = App (findFmap t1 f) $ App Prj1 (Var 0)
-    right = App (findFmap t2 f) $ App Prj2 (Var 0)
-findFmap t@(TSum  t1 t2) f = Abs 0 t $ App (App (App Case (Var 0)) inl) inr
+    left  = App (findFmap t1 f) $ App Prj1 (Var "x")
+    right = App (findFmap t2 f) $ App Prj2 (Var "x")
+findFmap t@(TSum  t1 t2) f = Abs "x" t $ App (App (App Case (Var "x")) inl) inr
   where
-    inl = Abs 1 t1 (App (Inl t) (App (findFmap t1 f) (Var 1)))
-    inr = Abs 1 t1 (App (Inr t) (App (findFmap t2 f) (Var 1)))
-findFmap t f               = Abs 0 t (Var 0)
+    inl = Abs "y" t1 (App (Inl t) (App (findFmap t1 f) (Var "y")))
+    inr = Abs "y" t1 (App (Inr t) (App (findFmap t2 f) (Var "y")))
+findFmap t f               = Abs "x" t (Var "x")
 
 -- multi-step reduction relation
 -- NOT GUARANTEED TO TERMINATE IF typeof' FAILS

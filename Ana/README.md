@@ -28,16 +28,20 @@ Compile it using GHC if you need this.
 
 ## Examples 
 Where you can then have some fun, try these examples:
-- `\1:A.1`
-- TODO
+- `\x:A.x` this is the identity function on As.
+- `\s:N(X*A).s` this is the identity function on streams.
+- `case (inl () : 1 + A) (\x:1.x) (\y:A.())` (performs case analysis on the first argument to `case`, passing the result to the first function if `inl` or otherwise `inr`).
+- `\s:N(X*A).snd (out s)` this gets the head of a stream by unfolding the stream once and then getting out the second element.
 
 The parser is also smart enough to recognise λ, so you can copy and paste from the output:
 ```
-> \1:A.1
-λ1:A.1
-> λ1:A.1
-λ1:A.1
+>   \x:A.x
+=   λx:A.x
+>   λx:A.x
+=   λx:A.x
 ```
+`>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
+
 Note: see syntax below for a description of what the various symbols mean.
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
@@ -47,8 +51,24 @@ TODO
 
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
+>   t\s:N(X*A).snd (out s)
+ν(X × A)->ν(X × A)
+>   t\x:X.x x
+Cannot Type Term: \x:X.x x
+```
+If you provide a untypeable term, the type checker will fail and reduction will not occur.
+
+You can save terms for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+```
 TODO
 ```
+Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `inl`, `inr`, `ana`, `out`, `case`, `fst`, `snd`, and `X` are keywords in Cata.
+
+Additionally we have type level `lett` statements that allow you to define and use types:
+```
+TODO
+```
+This makes it easier to define both terms and types, but does not allow type level application (See Omega). `lett` is also a keyword.
 
 ## Syntax 
 
@@ -56,7 +76,7 @@ We base the language on the BNF for Ana:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;(ana\,\tau:\sigma)\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;()&space;\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;(ana\,\tau:\sigma)\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;()&space;\\&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& out\,\tau\\ &|& (ana\,\tau:\sigma)\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case\,\tau\,\tau\,\tau\\ &|& (\tau, \tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& () \\ \end{matrix}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+https://www.codecogs.com/eqnedit.php?latex=\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\\
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;A,B,C,...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\\&space;&|&&space;\top\\&space;&|&&space;\sigma&space;\times&space;\sigma\\&space;&|&&space;\sigma&space;&plus;&space;\sigma\\&space;&|&&space;\nu\,&space;\sigma\\&space;&|&&space;{\tt&space;X}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;A,B,C,...\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\\&space;&|&&space;\top\\&space;&|&&space;\sigma&space;\times&space;\sigma\\&space;&|&&space;\sigma&space;&plus;&space;\sigma\\&space;&|&&space;\nu\,&space;\sigma\\&space;&|&&space;{\tt&space;X}&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & A,B,C,...\\ & | & \sigma \rightarrow \sigma \\ &|& \top\\ &|& \sigma \times \sigma\\ &|& \sigma + \sigma\\ &|& \nu\, \sigma\\ &|& {\tt X} \end{matrix}" /></a>
 
@@ -64,7 +84,7 @@ However we adopt standard bracketing conventions to eliminate ambiguity in the p
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \end{matrix}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;ana\\&space;&|&&space;(\tau,\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;out\,\tau\\&space;&|&&space;ana\\&space;&|&&space;(\tau,\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case&space;\end{matrix}" title="\begin{matrix}&&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& () \\ &|& out\,\tau\\ &|& ana\\ &|& (\tau,\tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;out\\&space;&|&&space;ana\,\tau&space;:&space;\sigma\\&space;&|&&space;(\tau,\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;()&space;\\&space;&|&&space;out\\&space;&|&&space;ana\,\tau&space;:&space;\sigma\\&space;&|&&space;(\tau,\tau)\\&space;&|&&space;\pi_{1}\,\tau\\&space;&|&&space;\pi_{2}\,\tau\\&space;&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case&space;\end{matrix}" title="\begin{matrix}&&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& () \\ &|& out\\ &|& ana\,\tau : \sigma\\ &|& (\tau,\tau)\\ &|& \pi_{1}\,\tau\\ &|& \pi_{2}\,\tau\\ &|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case \end{matrix}" /></a>
 
 and types:
 
@@ -72,16 +92,19 @@ and types:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}\delta&space;&::=&&space;\rho&space;\times&space;\rho\\&space;&|&&space;\rho\\&&\\&space;\rho&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&|&&space;{\tt&space;X}\\&space;&|&&space;A,B,C,...\\&space;&|&&space;\top&space;\\&space;&|&&space;\nu\,(\sigma)&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}\delta&space;&::=&&space;\rho&space;\times&space;\rho\\&space;&|&&space;\rho\\&&\\&space;\rho&space;&&space;::=&&space;\tt{(}&space;\sigma&space;\tt{)}\\&space;&|&&space;{\tt&space;X}\\&space;&|&&space;A,B,C,...\\&space;&|&&space;\top&space;\\&space;&|&&space;\nu\,(\sigma)&space;\end{matrix}" title="\begin{matrix}\delta &::=& \rho \times \rho\\ &|& \rho\\&&\\ \rho & ::=& \tt{(} \sigma \tt{)}\\ &|& {\tt X}\\ &|& A,B,C,...\\ &|& \top \\ &|& \nu\,(\sigma) \end{matrix}" /></a>
 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\upsilon&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \upsilon & ::= & \tt{0} | \tt{1} | \tt{2} | ... \end{matrix}" /></a>
+
 Some notes about the syntax:
 
-- Variables are positive integers (including zero) as this is easy for Haskell to process, and for me implement variable generation. This is isomorphic to a whiteboard treatment using characters (like `\x:A.x`).
+- The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
+- Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
 - `X` is a reserved `ν` variable and is interpreted as such in a term. _ν-less_ terms that use `X` won't act differently than STLC but introducing `ν` will change the semantics. Best to avoid unless using `ν`. 
 - Types range over upper-case characters `A,B,C...`, nested arrow types: `T -> T`, product types `A * B` (or `×`), sum types `A + B`, unit types `1` (or `⊤`), a special Nu type `ν(T)` (or `N(T)`), and Nu type variable `X`.  
 - Arrows associate to the right so that `A -> A -> A` is the same as `A -> (A -> A)` but not `((A -> A) -> A)`. Similar rules follow for the other types.
 - Products have the highest precedence, followed by sums, arrows, and then all other types. 
-- Nested terms don't need brackets: `\1:A.\2:B. 2` unless enforcing application on the right. Whitespace does not matter `(\1:A.          1)` unless it is between application where you need at least one space.
-- Products are 2-element pairs like in Haskell. You form products like `(1, 2)` and access each element using `fst` (or `π1`) and `snd` (or `π2`).
-- Sums are 2-element co-pairs, formed with either `inl 1:A` or `inr 2:B` (assuming either `1:A` or `2:B` is in scope). `case s f g` does case analysis on `s`, passing the result to the function `f` if s was `inl` or `g` if `inr`.
+- Nested terms don't need brackets: `\x:A.\y:B. y` unless enforcing application on the right. Whitespace does not matter `(\x:A.          x)` unless it is between application where you need at least one space.
+- Products are 2-element pairs like in Haskell. You form products like `(x, y)` and access each element using `fst` (or `π1`) and `snd` (or `π2`).
+- Sums are 2-element co-pairs, formed with either `inl a:A` or `inr b:B` (assuming either `a:A` or `b:B` is in scope). `case s f g` does case analysis on `s`, passing the result to the function `f` if s was `inl` or `g` if `inr`.
 - Units are largely uninteresting, but can be formed as `()` like in Haskell, and typed like `1` or (or `⊤`).
 - To construct terms using `ana` or `case`, use _space_ to apply arguments. for instance, `case s f c` applies `s` to `case`, which then applies `f` to the `case s` and `g` to `case s f` etc...
 - Coinductive types are formed by prefixing a term with `out` and a type with `N` (or `ν`). Concretely, a coinductive term looks like `out x:t` where `x` is the term and `t` is its type. Similarly, a coinductive type looks like `ν(T)` where `T` is the type we insist is coinductive. 
@@ -89,7 +112,7 @@ Some notes about the syntax:
 TODO example
 
 See the semantics for a description of what these constructions mean.
-- I should note that the parser is pretty verbose with it's types, a nice challenge would be to implement a backtracking parser as a means to reduce the number of necessary type annotations (in say the example above).
+- I should note that the parser is pretty verbose with its types, a nice challenge would be to implement a backtracking parser as a means to reduce the number of necessary type annotations (in say the example above).
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
@@ -154,7 +177,7 @@ with reduction inside terms like above.
 - We adopt the categorical notation of a [functor](https://en.wikipedia.org/wiki/Functor), which expresses a mapping from terms to terms and types to types. For example, given the functor type `F X = 1 + X`, and type `Y = B`, then `F Y = 1 + Y = 1 + B`. similarly if we had a term `inl _ : F _`, then `inl b: 1+B` for some `b:B`. This idea translates directly into Ana, however we don't do type-level application, and so you must apply these types yourself before using them. Concretely, you might provide `F Y` as the type `1 + B` in Ana.
 - We can construct functors using `+`, `*`, `->`. A functor is _strictly positive_ if it contains only constant variables `A,B,C,...`, μ variable `X`, `+`, `*`, and `->` such that `X` only occurs on the right of arrows. For every _s.p._ functor F, we can define a coinductive type `νF`. A strictly positive check has not been implemented yet, behaviour for non-s.p functors is thus undefined (submit a PR, as it's an easy fix). 
 - TODO Example
-- TODO Update We can implement functions on functors too, supposing `F X = 1 + X`, then a function `F X -> X` might [reduce](https://www.schoolofhaskell.com/user/bartosz/understanding-algebras) F-shaped terms into a simpler form `X`. For instance, `\0:1+X.case 0 (\1:1.()) (\2:X.())` reduces terms of type `1+X` to `()`; in languages with useful types (like booleans), we might use this to implement more powerful constructs (like conditionals). 
+- TODO Update We can implement functions on functors too, supposing `F X = 1 + X`, then a function `F X -> X` might [reduce](https://www.schoolofhaskell.com/user/bartosz/understanding-algebras) F-shaped terms into a simpler form `X`. For instance, `\x:1+X.case x (\x:1.()) (\x:X.())` reduces terms of type `1+X` to `()`; in languages with useful types (like booleans), we might use this to implement more powerful constructs (like conditionals). 
 - We can extend the notation of typed unfolding by _lifting_ it to the coinductive level, that is given `f:X -> F X`, we get `ana f:X -> νF`. This forms the elimination rule for coinductive types and is known as the _anamorphism_ of F.
 - We combine our knowledge of anamorphisms and coinductive types and get unfolds (finally!). TODO FIX 
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Ana.hs). 
