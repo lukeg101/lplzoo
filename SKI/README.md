@@ -45,20 +45,20 @@ Type some terms or press Enter to leave.
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-> 'S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))
-S (K S) (S (K K) I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
-K S (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
-S (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
-S (K K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
-S (K (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K S) (S (K K) I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K S (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
-S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) I)
+>   'S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))
+~>  S (K S) (S (K K) I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+~>  K S (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+~>  S (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+~>  S (K K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+~>  S (K (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K S) (S (K K) I)) (K I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K S) (S (K K) I) (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K S (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (S (K K) I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))) (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I))))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (K I (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))))
+~>  S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) (S (K (S (S (K S) (S (K K) I)) (S (S (K S) (S (K K) I)) (K I)))) I)
 ```
 Note: the above computes 2^2 in Church Numeral format.
 
