@@ -107,14 +107,13 @@ However we adopt standard bracketing conventions to eliminate ambiguity in the p
 
 Some notes about the syntax:
 
-[TODO]
 - The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
 - Term and type variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar. Term variables are lower case whereas type variables are upper case.
 - All term level syntax is identical to STLC, however the valid types are different.
 - Types are variables `A,B,C,...`, type operators/abstractions `\X::K.T`, applications `A B`, or arrows `A -> B`. There is also the `Nat` type.
-- Omega formally introduces type variables `A, B, C...` which until now are used informally for convenience. STLC does not have variables for this reason.
+- Omega formally introduces type variables `A, B, C...` which until now are used informally for convenience. STLC does not have variables for this reason. Some treatments of STLC range over base types `A,B,C,...` which implicitly assumes these are proper types. 
 - Arrows associate to the right so that `X -> Y -> Z` is the same as `X -> (Y -> Z)` but not `((X -> Y) -> Z)`.
-- For both term and type abstractions nested terms don't need brackets: `\x:Nat.\y:Nat. y` unless enforcing application on the right. Similarly at both levels whitespace does not matter `(\x:Nat.          x)` unless it is between application where you need at least one space.
+- For both term and type abstractions, nested terms don't need brackets: `\x:Nat.\y:Nat. y` unless enforcing application on the right. Similarly at both levels whitespace does not matter `(\x:Nat.          x)` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
@@ -165,20 +164,22 @@ For the existing type arrow (now with constraints that both sides of the arrow m
 
 Next, Nats are a proper type: 
 
--<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;Nat::*}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;Nat::*}" title="\overline{\Gamma \vdash Nat::*}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;Nat::*}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;Nat::*}" title="\overline{\Gamma \vdash Nat::*}" /></a>
 
 Lastly, we have type-level beta reduction, identical to STLC reduction but for types:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;X&space;::&space;K&space;.&space;T_1)\,T_2&space;\rightsquigarrow&space;T_1&space;[X&space;:=&space;T_2]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;X&space;::&space;K&space;.&space;T_1)\,T_2&space;\rightsquigarrow&space;T_1&space;[X&space;:=&space;T_2]" title="(\lambda X :: K . T_1)\,T_2 \rightsquigarrow T_1 [X := T_2]" /></a>
 
 - This means the typing context now also contains types, and types occur in terms. The phrase `X :: K` means X is has kind K. We do not implement Agda style type hierarchies here.
--There is the additional constraint that any term abstractions must take a term of proper type. This is in order to prevent nonsensical or partially applied types terms such as `Nat Nat`.
--This reflects the principle that any typeable term has a kindable type.
--The calculus on its own does not have any proper types (such as Nat, Bool or Unit) and so the base calculus is unusable as no terms can be introduced. To demonstrate proper types, we add the proper type Nat, with constructors `z` and `s`.
--Type abstractions can be of any kind permitted by Omega, however the resultant type must be proper for it to be accepted by a term-level abstraction.
--Type-level application is identical to term-level application STLC, except is makes uses of a kinding arrow `=>` from types to types.
--Arrows have the constraint that both the domain and co-domain must be proper types. This prevents non-nonsensical terms such as `Pair Nat _ -> Nat`.
--The term-level calculus is identical to STLC.
+- There is the additional constraint that any term abstractions must take a term of proper type. This is in order to prevent nonsensical or partially applied types terms such as `Nat Nat`.
+- This reflects the principle that any typeable term has a kindable type.
+- The calculus on its own does not have any proper types (such as Nat, Bool or Unit) and so the base calculus is unusable as no terms can be introduced. To demonstrate proper types, we add the proper type Nat, with constructors `z` and `s`.
+- Type abstractions can be of any kind permitted by Omega, however the resultant type must be proper for it to be accepted by a term-level abstraction.
+- Type-level application is identical to term-level application in STLC, except it makes uses of the kinding arrow `=>` from types to types.
+- Arrows have the constraint that both the domain and co-domain must be proper types. This prevents non-nonsensical types such as `Pair Nat _ -> Nat`.
+- The term-level calculus is identical to STLC.
+- Omega provides a mean to define _types_ from _types_. By using abstraction and application to form types from types. Type operators themselves do not define _terms_ (there is no term of type `\X::*.X`) but are used to form proper types which do have terms: `(\X::*.X) Nat ~>* Nat` which has term `z`.
+- System F provides a means to form _terms_ from a type. By providing a type at the _term_ level we can form terms parametrised by that type.
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in Omega.hs). 
 - Reductions include the one-step reduction (see `reduce1` in Omega.hs), the many-step reduction (see `reduce` in Omega.hs). additionally there is a one-step type-level reduction (see `reduce1T` in Omega.hs).
 
