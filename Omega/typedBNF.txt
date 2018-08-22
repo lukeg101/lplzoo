@@ -21,8 +21,28 @@ semantics for stlc
 
 \overline{\Gamma \vdash x:T}, \mbox{(if $x:T \in \Gamma$)}
 
-\frac{\Gamma ,x:A \vdash t:B}{\Gamma \vdash (\lambda x : A. t) : B }
+\frac{\Gamma \vdash A :: * \quad \Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}
 
 \frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}
 
+\overline{\Gamma \vdash z:Nat}
+
+\frac{\Gamma \vdash n : Nat}{\Gamma \vdash s\, n : Nat}
+
+\frac{n \rightsquigarrow n'}{s\, n \rightsquigarrow s\,n'}
+
 (\lambda x : T . M)N \rightsquigarrow M [x := N]
+
+\overline{\Gamma \vdash X :: K}, \mbox{(if $X :: K \in \Gamma$)}
+
+\frac{\Gamma,X :: K_1 \vdash Y :: K_2\quad}{\Gamma \vdash \lambda X :: K_1 . Y :: K_2}
+
+\frac{\Gamma \vdash F :: K_1 \Rightarrow K_2\quad\Gamma\vdash X : :K_1}{\Gamma \vdash F\,X :: K_2}
+
+\frac{\Gamma \vdash T_1 :: *\quad\Gamma\vdash T_2 : :*}{\Gamma \vdash T_1 \rightarrow T_2::*}
+
+\overline{\Gamma \vdash Nat::*}
+
+(\lambda X :: K . T_1)\,T_2 \rightsquigarrow T_1 [X := T_2]
+
+
