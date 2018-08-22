@@ -1,7 +1,7 @@
 # Lambda Omega 
-Haskell implementation of the Simply Typed Lambda Calculus with type operators. It has STLC terms, a type-level abstraction (with application), kinding, and Nats as an example of well-kinded types.
+Haskell implementation of the Simply Typed Lambda Calculus with type operators. It has STLC terms, a type-level abstraction (with application), kinding (with `*` and `K => K` kinds), and `Nat`ural numbers as an example of proper types.
 
-This language formalises the notion of a type constructor by providing functions from types to types.
+This language formalises the notion of a [type constructor](https://en.wikipedia.org/wiki/Type_constructor) by providing functions from types to types used by many functional languages. Additionally this language formalises the inclusion of type variables
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -44,6 +44,7 @@ The parser is also smart enough to recognise λ, so you can copy and paste from 
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
+TODO
 ```
 Reduction occurs at both the term level and type level (inside term-level abstractions as this is where the types are). Here's a function that reduces only at the type level:
 ```
@@ -63,7 +64,7 @@ There is also a typing mechanism, which should display the type or fail as usual
 >   \x:(\A::*.A).x
 Cannot Type Term: λx:λA::*.A.x
 ```
-Note: The above is untypeable as `λA::*.A` is a type operator, such that it takes a type and returns a type (not a term).
+Note: The above is untypeable as `λA::*.A` is a type operator, such that it takes a type and returns a type (not a term). See the semantics for details on why.
 
 Note: if you provide a non-normalizing term, the type checker will fail and reduction will not occur.
 
@@ -99,7 +100,9 @@ We base the language on the BNF for the typed calculus:
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...\end{matrix}" title="\begin{matrix} \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ...\end{matrix}" /></a>
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
-[TODO]
+
+TODO
+
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... &&\\ \end{matrix}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\sigma}&&space;::=&space;&&space;\lambda&space;\mathbf{\theta}\tt{::}\kappa&space;.&space;\mathbf{\sigma}\\&space;&&space;|&space;&&space;\eta\\&space;&&\\&space;\eta&space;&&space;::=&space;&&space;\eta&space;\rightarrow&space;\delta\\&space;&|&\delta&space;\\&space;&&\\&space;\delta&space;&&space;::=&space;&\mathbf{\delta\,&space;\tt{space}\,\epsilon&space;}&space;\\&|&&space;\epsilon\\\\&space;\epsilon&space;&&space;::=&space;&\tt{(}\sigma&space;\tt{)}\\&space;&|&&space;\theta&space;\\\\&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\sigma}&&space;::=&space;&&space;\lambda&space;\mathbf{\theta}\tt{::}\kappa&space;.&space;\mathbf{\sigma}\\&space;&&space;|&space;&&space;\eta\\&space;&&\\&space;\eta&space;&&space;::=&space;&&space;\eta&space;\rightarrow&space;\delta\\&space;&|&\delta&space;\\&space;&&\\&space;\delta&space;&&space;::=&space;&\mathbf{\delta\,&space;\tt{space}\,\epsilon&space;}&space;\\&|&&space;\epsilon\\\\&space;\epsilon&space;&&space;::=&space;&\tt{(}\sigma&space;\tt{)}\\&space;&|&&space;\theta&space;\\\\&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\sigma}& ::= & \lambda \mathbf{\theta}\tt{::}\kappa . \mathbf{\sigma}\\ & | & \eta\\ &&\\ \eta & ::= & \eta \rightarrow \delta\\ &|&\delta \\ &&\\ \delta & ::= &\mathbf{\delta\, \tt{space}\,\epsilon } \\&|& \epsilon\\\\ \epsilon & ::= &\tt{(}\sigma \tt{)}\\ &|& \theta \\\\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... &&\\ \end{matrix}" /></a>
@@ -124,7 +127,7 @@ for term-level variables:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" title="\overline{\Gamma \vdash x:T},\quad \mbox{(if $x:T \in \Gamma$)}" /></a>
 
-for term-level abstractions, with the added constraint that the variable in the abstraction is a proper type (`*`):
+for term-level abstractions, with the added constraint that the variable in the abstraction has a proper type (`*`):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;A&space;::&space;*&space;\quad&space;\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;A&space;::&space;*&space;\quad&space;\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" title="\frac{\Gamma \vdash A :: * \quad \Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}" /></a>
 
@@ -170,11 +173,11 @@ Lastly, we have type-level beta reduction, identical to STLC reduction but for t
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;X&space;::&space;K&space;.&space;T_1)\,T_2&space;\rightsquigarrow&space;T_1&space;[X&space;:=&space;T_2]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;X&space;::&space;K&space;.&space;T_1)\,T_2&space;\rightsquigarrow&space;T_1&space;[X&space;:=&space;T_2]" title="(\lambda X :: K . T_1)\,T_2 \rightsquigarrow T_1 [X := T_2]" /></a>
 
-- This means the typing context now also contains types, and types occur in terms. The phrase `X :: K` means X is has kind K. We do not implement Agda style type hierarchies here.
-- There is the additional constraint that any term abstractions must take a term of proper type. This is in order to prevent nonsensical or partially applied types terms such as `Nat Nat`.
+- This means the typing context now also contains types. The phrase `X :: K` means X is has kind K. We do not implement Agda style type hierarchies here.
+- There is the additional constraint that any term abstractions must take a term of proper type. This prevents nonsensical or partially-applied types terms such as `Pair Nat _`.
 - This reflects the principle that any typeable term has a kindable type.
-- The calculus on its own does not have any proper types (such as Nat, Bool or Unit) and so the base calculus is unusable as no terms can be introduced. To demonstrate proper types, we add the proper type Nat, with constructors `z` and `s`.
-- Type abstractions can be of any kind permitted by Omega, however the resultant type must be proper for it to be accepted by a term-level abstraction.
+- The base calculus on its own does not have any proper types (such as Nat, Bool or Unit) and so it is unusable as no terms can be introduced. To demonstrate proper types, we add the proper type `Nat`, with constructors `z` and `s`.
+- Type abstractions can be of any kind permitted by Omega, however the resultant type must be proper for it to be accepted by a term-level abstraction. This prevents nonsensical terms and types like `z (s z)` typed `Nat Nat`.
 - Type-level application is identical to term-level application in STLC, except it makes uses of the kinding arrow `=>` from types to types.
 - Arrows have the constraint that both the domain and co-domain must be proper types. This prevents non-nonsensical types such as `Pair Nat _ -> Nat`.
 - The term-level calculus is identical to STLC.
