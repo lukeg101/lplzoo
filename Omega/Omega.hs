@@ -33,7 +33,41 @@ data T
   | TAbs String K T
   | TApp T T
   | TNat
-  deriving (Eq, Ord)
+  deriving Ord
+
+-- alpha equivalence of types
+instance Eq T where 
+  t1 == t2 = typeEquality (t1, t2) (M.empty, M.empty) 0
+
+-- checks for equality of typea, has a map (term, id) for each type var
+-- each abstraction adds vars to the map and increments the id
+-- also checks that each term is identical
+-- variable occurrence checks for ocurrences in t1 and t2 using the logic:
+-- if both bound, check that s is same in both maps
+-- if neither is bound, check literal equality
+-- if bound t1 XOR bound t2 == true then False
+-- application recursively checks both the LHS and RHS
+typeEquality :: (T, T)
+  -> (Map String Int, Map String Int)
+  -> Int
+  -> Bool
+typeEquality (TVar x, TVar y) (m1, m2) s = case M.lookup x m1 of
+  Just a -> case M.lookup y m2 of
+    Just b -> a == b
+    _ -> False
+  _ -> x == y
+typeEquality (TAbs x k1 t1, TAbs y k2 t2) (m1, m2) s =
+  k1 == k2 && typeEquality (t1, t2) (m1', m2') (s+1)
+  where
+    m1' = M.insert x s m1
+    m2' = M.insert y s m2
+typeEquality (TApp a1 b1, TApp a2 b2) c s =
+  typeEquality (a1, a2) c s && typeEquality (b1, b2) c s
+typeEquality (TArr a1 b1, TArr a2 b2) c s =
+  typeEquality (a1, a2) c s && typeEquality (b1, b2) c s
+typeEquality (TNat, TNat) _ _ = True
+typeEquality _ _ _ = False
+
 
 -- show implementation, uses Unicode for Unit
 -- uses bracketing convention for types
