@@ -8,14 +8,18 @@ bnf for stlc
 \begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \tau\, {\tt space}\, \tau\\ & | & \upsilon\\ &|& z\\ &|& s\, \tau \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\ &&\\ \sigma & ::= &  \lambda \mathbf{\theta }\tt{::}\kappa.\sigma\\&|& \sigma\,{\tt space}\,\sigma\\ &|& \theta\\ & | & \sigma \rightarrow \sigma \\ &|& Nat\\ \end{matrix}
 \begin{matrix} \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ...\end{matrix}
 
+\begin{matrix}\kappa & ::= & \kappa \Rightarrow \kappa \\ &|& *\\ \end{matrix}
 
 
 grammar for stlc parser
 
-\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... &&\\
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ 
+&|& {\tt z}\\ &|& {\tt s} \\
+&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... &&\\ \end{matrix}
 
-\begin{matrix} &&\\ \mathbf{\sigma}& ::= & \lambda \mathbf{\theta}\tt{::}\kappa . \mathbf{\sigma}\\ & | & \eta\\ &&\\ \eta & ::= & \eta \rightarrow \delta\\ &|&\delta \\ &&\\ \delta & ::= &\mathbf{\delta\, \tt{space}\,\epsilon } \\&|& \epsilon\\\\ \epsilon & ::= &\tt{(}\sigma \tt{)}\\ &|& \theta \\\\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... &&\\ \end{matrix}
+\begin{matrix} &&\\ \mathbf{\sigma}& ::= & \lambda \mathbf{\theta}\tt{::}\kappa . \mathbf{\sigma}\\ & | & \eta\\ &&\\ \eta & ::= & \eta \rightarrow \delta\\ &|&\delta \\ &&\\ \delta & ::= &\mathbf{\delta\, \tt{space}\,\epsilon } \\&|& \epsilon\\\\ \epsilon & ::= &\tt{(}\sigma \tt{)}\\ &|& \theta \\\\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... &&\\ &|& Nat \end{matrix}
 
+\begin{matrix}\kappa & ::= & \gamma \\ & | & \gamma\, \tt{\Rightarrow}\, \kappa \\ &&\\ \gamma & ::=& \tt{(} \kappa \tt{)}\, |\, \tt{*} \end{matrix}
 
 semantics for stlc
 

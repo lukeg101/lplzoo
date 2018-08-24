@@ -152,9 +152,9 @@ typeLam = do
 
 -- arrow type parser
 typeArr = do
-  x <- spaces $ type2
+  x <- spaces $ typeApp
   symb "->"
-  y <- spaces $ type3
+  y <- spaces $ type2
   return $ TArr x y
 
 -- app has zero or more spaces
@@ -173,11 +173,9 @@ typeNat = do
   return TNat
 
 -- top level CFG for arrow types are "(X -> Y)" packaged up
-typeTerm = typeLam +++ type2
+typeTerm = type2 +++ typeLam
 
-type2 = typeArr +++ type3
-
-type3 = typeApp +++ type4
+type2 = typeArr +++ typeApp
 
 -- bottom level of cfg for types
 type4 = (bracket typeTerm) 

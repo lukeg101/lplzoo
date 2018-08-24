@@ -44,7 +44,10 @@ The parser is also smart enough to recognise λ, so you can copy and paste from 
 
 There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
 ```
-TODO
+>   '(\n:Nat.(\m:Nat.m) ((\x:Nat.x) n)) z
+~>  (λm:Nat.m) ((λx:Nat.x) z)
+~>  (λx:Nat.x) z
+~>  z
 ```
 Reduction occurs at both the term level and type level (inside term-level abstractions as this is where the types are). Here's a function that reduces only at the type level:
 ```
@@ -61,8 +64,8 @@ There is also a typing mechanism, which should display the type or fail as usual
 ```
 >   t\x:(\A::*.A) Nat.x
 (λA::*.A) Nat->(λA::*.A) Nat
->   \x:(\A::*.A).x
-Cannot Type Term: λx:λA::*.A.x
+>   t\x:(\A::*.A).x
+Cannot Type Term: \x:(\A::*.A).x
 ```
 Note: The above is untypeable as `λA::*.A` is a type operator, such that it takes a type and returns a type (not a term). See the semantics for details on why.
 
@@ -70,6 +73,7 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 
 You can save variables for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
 ```
+>   let three = s (s (s z))
 Saved term: s (s (s z))
 >   let addone = \m:Nat. s m
 Saved term: λm:Nat.s m
@@ -99,14 +103,21 @@ We base the language on the BNF for the typed calculus:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...\end{matrix}" title="\begin{matrix} \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ...\end{matrix}" /></a>
 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}\kappa&space;&&space;::=&space;&&space;\kappa&space;\Rightarrow&space;\kappa&space;\\&space;&|&&space;*\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}\kappa&space;&&space;::=&space;&&space;\kappa&space;\Rightarrow&space;\kappa&space;\\&space;&|&&space;*\\&space;\end{matrix}" title="\begin{matrix}\kappa & ::= & \kappa \Rightarrow \kappa \\ &|& *\\ \end{matrix}" /></a>
+
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar as follows:
 
-TODO
+For terms:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... &&\\ \end{matrix}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;{\tt&space;z}\\&space;&|&&space;{\tt&space;s}&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon&space;\\&space;&|&&space;{\tt&space;z}\\&space;&|&&space;{\tt&space;s}&space;\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& {\tt z}\\ &|& {\tt s} \\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... &&\\ \end{matrix}" /></a>
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\sigma}&&space;::=&space;&&space;\lambda&space;\mathbf{\theta}\tt{::}\kappa&space;.&space;\mathbf{\sigma}\\&space;&&space;|&space;&&space;\eta\\&space;&&\\&space;\eta&space;&&space;::=&space;&&space;\eta&space;\rightarrow&space;\delta\\&space;&|&\delta&space;\\&space;&&\\&space;\delta&space;&&space;::=&space;&\mathbf{\delta\,&space;\tt{space}\,\epsilon&space;}&space;\\&|&&space;\epsilon\\\\&space;\epsilon&space;&&space;::=&space;&\tt{(}\sigma&space;\tt{)}\\&space;&|&&space;\theta&space;\\\\&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;&&\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\sigma}&&space;::=&space;&&space;\lambda&space;\mathbf{\theta}\tt{::}\kappa&space;.&space;\mathbf{\sigma}\\&space;&&space;|&space;&&space;\eta\\&space;&&\\&space;\eta&space;&&space;::=&space;&&space;\eta&space;\rightarrow&space;\delta\\&space;&|&\delta&space;\\&space;&&\\&space;\delta&space;&&space;::=&space;&\mathbf{\delta\,&space;\tt{space}\,\epsilon&space;}&space;\\&|&&space;\epsilon\\\\&space;\epsilon&space;&&space;::=&space;&\tt{(}\sigma&space;\tt{)}\\&space;&|&&space;\theta&space;\\\\&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;&&\\&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\sigma}& ::= & \lambda \mathbf{\theta}\tt{::}\kappa . \mathbf{\sigma}\\ & | & \eta\\ &&\\ \eta & ::= & \eta \rightarrow \delta\\ &|&\delta \\ &&\\ \delta & ::= &\mathbf{\delta\, \tt{space}\,\epsilon } \\&|& \epsilon\\\\ \epsilon & ::= &\tt{(}\sigma \tt{)}\\ &|& \theta \\\\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... &&\\ \end{matrix}" /></a>
+for types:
 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&&\\&space;\mathbf{\sigma}&&space;::=&space;&&space;\lambda&space;\mathbf{\theta}\tt{::}\kappa&space;.&space;\mathbf{\sigma}\\&space;&&space;|&space;&&space;\eta\\&space;&&\\&space;\eta&space;&&space;::=&space;&&space;\eta&space;\rightarrow&space;\delta\\&space;&|&\delta&space;\\&space;&&\\&space;\delta&space;&&space;::=&space;&\mathbf{\delta\,&space;\tt{space}\,\epsilon&space;}&space;\\&|&&space;\epsilon\\\\&space;\epsilon&space;&&space;::=&space;&\tt{(}\sigma&space;\tt{)}\\&space;&|&&space;\theta&space;\\\\&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;&&\\&space;&|&&space;Nat&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&&\\&space;\mathbf{\sigma}&&space;::=&space;&&space;\lambda&space;\mathbf{\theta}\tt{::}\kappa&space;.&space;\mathbf{\sigma}\\&space;&&space;|&space;&&space;\eta\\&space;&&\\&space;\eta&space;&&space;::=&space;&&space;\eta&space;\rightarrow&space;\delta\\&space;&|&\delta&space;\\&space;&&\\&space;\delta&space;&&space;::=&space;&\mathbf{\delta\,&space;\tt{space}\,\epsilon&space;}&space;\\&|&&space;\epsilon\\\\&space;\epsilon&space;&&space;::=&space;&\tt{(}\sigma&space;\tt{)}\\&space;&|&&space;\theta&space;\\\\&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;&&\\&space;&|&&space;Nat&space;\end{matrix}" title="\begin{matrix} &&\\ \mathbf{\sigma}& ::= & \lambda \mathbf{\theta}\tt{::}\kappa . \mathbf{\sigma}\\ & | & \eta\\ &&\\ \eta & ::= & \eta \rightarrow \delta\\ &|&\delta \\ &&\\ \delta & ::= &\mathbf{\delta\, \tt{space}\,\epsilon } \\&|& \epsilon\\\\ \epsilon & ::= &\tt{(}\sigma \tt{)}\\ &|& \theta \\\\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... &&\\ &|& Nat \end{matrix}" /></a>
+
+and for kinds (equivalent to the parser for `O` and `T->T` in STLC):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}\kappa&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma\,&space;\tt{\Rightarrow}\&space;\kappa&space;\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\kappa&space;\tt{)}\,&space;|\,&space;\tt{*}&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}\kappa&space;&&space;::=&space;&&space;\gamma&space;\\&space;&&space;|&space;&&space;\gamma\,&space;\tt{\Rightarrow}\&space;\kappa&space;\\&space;&&\\&space;\gamma&space;&&space;::=&&space;\tt{(}&space;\kappa&space;\tt{)}\,&space;|\,&space;\tt{*}&space;\end{matrix}" title="\begin{matrix}\kappa & ::= & \gamma \\ & | & \gamma\, \tt{\Rightarrow}\ \kappa \\ &&\\ \gamma & ::=& \tt{(} \kappa \tt{)}\, |\, \tt{*} \end{matrix}" /></a>
 
 Some notes about the syntax:
 
@@ -115,7 +126,7 @@ Some notes about the syntax:
 - All term level syntax is identical to STLC, however the valid types are different.
 - Types are variables `A,B,C,...`, type operators/abstractions `\X::K.T`, applications `A B`, or arrows `A -> B`. There is also the `Nat` type.
 - Omega formally introduces type variables `A, B, C...` which until now are used informally for convenience. STLC does not have variables for this reason. Some treatments of STLC range over base types `A,B,C,...` which implicitly assumes these are proper types. 
-- Arrows associate to the right so that `X -> Y -> Z` is the same as `X -> (Y -> Z)` but not `((X -> Y) -> Z)`.
+- Type arrows associate to the right so that `X -> Y -> Z` is the same as `X -> (Y -> Z)` but not `((X -> Y) -> Z)`. The same is true at the kind level `* => * => *` is the same as `* => (* => *)` but not `(* => *) => *`.
 - For both term and type abstractions, nested terms don't need brackets: `\x:Nat.\y:Nat. y` unless enforcing application on the right. Similarly at both levels whitespace does not matter `(\x:Nat.          x)` unless it is between application where you need at least one space.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
