@@ -24,6 +24,6 @@ The intention here is to maximise your understanding of language design whilst m
 8. [_Cata_](Cata/): In essence it's STLC with [inductive types](https://en.wikipedia.org/wiki/Inductive_type). 
 9. [_Ana_](Ana/): In essence it's STLC with [coinductive types](https://en.wikipedia.org/wiki/Coinduction).
 10. [_Sub_](Sub/): Benjamin Pierce's Lambda Calculus with Subtypes. In essence it's STLC with generalised records and [subtype polymorphism](https://en.wikipedia.org/wiki/Subtyping).
-11. [_Omega_](Omega/): Renardel de Lavalette's [L(or λ__*ω*__)](http://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf). In essence it's STLC with kinding and [type-operators](https://en.wikipedia.org/wiki/Type_constructor).
+11. [_Omega_](Omega/): Renardel de Lavalette's [L(or λω)](https://core.ac.uk/download/pdf/82628447.pdf). In essence it's STLC with kinding and [type-operators](https://en.wikipedia.org/wiki/Type_constructor).
 
 See each repo for details on installation/use and submit a PR if there's something you want to fix!

@@ -1,5 +1,5 @@
 # Lambda Omega 
-Haskell implementation of Renardel de Lavalette's Simply Typed Lambda Calculus with type operators. It has STLC terms, a type-level abstraction (with application), kinding (with `*` and `K => K` kinds), and `Nat`ural numbers as an example of proper types.
+Haskell implementation of Renardel de Lavalette's Simply Typed Lambda Calculus with type operators. It has STLC terms, a type-level abstraction (with application), [kinding](http://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf) (with `*` and `K => K` kinds), and `Nat`ural numbers as an example of proper types.
 
 This language formalises the notion of a [type constructor](https://en.wikipedia.org/wiki/Type_constructor) by providing functions from types to types used by many functional languages. This is enabled by having two _sorts_ of expressions of the form `object/term:type` and `type:kind` Additionally this language formalises the inclusion of type variables.
 
