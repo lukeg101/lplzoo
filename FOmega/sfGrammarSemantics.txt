@@ -1,0 +1,40 @@
+
+syntax 
+
+bnf 
+
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \mu.\tau\\ &|& [\sigma] &&\\&|& {\tt z} \\&|&{\tt s}\, \tau\\&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}
+
+\begin{matrix} \sigma & ::= & \lambda \mathbf{\theta }\tt{::}\kappa.\sigma\\&|& \sigma\,{\tt space}\,\sigma\\ &|& \theta\\ & | & \sigma \rightarrow \sigma \\ &|& Nat\\ &|& \Pi \theta . \sigma\\ \\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... \\ \end{matrix}
+
+parser grammar
+
+\begin{matrix} &&\\ \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ & | & \alpha\\ &&\\ 
+\alpha & ::= & \Lambda\theta::\kappa.\tau\\ &|& \beta \\\\
+\beta &::= &\mathbf{\beta\, \tt{space}\, \phi} \\ &|& \phi\\\\
+\phi & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon \\ &|& {\tt z}\\ &|& {\tt s} \\ &|& [\sigma]\\
+\end{matrix}
+
+\begin{matrix} &&\\ \mathbf{\sigma}& ::= & \lambda \mathbf{\theta}\tt{::}\kappa . \mathbf{\sigma}\\ & | & \eta\\ &&\\ 
+\eta & ::= &  \Pi\theta::\kappa.\eta\\
+&|&\delta \\ &&\\ 
+\delta & ::= & \delta \rightarrow \epsilon\\ 
+&|& \epsilon\\\\ 
+\epsilon & ::= & \mathbf{\epsilon\, \tt{space}\,\rho } \\
+&|& \rho\\\\
+\rho &::=&\tt{(}\sigma \tt{)}\\ &|& \theta \\&|& Nat\\ \end{matrix}
+
+\upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \\
+
+\begin{matrix} \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... \\\end{matrix}
+
+semantics
+
+see STLC
+
+\frac{\Gamma\,, X\, Type \vdash t : T}{\Gamma \vdash (\Lambda X.t):\Pi X.T}
+
+\frac{\Gamma \vdash f : \Pi X.T}{\Gamma \vdash (f\, A):T[X := A]}
+
+(\Lambda X.t)\,A \rightsquigarrow t[X:=A]
+
