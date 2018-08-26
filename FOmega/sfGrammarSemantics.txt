@@ -3,9 +3,9 @@ syntax
 
 bnf 
 
-\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \mu.\tau\\ &|& [\sigma] &&\\&|& {\tt z} \\&|&{\tt s}\, \tau\\&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}
+\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \theta::\kappa.\tau\\ &|& [\sigma] &&\\&|& {\tt z} \\&|&{\tt s}\, \tau\\&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}
 
-\begin{matrix} \sigma & ::= & \lambda \mathbf{\theta }\tt{::}\kappa.\sigma\\&|& \sigma\,{\tt space}\,\sigma\\ &|& \theta\\ & | & \sigma \rightarrow \sigma \\ &|& Nat\\ &|& \Pi \theta . \sigma\\ \\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... \\ \end{matrix}
+\begin{matrix} \sigma & ::= & \lambda \mathbf{\theta }\tt{::}\kappa.\sigma\\&|& \sigma\,{\tt space}\,\sigma\\ &|& \theta\\ & | & \sigma \rightarrow \sigma \\ &|& Nat\\ &|& \Pi \theta::\kappa . \sigma\\ \\ \theta & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... \\ \end{matrix}
 
 parser grammar
 
@@ -32,9 +32,10 @@ semantics
 
 see STLC
 
-\frac{\Gamma\,, X\, Type \vdash t : T}{\Gamma \vdash (\Lambda X.t):\Pi X.T}
+\frac{\Gamma\,, X\,::K \vdash t : T}{\Gamma \vdash (\Lambda X::K.t):\Pi X::K.T}
 
-\frac{\Gamma \vdash f : \Pi X.T}{\Gamma \vdash (f\, A):T[X := A]}
+\frac{\Gamma \vdash f : \Pi X::K.T\quad\Gamma\vdash A::K}{\Gamma \vdash (f\, [A]):T[X := A]}
 
-(\Lambda X.t)\,A \rightsquigarrow t[X:=A]
+(\Lambda X::K.t)\,A \rightsquigarrow t[X:=A]
+
 
