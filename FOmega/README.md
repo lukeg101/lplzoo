@@ -170,7 +170,7 @@ for term-level variables:
 
 for term-level abstractions, with the added constraint that the variable in the abstraction has a proper type (`*`):
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;A&space;::&space;*&space;\quad&space;\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;A&space;::&space;*&space;\quad&space;\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" title="\frac{\Gamma \vdash A :: * \quad \Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}" /></a>
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;A&space;::&space;*&space;\quad&space;\Gamma,&space;x:A\vdash&space;M:B}{\Gamma&space;\vdash&space;\lambda&space;x:A.M:B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;A&space;::&space;*&space;\quad&space;\Gamma,&space;x:A\vdash&space;M:B}{\Gamma&space;\vdash&space;\lambda&space;x:A.M:B}" title="\frac{\Gamma \vdash A :: * \quad \Gamma, x:A\vdash M:B}{\Gamma \vdash \lambda x:A.M:B}" /></a>
 
 and term-level application:
 
@@ -195,6 +195,36 @@ and special introduction, elimination, and reduction rules for types (now with k
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;X::K.T\quad\Gamma\vdash&space;A::K}{\Gamma&space;\vdash&space;(f\,&space;[A]):T[X&space;:=&space;A]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;X::K.T\quad\Gamma\vdash&space;A::K}{\Gamma&space;\vdash&space;(f\,&space;[A]):T[X&space;:=&space;A]}" title="\frac{\Gamma \vdash f : \Pi X::K.T\quad\Gamma\vdash A::K}{\Gamma \vdash (f\, [A]):T[X := A]}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=(\Lambda&space;X::K.t)\,A&space;\rightsquigarrow&space;t[X:=A]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\Lambda&space;X::K.t)\,A&space;\rightsquigarrow&space;t[X:=A]" title="(\Lambda X::K.t)\,A \rightsquigarrow t[X:=A]" /></a>
+
+We now have abstraction, application and type-variables at the type level with 'types of types' known as kinds. This means the semantics of types mirror term-level semantics of STLC but one level up:
+
+For type-variables:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;X&space;::&space;K},&space;\mbox{(if&space;$X&space;::&space;K&space;\in&space;\Gamma$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;X&space;::&space;K},&space;\mbox{(if&space;$X&space;::&space;K&space;\in&space;\Gamma$)}" title="\overline{\Gamma \vdash X :: K}, \mbox{(if $X :: K \in \Gamma$)}" /></a>
+
+For type-abstraction (known as a type operator):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma,X&space;::&space;K_1&space;\vdash&space;Y&space;::&space;K_2\quad}{\Gamma&space;\vdash&space;\lambda&space;X&space;::&space;K_1&space;.&space;Y&space;::&space;K_2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma,X&space;::&space;K_1&space;\vdash&space;Y&space;::&space;K_2\quad}{\Gamma&space;\vdash&space;\lambda&space;X&space;::&space;K_1&space;.&space;Y&space;::&space;K_2}" title="\frac{\Gamma,X :: K_1 \vdash Y :: K_2\quad}{\Gamma \vdash \lambda X :: K_1 . Y :: K_2}" /></a>
+
+For type-application:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;F&space;::&space;K_1&space;\Rightarrow&space;K_2\quad\Gamma\vdash&space;X&space;:&space;:K_1}{\Gamma&space;\vdash&space;F\,X&space;::&space;K_2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;F&space;::&space;K_1&space;\Rightarrow&space;K_2\quad\Gamma\vdash&space;X&space;:&space;:K_1}{\Gamma&space;\vdash&space;F\,X&space;::&space;K_2}" title="\frac{\Gamma \vdash F :: K_1 \Rightarrow K_2\quad\Gamma\vdash X : :K_1}{\Gamma \vdash F\,X :: K_2}" /></a>
+
+For the existing type arrow (now with constraints that both sides of the arrow must have proper types):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad\Gamma\vdash&space;T_2&space;:&space;:*}{\Gamma&space;\vdash&space;T_1&space;\rightarrow&space;T_2::*}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad\Gamma\vdash&space;T_2&space;:&space;:*}{\Gamma&space;\vdash&space;T_1&space;\rightarrow&space;T_2::*}" title="\frac{\Gamma \vdash T_1 :: *\quad\Gamma\vdash T_2 : :*}{\Gamma \vdash T_1 \rightarrow T_2::*}" /></a>
+
+Pi types can only be constructed from terms of proper type:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma\,,&space;X\,::K&space;\vdash&space;T&space;::&space;*}{\Gamma&space;\vdash&space;\Pi&space;X::K.T::*}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma\,,&space;X\,::K&space;\vdash&space;T&space;::&space;*}{\Gamma&space;\vdash&space;\Pi&space;X::K.T::*}" title="\frac{\Gamma\,, X\,::K \vdash T :: *}{\Gamma \vdash \Pi X::K.T::*}" /></a>
+
+Next, Nats are a proper type: 
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;Nat::*}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;Nat::*}" title="\overline{\Gamma \vdash Nat::*}" /></a>
+
+Lastly, we have type-level beta reduction, identical to STLC reduction but for types:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;X&space;::&space;K&space;.&space;T_1)\,T_2&space;\rightsquigarrow&space;T_1&space;[X&space;:=&space;T_2]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;X&space;::&space;K&space;.&space;T_1)\,T_2&space;\rightsquigarrow&space;T_1&space;[X&space;:=&space;T_2]" title="(\lambda X :: K . T_1)\,T_2 \rightsquigarrow T_1 [X := T_2]" /></a>
 
 - This means the typing context now also contains types, and types occur in terms. The phrase `X :: K` means X is has kind K. We do not implement Agda style type hierarchies here.
 - There is the additional constraint that any term abstractions must take a term of proper type. This prevents nonsensical or partially-applied types terms such as `Pair Nat _`.
