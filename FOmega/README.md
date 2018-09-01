@@ -1,5 +1,7 @@
 # System F Omega
-TODO
+Haskell implementation of Girard-Reynolds' higher-order polymorphic lambda-calculus. It has type abstraction, type quantification (pi-type), type application, kinds, term-level second-order products, and Nats (as a demonstration of proper types). 
+
+This strongly normalising calculus was discovered by Girard and independently by Reynolds as a key stone in functional programming. Many modern functional type systems are based on this, including Haskell and ML. FOmega can be viewed as a logical system of natural deduction for [intuitionistic](https://en.wikipedia.org/wiki/Intuitionistic_type_theory) [higher-order propositional](https://en.wikipedia.org/wiki/Higher-order_logic) logic.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
@@ -164,6 +166,7 @@ Some notes about the syntax:
 ## Semantics
 
 The semantics implements beta-reduction on terms and alpha-equivalence as the `Eq` instance of `FOTerm`. The semantics are the same as STLC with the addition of second-order abstraction over types, kinds, and a type operators. We reformulate the semantics as [typing judgements](https://existentialtype.wordpress.com/2011/03/27/the-holy-trinity/):
+
 for term-level variables:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" title="\overline{\Gamma \vdash x:T},\quad \mbox{(if $x:T \in \Gamma$)}" /></a>
