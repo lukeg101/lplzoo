@@ -1,7 +1,7 @@
 # System F Omega
 Haskell implementation of Girard-Reynolds' higher-order polymorphic lambda-calculus. It has type abstraction, type quantification (pi-type), type application, kinds, term-level second-order products, and Nats (as a demonstration of proper types). 
 
-This strongly normalising calculus was discovered by Girard and independently by Reynolds as a key stone in functional programming. Many modern functional type systems are based on this, including Haskell and ML. FOmega can be viewed as a logical system of natural deduction for [intuitionistic](https://en.wikipedia.org/wiki/Intuitionistic_type_theory) [higher-order] propositional(https://en.wikipedia.org/wiki/Higher-order_logic) logic.
+This strongly normalising calculus was discovered by Girard and independently by Reynolds as a key stone in functional programming. Many modern functional type systems are based on this, including Haskell and ML. FOmega can be viewed as a logical system of natural deduction for [intuitionistic](https://en.wikipedia.org/wiki/Intuitionistic_type_theory) [higher-order](https://en.wikipedia.org/wiki/Higher-order_logic) propositional logic.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
