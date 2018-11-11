@@ -101,7 +101,7 @@ The semantics implements beta-reduction on terms and alpha-equivalence as the `E
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
 - Tests.hs is the test suite. We run have unit tests for terms in the language. QuickCheck is used to generate arbitrary trees and test they are parsed and printed correctly.
 
-For contributions, see the [project to-do list](https://github.com/lukeg101/lplzoo/projects/1) or submit a PR with something you think it needs.
+For contributions, see the [project to-do list](https://github.com/lukeg101/lplzoo/projects/1), [Contributions](https://github.com/lukeg101/lplzoo#contributions), and submit a PR with something you think it needs.
 
 Work initially documented [here](https://gist.github.com/lukeg101/9090f20f4a7b09f401df9390a0e357c9).
 

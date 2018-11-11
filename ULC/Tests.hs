@@ -114,7 +114,7 @@ unittest9 = let term = App (App (Abs "x" (Var "x")) (Abs "y" (Var "y"))) (Var "z
 -- | List of pretty printing unit tests
 ppunittests :: UnitTests
 ppunittests = [unittest1, unittest2, unittest2, unittest3, unittest4,
-  unittest5, unittest6, unittest7, unittest8]
+  unittest5, unittest6, unittest7, unittest8, unittest9]
 
 
 -- | Function that runs the tests and returns true if they all pass
@@ -138,11 +138,8 @@ instance QC.Arbitrary Term where
                         t2 <- term n
                         return $ App t1 t2 
           term n | n == 0    = Var <$> varname
-                 | n > 0     = do x <- QC.choose (0::Int,2::Int)
-                                  if x == 1
-                                    then genAbs (n-1)
-                                    else genApp (n-1)
-                 | otherwise =  term (abs n)
+                 | n > 0     = QC.oneof [genAbs (n-1), genApp (n-1)]
+                 | otherwise = term (abs n)
   shrink (Var _)     = []
   shrink (App t1 t2) = [t1, t2]
   shrink (Abs _ t1)  = [t1]
@@ -166,7 +163,7 @@ propParse t = let parse = P.apply P.pTerm (show t)
 -- | Helper function to run the above unit tests, and the quickCheck tests
 runTests :: IO ()
 runTests = let tests = all (\(a,_,_)->a) ppunittests
-           in do M.when (not tests) (putStrLn "unit tests failed!")
+           in do M.unless tests (putStrLn "unit tests failed!")
                  QC.quickCheck (QC.withMaxSuccess 20 propShow)
                  QC.quickCheck (QC.withMaxSuccess 20 propParse) 
 

@@ -27,4 +27,15 @@ The intention here is to maximise your understanding of language design whilst m
 11. [_Omega_](Omega/): Renardel de Lavalette's [L(or λω)](https://core.ac.uk/download/pdf/82628447.pdf). In essence it's STLC with kinding and [type-operators](https://en.wikipedia.org/wiki/Type_constructor).
 12. [_FOmega_](FOmega/): Jean Yves-Girard's [FOmega](https://en.wikipedia.org/wiki/Lambda_cube). In essence it's SystemF + Omega which enables higher-order polymorphism.
 
-See each repo for details on installation/use and submit a PR if there's something you want to fix!
+See each repo for details on installation/use.
+
+## Contributions
+Submit a PR if there's something you want to add or fix! Bearing in mind a few things:
+1. Compile your code with `-W`, This catches any warnings. There shouldn't be any warnings 
+2. Use [hlint](http://hackage.haskell.org/package/hlint), to handle code linting and suggestions. Like wall, there should be no suggesstions for file `Foo.hs` when running `hlint Foo.hs`.
+3. Ensure code has 100% [Haddock](https://www.haskell.org/haddock/) coverage. This helps to document things if ever we want to.
+4. Keep in mind the motivations above, this code is not meant to be advanced Haskell, but rather simple (for demonstration) so try not to use advanced technologies if you can.
+
+
+
+
