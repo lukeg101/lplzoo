@@ -14,6 +14,7 @@ module Tests where
 
 -- Tool Imports.
 import qualified Test.QuickCheck as QC
+import qualified Control.Monad   as M
 
 
 -- ULC Imports.
@@ -121,11 +122,15 @@ testPP :: Maybe UnitTests
 testPP = let passed = filter (\(a,_,_)->a) ppunittests
          in if null passed then return passed else Nothing
 
+
 -- | Use QuickCheck to generate terms and show that both the Parsing and
 --Printing align.
 instance QC.Arbitrary Term where
   arbitrary = QC.sized term
-    where varname= QC.listOf1 (QC.choose ('a', 'z'))
+    where varname  = do s <- QC.listOf1 (QC.choose ('a', 'z'))
+                        if s `elem` ["let", "="] --make more general
+                          then varname
+                          else return s
           genAbs n = do s <- varname
                         t <- term n
                         return $ Abs s t
@@ -138,6 +143,9 @@ instance QC.Arbitrary Term where
                                     then genAbs (n-1)
                                     else genApp (n-1)
                  | otherwise =  term (abs n)
+  shrink (Var _)     = []
+  shrink (App t1 t2) = [t1, t2]
+  shrink (Abs _ t1)  = [t1]
 
 
 -- | QuickCheck predicate to show that parsing a printed term
@@ -145,10 +153,26 @@ instance QC.Arbitrary Term where
 propShow :: Term -> Bool
 propShow t = let parsed = snd . fst . head $ P.apply P.pTerm (show t)
              in parsed == t
--- run with QC.quickCheckResult (QC.withMaxSuccess n propShow)
--- for some n
 
 
+-- | QuickCheck predicate to test parsing succeeds for a term
+propParse :: Term -> Bool
+propParse t = let parse = P.apply P.pTerm (show t)
+              in case parse of
+                  [(("", _), "")] -> True
+                  _               -> False
+
+
+-- | Helper function to run the above unit tests, and the quickCheck tests
+runTests :: IO ()
+runTests = let tests = all (\(a,_,_)->a) ppunittests
+           in do M.when (not tests) (putStrLn "unit tests failed!")
+                 QC.quickCheck (QC.withMaxSuccess 20 propShow)
+                 QC.quickCheck (QC.withMaxSuccess 20 propParse) 
+
+-- deep diving syntax trees is slow! run this a couple of times if you can!
+
+-- TODO implement testing reduction for terms
 
 
 

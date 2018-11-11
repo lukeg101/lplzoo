@@ -157,14 +157,17 @@ bracket p = do
   return x
 
 -- | Vars are strings packaged up.
+var :: Parser ULC.Term
 var = ULC.Var <$> str
 
 
 -- | Abstraction allows escaped backslash or lambda
+lambdas :: [Char]
 lambdas = ['\x03bb','\\']
 
 
 -- | Lam parser parses abstractions
+lam :: Parser ULC.Term
 lam = do 
   spaces $ identifier lambdas
   x <- spaces str
@@ -174,6 +177,7 @@ lam = do
 
 
 -- | App parses application terms, with one or more spaces in between terms.
+app :: Parser ULC.Term
 app = chainl1 expr $ do
   space1
   return ULC.App 
