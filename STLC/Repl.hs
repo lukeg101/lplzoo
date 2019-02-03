@@ -51,23 +51,21 @@ repl env = do putStr ">   "
 -- in bound terms from the environment. For STLC termination is guaranteed.
 parseTerm :: String -> Environment -> IO ()
 parseTerm s env 
-  = if head s == '\'' 
-    then printReductions s env
-    else if head s == 't'
-           then printType s
-           else case apply (pLet +++ pTerm) s of
-             [(("",t),"")]  -> do      -- reducing a term
-               case typeof' t' of
-                 Just _ -> putStrLn . prependTerm t' $ reduce t'
-                 _      -> cannotType s
-               where t' = formatTerm t env 
-             [((v,t),"")]   -> do       -- let expression
-               case typeof' t' of
-                 Just _ -> do putStrLn $ "Saved: " ++ show t'
-                              repl $ M.insert v t' env
-                 _      -> cannotType s
-               where t' = formatTerm t env
-             _              -> cannotParse s  
+  | head s == '\'' = printReductions s env
+  | head s == 't'  = printType s 
+  | otherwise = case apply (pLet +++ pTerm) s of
+                  [(("",t),"")]  ->      -- reducing a term
+                    case typeof' t' of
+                      Just _ -> putStrLn . prependTerm t' $ reduce t'
+                      _      -> cannotType s
+                      where t' = formatTerm t env 
+                  [((v,t),"")]   ->       -- let expression
+                    case typeof' t' of
+                      Just _ -> do putStrLn $ "Saved: " ++ show t'
+                                   repl $ M.insert v t' env
+                      _      -> cannotType s
+                      where t' = formatTerm t env
+                  _              -> cannotParse s  
 
 
 -- | Takes a term and context and substitutes env terms
@@ -75,7 +73,7 @@ parseTerm s env
 formatTerm :: STTerm -> Environment -> STTerm
 formatTerm t1 env = foldl 
   (\t (v,t2) -> 
-    if elem v (vars t1) 
+    if v `elem` vars t1 
       then substitute t (Var v, t2) 
       else t) t1 $ M.assocs env
 
@@ -95,7 +93,7 @@ printReductions :: String -> Environment -> IO ()
 printReductions s env
   = let prepend x = prependReductions x $ reductions x
     in case apply term (tail s) of
-         (x:_) -> if (null $ snd x)
+         (x:_) -> if null $ snd x
                      then case typeof' x' of
                        Just _ -> mapM_ putStrLn $ prepend x'
                        _      -> cannotType $ tail s
@@ -107,12 +105,12 @@ printReductions s env
 -- | Helper function to print the type of a term
 printType :: String -> IO ()
 printType s = case apply term $ tail s of
-  (x:_) -> do if (null $ snd x)
-                 then case typeof' $ fst x of
-                   Just y -> print y
-                   _      -> cannotType $ tail s
-                 else cannotParse s
-  _      -> cannotParse s
+  (x:_) -> if null $ snd x
+             then case typeof' $ fst x of
+                    Just y -> print y
+                    _      -> cannotType $ tail s
+             else cannotParse s
+  _     -> cannotParse s
 
 -- | Error message for parse failure
 cannotParse :: String -> IO ()
@@ -120,4 +118,4 @@ cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
 
 -- | Error message for typing failure
 cannotType :: String -> IO ()
-cannotType s = putStrLn $ (++) "Cannot Type Term: " $ s
+cannotType s = putStrLn $ (++) "Cannot Type Term: " s

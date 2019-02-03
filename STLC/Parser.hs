@@ -136,7 +136,7 @@ apply = parse
 str :: Parser String
 str = do 
   s <- many1 $ sat C.isLower
-  if elem s ["let", "=", "O", ":"] 
+  if s `elem` ["let", "=", "O", ":"] 
     then zerop 
     else return s
 
@@ -173,18 +173,16 @@ typVar = do
   return STLC.TVar
 
 -- | Second level of CFG for types
-typExpr = (bracket typTerm) +++ typVar
+typExpr = bracket typTerm +++ typVar
 
 
 -- | Parser for term variables
 termVar :: Parser STLC.STTerm
-termVar = do
-  x <- str
-  return $ STLC.Var x
+termVar = STLC.Var <$> str
 
 
 -- | Abstraction allows escaped backslash or lambda
-lambdas :: [Char]
+lambdas :: String
 lambdas = ['\x03bb','\\', 'λ']
 
 
@@ -202,7 +200,7 @@ lam = do
 -- | App parses application terms, with one or more spaces in between terms.
 app = chainl1 expr $ do
   space1
-  return $ STLC.App 
+  return STLC.App 
 
 
 -- | Parser for let expressions
@@ -223,7 +221,7 @@ pTerm = do
 
 
 -- | Expression follows CFG form with bracketing convention.
-expr = (bracket term) +++ termVar
+expr = bracket term +++ termVar
 
 
 -- | Top-level of CFG Grammar.
