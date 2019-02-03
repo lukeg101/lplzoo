@@ -46,7 +46,7 @@ isArr _          = False
 
 
 -- | Simply-Typed Lambda Calculus Terms
--- variables are numbers as it's easier for renaming
+-- variables are String
 -- Abstractions carry the type Church style
 data STTerm
   = Var VarName
