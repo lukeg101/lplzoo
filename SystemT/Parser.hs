@@ -259,7 +259,7 @@ expr :: Parser SystemT.STTerm
 expr = bracket term +++ termVar +++ zero +++ Parser.succ +++ rec
 
 
--- top level of CFG Gramma
+-- | Top level of CFG Grammar
 term :: Parser SystemT.STTerm
 term = lam +++ app
 
