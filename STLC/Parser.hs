@@ -24,7 +24,7 @@ Implementation based on ideas in Monadic Parser Combinators paper
 http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf
 -}
 
--- | Necessary AMP additions for Parser instance.
+-- | Parser type takes input string and returns a list of possible parses
 newtype Parser a = Parser (String -> [(a, String)])
 
 
@@ -41,7 +41,7 @@ instance Applicative Parser where
 
 -- | Monad instance, generators use the first parser then apply f to the result
 instance Monad Parser where
-  return = pure
+  return  = pure
   p >>= f = Parser (\cs -> concat [parse (f a) cs' | (a,cs') <- parse p cs])
 
 
@@ -160,6 +160,7 @@ bracket p = do
 
 
 -- | Top level CFG for arrow types are "(X -> Y)" packaged up
+typTerm :: Parser STLC.T
 typTerm = (do
   x <- typExpr
   spaces (symb "->")
@@ -167,12 +168,14 @@ typTerm = (do
   return $ STLC.TArr x y) +++ typExpr
 
 
--- | Type vars are "o" packaged up 
+-- | Type vars are "O" packaged up 
+typVar :: Parser STLC.T
 typVar = do
   symb "O"
   return STLC.TVar
 
 -- | Second level of CFG for types
+typExpr :: Parser STLC.T
 typExpr = bracket typTerm +++ typVar
 
 
@@ -187,6 +190,7 @@ lambdas = ['\x03bb','\\', 'λ']
 
 
 -- | Lam parser parses abstractions
+lam :: Parser STLC.STTerm
 lam = do 
   spaces $ identifier lambdas
   x <- str 
@@ -198,12 +202,14 @@ lam = do
 
 
 -- | App parses application terms, with one or more spaces in between terms.
+app :: Parser STLC.STTerm
 app = chainl1 expr $ do
   space1
   return STLC.App 
 
 
 -- | Parser for let expressions
+pLet :: Parser (String, STLC.STTerm)
 pLet = do
   space
   symb "let"
@@ -215,16 +221,19 @@ pLet = do
 
 
 -- | Parser for regular terms.
+pTerm :: Parser (String, STLC.STTerm)
 pTerm = do
   t <- term 
   return ("", t)
 
 
 -- | Expression follows CFG form with bracketing convention.
+expr :: Parser STLC.STTerm
 expr = bracket term +++ termVar
 
 
 -- | Top-level of CFG Grammar.
+term :: Parser STLC.STTerm
 term = lam +++ app
 
 
