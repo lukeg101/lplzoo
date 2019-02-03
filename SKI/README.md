@@ -119,6 +119,7 @@ and reduced with rules:
 - Parser.hs contains the monadic parser combinators needed to parse input strings into term ASTs for the calculus. It follows the grammar above.
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
+- Note this file does not have unit tests as there are no special symbols that need testing in the grammar and the untyped nature of the calculus means generative testing with QuickCheck would be more complicated that the language itself.
 
 For contributions, see the project to-do list or submit a PR with something you think it needs.
 
