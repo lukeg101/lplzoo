@@ -1,80 +1,119 @@
+{-|
+Module      : Parser
+Description : Monadic Parser Combinators for ST in Haskell.
+Copyright   : (c) Luke Geeson, 2018
+License     : GPL-3
+Maintainer  : mail@lukegeeson.com 
+Stability   : stable
+Portability : POSIX
+
+The "Parser" module provides the monadic parser combinators, grammars, and top-level functions needed to parse a human friendly (read whiteboard) version of System T.
+-}
 module Parser where
 
-import SystemT
-import Control.Applicative (Applicative(..))
-import Control.Monad       (liftM, ap, guard)
-import Data.Char
+-- System T imports.
+import qualified SystemT
+
+-- Tool Imports.
+import qualified Control.Applicative as A (Applicative(..))
+import qualified Control.Monad       as M (liftM, ap)
+import qualified Data.Char           as C
 
 {-
 Implementation based on ideas in Monadic Parser Combinators paper
 http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf
 -}
 
--- Parser type takes input string and returns a list of possible parses
+
+-- | Parser type takes input string and returns a list of possible parses
 newtype Parser a = Parser (String -> [(a, String)])
 
--- Necessary AMP additions for Parser instance
+
+-- | Necessary AMP additions for Parser instance.
 instance Functor Parser where
-  fmap = liftM
+  fmap = M.liftM
+
+
+-- | Necessary AMP additions for Parser instance.
 instance Applicative Parser where
   pure a = Parser (\cs -> [(a,cs)])
-  (<*>) = ap
+  (<*>)  = M.ap
 
--- Monad instance, generators use the first parser then apply f to the result
+
+-- | Monad instance, generators use the first parser then apply f to the result
 instance Monad Parser where
-  return = pure
+  return  = pure
   p >>= f = Parser (\cs -> concat [parse (f a) cs' | (a,cs') <- parse p cs])
 
--- parser deconstructor
+
+-- | Parser deconstructor.
 parse (Parser p) = p
 
--- takes a string and splits on the first char or fails
-item :: Parser Char
-item = Parser (\cs -> case cs of
-  "" -> []
-  (c:cs) -> [(c,cs)])
 
--- combines the results of 2 parsers on an input string
+-- | Item takes a string and splits on the first char or fails
+item :: Parser Char
+item = let split cs = case cs of
+                        ""     -> []
+                        (c:cs) -> [(c,cs)]
+       in Parser split
+
+
+-- | Combines the results of 2 parsers on an input string
 -- shortcircuits on the first result returned or fails
 (+++) :: Parser a -> Parser a -> Parser a
-p +++ q = Parser (\cs -> case parse p cs ++ parse q cs of
-  [] -> []
-  (x:xs) -> [x])
+p +++ q = let apply cs = case parse p cs ++ parse q cs of
+                          []    -> []
+                          (x:_) -> [x]
+          in Parser apply 
 
--- failure parser
-zerop = Parser (\cs -> [])
 
--- parses an element and returns if they satisfy a predicate
+-- | Failure parser.
+zerop = Parser (const [])
+
+
+-- | Parses an element and returns if they satisfy a predicate.
 sat :: (Char -> Bool) -> Parser Char
-sat p = do {c <- item; if p c then return c else zerop}
+sat p = do 
+  c <- item
+  if p c 
+    then return c 
+    else zerop
 
--- parses chars only
+
+-- | Parses chars only.
 char :: Char -> Parser Char
 char c = sat (c ==)
 
--- parses a string of chars
+
+-- | Parses a string of chars.
 string :: String -> Parser String
 string = mapM char
 
--- parses 0 or more elements
+
+-- | Parses 0 or more elements.
 many :: Parser a -> Parser [a]
 many p = many1 p +++ return []
 
--- parses 1 or more elements
+
+-- | Parses 1 or more elements.
 many1 :: Parser a -> Parser [a]
 many1 p = do
-  a <- p
+  a  <- p
   as <- many p
   return (a:as)
 
--- parses 0 or more whitespace
+
+-- | Parses 0 or more whitespace.
 space :: Parser String
-space = many (sat isSpace)
+space = many (sat C.isSpace)
 
+
+-- | Parsers 1 or more whitespace.
 space1 :: Parser String
-space1 = many1 (sat isSpace)
+space1 = many1 (sat C.isSpace)
 
--- trims whitespace between an expression
+
+-- | Trims whitespace between an expression.
 spaces :: Parser a -> Parser a 
 spaces p = do
   space
@@ -82,31 +121,41 @@ spaces p = do
   space
   return x
 
--- parses a single string
+
+-- | Parses a single string.
 symb :: String -> Parser String
 symb = string
 
--- apply a parser to a string
-apply :: Parser a -> String -> [(a,String)]
-apply p = parse (do {space; p})
 
--- 1 or more chars
+-- | Apply a parser to a string.
+apply :: Parser a -> String -> [(a,String)]
+apply = parse
+
+
+-- | set of reserved words for System T
+keywords :: [String]
+keywords = ["let", "=", ":", "Nat", "z", "s", "rec"]
+
+
+-- | 1 or more chars
 str :: Parser String
 str = do 
-  s <- many1 $ sat isLower
-  if elem s ["let", "=", ":", "Nat"
-    , "z", "s", "rec"] then zerop else return s
+  s <- many1 $ sat C.isLower
+  if s `elem` keywords 
+     then zerop 
+     else return s
 
--- left recursion 
+
+-- | Left recursion. 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
-p `chainl1` op = do {a <- p; rest a}
-  where
-    rest a = (do 
-      f <- op
-      b <- p
-      rest (f a b)) +++ return a
+p `chainl1` op = let rest a = (do f <- op
+                                  b <- p
+                                  rest (f a b)) +++ return a
+                 in do a <- p
+                       rest a 
 
--- bracket parses away brackets as you'd expect
+
+-- | Parses away brackets as you'd expect.
 bracket :: Parser a -> Parser a
 bracket p = do
   symb "("
@@ -114,28 +163,40 @@ bracket p = do
   symb ")"
   return x
 
--- top level CFG for arrow types are "(X -> Y)" packaged up
+
+-- | Top level CFG for arrow types are "(X -> Y)" packaged up
+typTerm :: Parser SystemT.T
 typTerm = (do
   x <- typExpr
   spaces (symb "->")
   y <- typTerm
-  return $ TArr x y) +++ typExpr
+  return $ SystemT.TArr x y) +++ typExpr
 
--- type vars are "o" packaged up 
+
+-- | type vars are "Nat" packaged up 
+typVar :: Parser SystemT.T
 typVar = do
   symb "Nat"
-  return TNat
+  return SystemT.TNat
 
--- second level of CFG for types
-typExpr = (bracket typTerm) +++ typVar
 
--- parser for term variables
-termVar = do
-  x <- str
-  return $ Var x
+-- | Second level of CFG for types
+typExpr :: Parser SystemT.T
+typExpr = bracket typTerm +++ typVar
 
--- abstraction allows escaped backslash or lambda
+
+-- | Parser for term variables
+termVar :: Parser SystemT.STTerm
+termVar = SystemT.Var <$> str
+
+
+-- | Abstraction allows escaped backslash or lambda
+lambdas :: String
 lambdas = ['\x03bb','\\']
+
+
+-- | Lam parser parses abstractions
+lam :: Parser SystemT.STTerm
 lam = do 
   spaces $ identifier lambdas
   x <- str
@@ -143,14 +204,18 @@ lam = do
   t <- typTerm
   spaces (symb ".")
   e <- spaces term
-  return $ Abs x t e
+  return $ SystemT.Abs x t e
 
--- app has zero or more spaces
-app = (chainl1 expr $ do
+
+-- | App parses application terms, with one or more spaces in between terms.
+app :: Parser SystemT.STTerm
+app = chainl1 expr $ do
   space1
-  return $ App) 
+  return SystemT.App
 
--- parser for let expressions
+
+-- | Parser for let expressions
+pLet :: Parser (String, SystemT.STTerm)
 pLet = do
   space
   symb "let"
@@ -160,30 +225,44 @@ pLet = do
   t <- term 
   return (v,t)
 
+
+-- | Parser for regular terms.
+pTerm :: Parser (String, SystemT.STTerm)
 pTerm = do
   t <- term 
   return ("", t)
 
+
+-- | Parser for the zero term
+zero :: Parser SystemT.STTerm
 zero = do 
   char 'z'
-  return Zero
+  return SystemT.Zero
 
+
+-- | Parser for the successor term
+succ :: Parser SystemT.STTerm
 succ = do
     char 's'
-    return Succ
+    return SystemT.Succ
 
+
+-- | Parser for the recursor term
+rec :: Parser SystemT.STTerm
 rec = do
   symb "rec"
-  return RecNat
+  return SystemT.RecNat
 
--- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termVar +++ zero +++ Parser.succ +++ rec
+
+-- | Expression follows CFG form with bracketing convention.
+expr :: Parser SystemT.STTerm
+expr = bracket term +++ termVar +++ zero +++ Parser.succ +++ rec
+
 
 -- top level of CFG Gramma
+term :: Parser SystemT.STTerm
 term = lam +++ app
 
--- identifies key words
-identifier :: [Char] -> Parser Char 
-identifier xs = do
-  x <- sat (\x -> elem x xs)
-  return x
+-- | Identifies key words.
+identifier :: String -> Parser Char 
+identifier xs = sat (`elem` xs)
