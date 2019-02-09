@@ -144,6 +144,7 @@ There are similar _inner_ reduction rules for each of the inner arguments of `re
 - Parser.hs contains the monadic parser combinators needed to parse input strings into typed-term ASTs for the calculus.
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
+- Tests.hs is the test suite. We have unit tests for terms in the language. QuickCheck is used to generate arbitrary trees and test they are parsed and printed correctly.
 
 For contributions, see the [project to-do list](https://github.com/lukeg101/lplzoo/projects/3) or submit a PR with something you think it needs.
 
