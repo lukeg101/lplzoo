@@ -1,80 +1,116 @@
+{-|
+Module      : Parser
+Description : Monadic Parser Combinators for PCF in Haskell.
+Copyright   : (c) Luke Geeson, 2019
+License     : GPL-3
+Maintainer  : mail@lukegeeson.com 
+Stability   : stable
+Portability : POSIX
+
+The "Parser" module provides the monadic parser combinators, grammars, and top-level functions needed to parse a human friendly (read whiteboard) version of PCF.
+-}
 module Parser where
 
-import PCF
-import Control.Applicative (Applicative(..))
-import Control.Monad       (liftM, ap, guard)
-import Data.Char
+-- PCF Imports.
+import qualified PCF
+
+-- Tool Imports.
+import qualified Control.Applicative as A (Applicative(..))
+import qualified Control.Monad       as M (liftM, ap)
+import qualified Data.Char           as C
 
 {-
 Implementation based on ideas in Monadic Parser Combinators paper
 http://www.cs.nott.ac.uk/~pszgmh/monparsing.pdf
 -}
 
--- Parser type takes input string and returns a list of possible parses
+-- | Parser type takes input string and returns a list of possible parses
 newtype Parser a = Parser (String -> [(a, String)])
 
--- Necessary AMP additions for Parser instance
+
+-- | Necessary AMP additions for Parser instance.
 instance Functor Parser where
-  fmap = liftM
+  fmap = M.liftM
+
+
+-- | Necessary AMP additions for Parser instance.
 instance Applicative Parser where
   pure a = Parser (\cs -> [(a,cs)])
-  (<*>) = ap
+  (<*>)  = M.ap
 
--- Monad instance, generators use the first parser then apply f to the result
+
+-- | Monad instance, generators use the first parser then apply f to the result
 instance Monad Parser where
-  return = pure
+  return  = pure
   p >>= f = Parser (\cs -> concat [parse (f a) cs' | (a,cs') <- parse p cs])
 
--- parser deconstructor
+
+-- | Parser deconstructor.
 parse (Parser p) = p
 
--- takes a string and splits on the first char or fails
-item :: Parser Char
-item = Parser (\cs -> case cs of
-  "" -> []
-  (c:cs) -> [(c,cs)])
 
--- combines the results of 2 parsers on an input string
+-- | Item takes a string and splits on the first char or fails
+item :: Parser Char
+item = let split cs = case cs of
+                        ""     -> []
+                        (c:cs) -> [(c,cs)]
+       in Parser split
+
+
+-- | Combines the results of 2 parsers on an input string
 -- shortcircuits on the first result returned or fails
 (+++) :: Parser a -> Parser a -> Parser a
-p +++ q = Parser (\cs -> case parse p cs ++ parse q cs of
-  [] -> []
-  (x:xs) -> [x])
+p +++ q = let apply cs = case parse p cs ++ parse q cs of
+                          []    -> []
+                          (x:_) -> [x]
+          in Parser apply 
 
--- failure parser
-zerop = Parser (\cs -> [])
 
--- parses an element and returns if they satisfy a predicate
+-- | Failure parser.
+zerop = Parser (const [])
+
+
+-- | Parses an element and returns if they satisfy a predicate.
 sat :: (Char -> Bool) -> Parser Char
-sat p = do {c <- item; if p c then return c else zerop}
+sat p = do 
+  c <- item
+  if p c 
+    then return c 
+    else zerop
 
--- parses chars only
+
+-- | Parses chars only.
 char :: Char -> Parser Char
 char c = sat (c ==)
 
--- parses a string of chars
+-- | Parses a string of chars.
 string :: String -> Parser String
 string = mapM char
 
--- parses 0 or more elements
+
+-- | Parses 0 or more elements.
 many :: Parser a -> Parser [a]
 many p = many1 p +++ return []
 
--- parses 1 or more elements
+
+-- | Parses 1 or more elements.
 many1 :: Parser a -> Parser [a]
 many1 p = do
-  a <- p
+  a  <- p
   as <- many p
   return (a:as)
 
--- parses 0 or more whitespace
+
+-- | Parses 0 or more whitespace.
 space :: Parser String
-space = many (sat isSpace)
+space = many (sat C.isSpace)
 
+-- | Parsers 1 or more whitespace.
 space1 :: Parser String
-space1 = many1 (sat isSpace)
+space1 = many1 (sat C.isSpace)
 
--- trims whitespace between an expression
+
+-- | Trims whitespace between an expression.
 spaces :: Parser a -> Parser a 
 spaces p = do
   space
@@ -82,31 +118,41 @@ spaces p = do
   space
   return x
 
--- parses a single string
+
+-- | Parses a single string.
 symb :: String -> Parser String
 symb = string
 
--- apply a parser to a string
-apply :: Parser a -> String -> [(a,String)]
-apply p = parse (do {space; p})
 
--- 1 or more chars
+-- | Apply a parser to a string.
+apply :: Parser a -> String -> [(a,String)]
+apply = parse
+
+
+-- | set of reserved words for PCF
+keywords :: [String]
+keywords = ["let", "=", ":", "Nat", "z", "s", "p", "if", "Y"] 
+
+
+-- | 1 or more chars
 str :: Parser String
 str = do 
-  s <- many1 $ sat isLower
-  if elem s ["let", "=", ":", "Nat"
-    , "z", "s", "p", "if", "Y"] then zerop else return s
+  s <- many1 $ sat C.isLower
+  if s `elem` keywords 
+     then zerop 
+     else return s
 
--- left recursion 
+
+-- | Left recursion. 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
-p `chainl1` op = do {a <- p; rest a}
-  where
-    rest a = (do 
-      f <- op
-      b <- p
-      rest (f a b)) +++ return a
+p `chainl1` op = let rest a = (do f <- op
+                                  b <- p
+                                  rest (f a b)) +++ return a
+                 in do a <- p
+                       rest a 
 
--- bracket parses away brackets as you'd expect
+
+-- | Parses away brackets as you'd expect.
 bracket :: Parser a -> Parser a
 bracket p = do
   symb "("
@@ -116,28 +162,40 @@ bracket p = do
 
 --Parser very similar to System T
 
--- top level CFG for arrow types are "(X -> Y)" packaged up
+
+-- | Top level CFG for arrow types are "(X -> Y)" packaged up
+typTerm :: Parser PCF.T
 typTerm = (do
   x <- typExpr
   spaces (symb "->")
   y <- typTerm
-  return $ TArr x y) +++ typExpr
+  return $ PCF.TArr x y) +++ typExpr
 
--- type vars are "o" packaged up 
+
+-- | type vars are "Nat" packaged up 
+typVar :: Parser PCF.T
 typVar = do
   symb "Nat"
-  return TNat
+  return PCF.TNat
 
--- second level of CFG for types
-typExpr = (bracket typTerm) +++ typVar
 
--- parser for term variables
-termVar = do
-  x <- str
-  return $ Var x
+-- | Second level of CFG for types
+typExpr :: Parser PCF.T
+typExpr = bracket typTerm +++ typVar
 
--- abstraction allows escape backslash or lambda
-lambdas = ['\x03bb','\\', 'λ']
+
+-- | Parser for term variables
+termVar :: Parser PCF.PCFTerm
+termVar = PCF.Var <$> str
+
+
+-- | Abstraction allows escaped backslash or lambda
+lambdas :: String
+lambdas = ['\x03bb','\\']
+
+
+-- | Lam parser parses abstractions
+lam :: Parser PCF.PCFTerm
 lam = do 
   spaces $ identifier lambdas
   x <- str
@@ -145,14 +203,18 @@ lam = do
   t <- typTerm
   spaces (symb ".")
   e <- spaces term
-  return $ Abs x t e
+  return $ PCF.Abs x t e
 
--- app has zero or more spaces
-app = (chainl1 expr $ do
+
+-- | App parses application terms, with one or more spaces in between terms.
+app :: Parser PCF.PCFTerm
+app = chainl1 expr $ do
   space1
-  return $ App) 
+  return PCF.App
 
--- parser for let expressions
+
+-- | Parser for let expressions
+pLet :: Parser (String, PCF.PCFTerm)
 pLet = do
   space
   symb "let"
@@ -162,40 +224,59 @@ pLet = do
   t <- term 
   return (v,t)
 
+
+-- | Parser for regular terms.
+pTerm :: Parser (String, PCF.PCFTerm)
 pTerm = do
   t <- term 
   return ("", t)
 
--- could probably refactor this, but it doesn't matter too much
+
+-- | Parser for the zero term
+zero :: Parser PCF.PCFTerm
 zero = do 
   char 'z'
-  return Zero
+  return PCF.Zero
 
+
+-- | Parser for the recursor term
+rec :: Parser PCF.PCFTerm
 rec = do
   symb "Y"
-  return Y
+  return PCF.Y
 
+
+-- | Parser for the succ term
+succ :: Parser PCF.PCFTerm
 succ = do
   char 's'
-  return $ Succ
+  return  PCF.Succ
 
+
+-- | Parser for the pred term
+pred :: Parser PCF.PCFTerm
 pred = do
   char 'p'
-  return $ Pred
+  return PCF.Pred
 
+
+-- | Parser for the if term
+if_ :: Parser PCF.PCFTerm
 if_ = do
   symb "if"
-  return $ If
+  return PCF.If
 
--- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termVar +++ zero +++ rec
+-- | Expression follows CFG form with bracketing convention.
+expr :: Parser PCF.PCFTerm
+expr = bracket term +++ termVar +++ zero +++ rec
   +++ Parser.pred +++ Parser.succ +++ if_
 
--- top level of CFG Gramma
+
+-- | Top level of CFG Grammar
+term :: Parser PCF.PCFTerm
 term = lam +++ app
 
--- identifies key words
-identifier :: [Char] -> Parser Char 
-identifier xs = do
-  x <- sat (\x -> elem x xs)
-  return x
+
+-- | Identifies key words.
+identifier :: String -> Parser Char 
+identifier xs = sat (`elem` xs)
