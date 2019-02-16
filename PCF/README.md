@@ -6,6 +6,8 @@ PCF is considered to be a simplified version of modern functional languages such
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
 
+_Optional_: If you want to run the tests for this module, you'll need [QuickCheck](http://hackage.haskell.org/package/QuickCheck-2.12.6.1/docs/Test-QuickCheck.html#v:label).
+
 ## To Build & Run
 
 To compile and run do:
@@ -164,6 +166,7 @@ or in other words:
 - Parser.hs contains the monadic parser combinators needed to parse input strings into typed-term ASTs for the calculus.
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser.
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
+- Tests.hs is the test suite. We have unit tests for terms in the language. QuickCheck is used to generate arbitrary trees and test they are parsed and printed correctly.
 
 For contributions, see the project to-do list or submit a PR with something you think it needs.
 
