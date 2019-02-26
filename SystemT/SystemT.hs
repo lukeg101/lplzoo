@@ -7,7 +7,7 @@ Maintainer  : mail@lukegeeson.com
 Stability   : stable
 Portability : POSIX
 
-The "SystemT" module denotes the tree types of the untyped lambda calculus. This languages is implemented as a deep embedding into Haskell, with all the canonical helper functions it needs.
+The "SystemT" module denotes the AST of Kurt Godel's T. This languages is implemented as a deep embedding into Haskell, with all the canonical helper functions it needs.
 -}
 module SystemT where
 
@@ -336,30 +336,37 @@ reductions t = case reduce1 t of
 
 
 -- | Identity function for nats
+iNat :: T -> STTerm
 iNat t = Abs "x" t (Var "x")
 
 
 -- | true
+true :: T -> T -> STTerm
 true t f = Abs "x" t (Abs "y" f (Var "x"))
 
 
 -- | false
-false t f= Abs "x" t (Abs "y" f (Var "y"))
+false :: T -> T -> STTerm
+false t f = Abs "x" t (Abs "y" f (Var "y"))
 
 
 -- | xx combinator (won't type check)
+xx :: STTerm
 xx = Abs "x" (TArr TNat TNat) (App (Var "x") (Var "x")) --won't type check as expected
 
 
 -- | omega combinator, won't type check
+omega :: STTerm
 omega = App xx xx --won't type check, see above
 
 
 -- | if combinator
+_if :: STTerm -> STTerm -> STTerm -> STTerm
 _if c t = App (App c t)
 
 
 -- | isZero
+isZero :: STTerm -> T -> T -> STTerm
 isZero Zero = true
 isZero _    = undefined 
 
@@ -372,7 +379,7 @@ toPeano n = App Succ (toPeano (n-1))
 
 -- | Function converting Peano nat to Haskell Int
 toInt :: STTerm -> Int
-toInt Zero = 0
+toInt Zero         = 0
 toInt (App Succ n) = 1 + toInt n
-toInt _ = error "Not Nat"
+toInt _            = error "Not Nat"
 

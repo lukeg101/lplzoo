@@ -98,8 +98,8 @@ formatTerm :: STTerm -> Environment -> STTerm
 formatTerm t1 env = foldl 
   (\t (v,t2) -> 
     if v `elem` vars t1 
-    then substitute t (Var v, t2) 
-    else t) t1 $ M.assocs env
+      then substitute t (Var v, t2) 
+      else t) t1 $ M.assocs env
 
 
 -- | Function prepends ~> arrows or prints existing term if no reds occur

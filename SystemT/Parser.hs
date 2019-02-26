@@ -263,6 +263,7 @@ expr = bracket term +++ termVar +++ zero +++ Parser.succ +++ rec
 term :: Parser SystemT.STTerm
 term = lam +++ app
 
+
 -- | Identifies key words.
 identifier :: String -> Parser Char 
 identifier xs = sat (`elem` xs)
