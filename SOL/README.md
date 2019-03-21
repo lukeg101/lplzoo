@@ -71,7 +71,7 @@ Note: this is succ zero (or one) in Church numeral format
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
 >   tpack {Nat, {init=0, set=\x:Nat.x}} as EX.{init:X, set:X->X}
-∃X,{init:X, set:X->X}
+∃X.{init:X, set:X->X}
 >   tLX.\x:X. x
 ∀X.X->X
 >   tLX.\x:X. x x
@@ -84,7 +84,7 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 You can save terms for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
 ```
 >   let foo = pack {Nat, {init=0, set=\x:Nat.x}} as EX.{init:X, set:X->X}
-Saved term: pack {Nat, {init=0, set=λx:Nat.x}} as ∃X,{init:X, set:X->X}
+Saved term: pack {Nat, {init=0, set=λx:Nat.x}} as ∃X.{init:X, set:X->X}
 >   unpack {X,body} = foo in body
 ~>* {init=0, set=λx:Nat.x}
 >   unpack {X,body} = foo in body.init
@@ -96,9 +96,9 @@ Note: Consequently `let` and `=` are keywords, and so you cannot name variables 
 Additionally we have type level `lett` statements that allow you to define and use types:
 ```
 >   lett REGISTER = EX.{init:X, set:X->X}
-Saved type: ∃X,{init:X, set:X->X}
+Saved type: ∃X.{init:X, set:X->X}
 >   let reg = pack {Nat, {init=0, set=λx:Nat.x}} as REGISTER
-Saved term: pack {Nat, {init=0, set=λx:Nat.x}} as ∃X,{init:X, set:X->X}
+Saved term: pack {Nat, {init=0, set=λx:Nat.x}} as ∃X.{init:X, set:X->X}
 >   unpack {R,register} = reg in register.init
 ~>* 0
 ```
@@ -109,7 +109,6 @@ This makes it easier to define both terms and types, but does not allow type lev
 We base the language on the BNF for the typed calculus:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\mu.\tau\\&space;&|&&space;[\sigma]&space;&&\\&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}/fst\,\tau\\&space;&|&&space;\pi_{2}/snd\,\tau\\\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&&space;|&space;&&space;\Lambda&space;\mu.\tau\\&space;&|&&space;[\sigma]&space;&&\\&|&&space;inl\,\tau:\sigma\\&space;&|&&space;inr\,\tau:\sigma\\&space;&|&&space;case\,\tau\,\tau\,\tau\\&space;&|&&space;(\tau,&space;\tau)\\&space;&|&&space;\pi_{1}/fst\,\tau\\&space;&|&&space;\pi_{2}/snd\,\tau\\\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ & | & \Lambda \mu.\tau\\ &|& [\sigma] &&\\&|& inl\,\tau:\sigma\\ &|& inr\,\tau:\sigma\\ &|& case\,\tau\,\tau\,\tau\\ &|& (\tau, \tau)\\ &|& \pi_{1}/fst\,\tau\\ &|& \pi_{2}/snd\,\tau\end{matrix}" /></a>
-
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;&|&&space;\tt{true}&space;&&\\&space;&|&&space;\tt{false}&space;&&\\&space;&|&&space;\eta&space;&&\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;pack\,\{\sigma,\tau&space;\}\,&space;as\,&space;\sigma&space;\\&space;&|&&space;unpack\,\{\mu,\upsilon&space;\}\,=\tau\,&space;as\,&space;\tau&space;\\&space;\\\eta&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{3}&space;|&space;...&space;|&space;\tt{42}&space;|&space;...&space;\\\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;&|&&space;\tt{true}&space;&&\\&space;&|&&space;\tt{false}&space;&&\\&space;&|&&space;\eta&space;&&\\&space;&|&&space;\{\upsilon=&space;\tau,...\}&space;\\&space;&|&\tau&space;.&space;\upsilon\\&space;&|&&space;pack\,\{\sigma,\tau&space;\}\,&space;as\,&space;\sigma&space;\\&space;&|&&space;unpack\,\{\mu,\upsilon&space;\}\,=\tau\,&space;as\,&space;\tau&space;\\&space;\\\eta&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{3}&space;|&space;...&space;|&space;\tt{42}&space;|&space;...&space;\\\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} &|& \tt{true} &&\\ &|& \tt{false} &&\\ &|& \eta &&\\ &|& \{\upsilon= \tau,...\} \\ &|&\tau . \upsilon\\ &|& pack\,\{\sigma,\tau \}\, as\, \sigma \\ &|& unpack\,\{\mu,\upsilon \}\,=\tau\, as\, \tau \\ \\\eta & ::= & \tt{0} | \tt{1} | \tt{3} | ... | \tt{42} | ... \\\upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ... \end{matrix}" /></a>
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\mu&space;}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\forall&space;\mu&space;.&space;\sigma\\&space;&|&\exists&space;\mu&space;.&space;\sigma\\&space;&|&&space;Nat\\&space;&|&Bool\\&|&\{\mathbf{\upsilon}\tt{:}\sigma,...\}\\\\&space;\mu&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;\\&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;{\tt&space;\mu&space;}\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma\\&space;&|&&space;\forall&space;\mu&space;.&space;\sigma\\&space;&|&\exists&space;\mu&space;.&space;\sigma\\&space;&|&&space;Nat\\&space;&|&Bool\\&|&\{\mathbf{\upsilon}\tt{:}\sigma,...\}\\\\&space;\mu&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;\\&space;\end{matrix}" title="\begin{matrix} \sigma & ::= & {\tt \mu }\\ & | & \sigma \rightarrow \sigma\\ &|& \forall \mu . \sigma\\ &|&\exists \mu . \sigma\\ &|& Nat\\ &|&Bool\\&|&\{\mathbf{\upsilon}\tt{:}\sigma,...\}\\\\ \mu & ::= & \tt{A} | \tt{B} | \tt{C} | ... | \tt{AA} | ... \\ \end{matrix}" /></a>

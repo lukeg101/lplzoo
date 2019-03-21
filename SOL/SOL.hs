@@ -95,7 +95,7 @@ instance Show T where
   show (TForall t1 t2)  
     = "\x2200" ++ t1 ++ "." ++ show t2
   show (TExists t1 t2)  
-    = "\x2203" ++ t1 ++ "," ++ show t2
+    = "\x2203" ++ t1 ++ "." ++ show t2
   show (TProd a b)= paren (isArr a) (show a)
     ++ " \x00D7 " ++ paren (isArr b) (show b)
   show (TSum a b) = paren (isTProd a || isArr a) (show a)
