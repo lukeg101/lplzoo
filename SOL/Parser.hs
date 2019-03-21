@@ -301,7 +301,7 @@ typExists :: Parser S.T
 typExists = do
   identifier $ exists
   v <- strT
-  spaces $ symb ","
+  spaces $ symb "."
   ty <- typTerm
   return $ S.TExists v ty
   
@@ -309,7 +309,7 @@ typExists = do
 -- | Top level CFG for types are "(X -> Y)" packaged up
 typTerm :: Parser S.T
 typTerm = typAbs +++ typeArr
-  +++ angbracket typExists  +++ typExpr
+  +++ typExists  +++ typExpr
 
 
 -- | Second level CFG for sums
