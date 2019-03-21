@@ -75,7 +75,7 @@ typeEquality (TExists x1 t1, TExists x2 t2) (m1, m2) s
 typeEquality (TNat, TNat)   _ _ = True
 typeEquality (TBool, TBool) _ _ = True
 typeEquality (TProd a1 a2, TProd b1 b2) c s 
-  = typeEquality (a1, a2) c s && typeEquality (b1, b2) c s
+  = typeEquality (a1, b1) c s && typeEquality (a2, b2) c s
 typeEquality (TSum a1 a2, TSum b1 b2) c s 
   = typeEquality (a1, a2) c s && typeEquality (b1, b2) c s
 typeEquality (TRec r1, TRec r2) _ _ 
@@ -144,6 +144,7 @@ data SOLTerm
   | Nat Int  -- Add prims to demo the records idea
   | BTrue
   | BFalse
+  | If
   | Typ T
   | Abs VarName T SOLTerm
   | App SOLTerm SOLTerm
@@ -225,6 +226,7 @@ termEquality (Case, Case) _ _     = True
 termEquality (BTrue, BTrue) _ _   = True
 termEquality (BFalse, BFalse) _ _ = True
 termEquality (Nat x, Nat y) _ _   = x == y
+termEquality (If, If) _ _         = True
 termEquality _ _ _                = False
 
 
@@ -234,6 +236,7 @@ instance Show SOLTerm where
   show (Var x)      = x
   show BTrue        = "true"
   show BFalse       = "false"
+  show If           = "if"
   show (Nat n)      = show n
   show (Typ t)      = "[" ++ show t ++"]"
   show (App l1 (Proj x)) = show l1 ++ "." ++ x
@@ -316,6 +319,13 @@ typeof :: SOLTerm -> Context -> Maybe T
 typeof (Nat _) _ = return TNat
 typeof BTrue   _ = return TBool
 typeof BFalse  _ = return TBool 
+typeof (App (App (App If l2) l3) l4) ctx 
+  = case typeof l2 ctx of
+      Just TBool -> do t3 <- typeof l3 ctx
+                       t4 <- typeof l4 ctx
+                       Monad.guard (t3 == t4)
+                       Just t3
+      _          -> Nothing
 typeof (Var v) ctx 
   = Monad.join $ M.lookup v ctx
 typeof (Typ _) _ 
@@ -658,6 +668,13 @@ reduce1 (App (App (App Case (App (Inr _) l1)) _) g)
   = return $ App g l1 -- case (inr x) f g ~> g x
 reduce1 (App (Forall x1 t) (Typ x2)) 
   = Just $ tSubUnder t (TVar x1, x2)  --type-level beta-reduction
+reduce1 (App (App (App If BTrue) l3) _) 
+  = Just l3
+reduce1 (App (App (App If BFalse) _) l4) 
+  = Just l4
+reduce1 (App (App (App If l2) l3) l4) 
+  = do l2' <- reduce1 l2
+       Just $ App (App (App If l2') l3) l4
 reduce1 (App l1 l2) 
   = case reduce1 l1 of 
       Just l' -> Just $ App l' l2
@@ -675,9 +692,9 @@ reduce1 (Rec l1)
 reduce1 (Pack ty1 t ty2)
   = do t' <- reduce1 t
        return $ Pack ty1 t' ty2
-reduce1 ((Unpack x1 y1 (Pack ty1 t1 ty2) t2))
+reduce1 ((Unpack x1 y1 (Pack ty1 t1 _) t2))
   = let t2' = substitute t2 (Var x1, t1)
-    in Just $ tSubUnder t2' (TVar y1, ty1)  
+    in Just $ tSubUnder t2' (TVar y1, ty1)
 reduce1 (Unpack x y t1 t2)
   = case (reduce1 t1, reduce1 t2) of
       (Just t1', Nothing) -> return $ Unpack x y t1' t2

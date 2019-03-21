@@ -151,7 +151,7 @@ keywords = ["let", "lett", "=", ".", ":","L", "[", "]", "P",
   "true", "false", "fst", "snd", "inl", "inr", "case", 
   "\x03C0"++"1", "\x03C0"++"2", "\x00D7", "*", "+",
   "Nat", "Bool", "{", "}", "pack", "as", "E", "(", ")",
-  "unpack", "in"] 
+  "unpack", "in", "if", "then", "else"] 
 
 
 -- | 1 or more chars
@@ -350,6 +350,17 @@ termFalse = do spaces $ symb "false"
                return S.BFalse
 
 
+-- | Parser for if expressions
+termIf :: Parser S.SOLTerm
+termIf = do spaces $ symb "if"
+            t1 <- expr
+            spaces $ symb "then" 
+            t2 <- expr
+            spaces $ symb "else"
+            t3 <- expr
+            return $ S.App (S.App (S.App S.If t1) t2) t3
+
+
 -- | Parser for records
 termRec :: Parser S.SOLTerm
 termRec = do
@@ -534,7 +545,7 @@ expr :: Parser S.SOLTerm
 expr = termTyp +++ termProj +++ termRec
   +++ termInl +++ termInr +++ termCase
   +++ termProd +++ termPrj1 +++ termPrj2
-  +++ termTrue +++ termFalse
+  +++ termTrue +++ termFalse +++ termIf
   +++ termNat +++ termVar 
   +++ bracket term
 
