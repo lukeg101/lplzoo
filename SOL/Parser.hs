@@ -230,18 +230,18 @@ typBool = do spaces (symb "Bool")
 -- | Parser Sum types
 typSum :: Parser S.T
 typSum = do
-  t1 <- spaces $ typExpr2
+  t1 <- spaces typExpr2
   symb "+"
-  t2 <- spaces $ typExpr2
+  t2 <- spaces typExpr2
   return $ S.TSum t1 t2
 
 
 -- | Parser for Product type 
 typProd :: Parser S.T
 typProd = do
-  t1 <- spaces $ typExpr3
+  t1 <- spaces typExpr3
   identifier ['\x00D7', '*']
-  t2 <- spaces $ typExpr3
+  t2 <- spaces typExpr3
   return $ S.TProd t1 t2
 
 
@@ -299,7 +299,7 @@ exists = ['\x2203', 'E']
 -- | Parser for existential types
 typExists :: Parser S.T
 typExists = do
-  identifier $ exists
+  identifier exists
   v <- strT
   spaces $ symb "."
   ty <- typTerm
@@ -392,24 +392,27 @@ termProj = do
   return $ S.App r (S.Proj x)
 
 
+-- | Parser for sums
+termIn :: Bool -> Parser S.SOLTerm
+termIn b
+  = let (s,c) = if b 
+                  then ("inl", S.Inl)
+                  else ("inr", S.Inr)
+    in do spaces $ symb s
+          l1 <- term
+          spaces $ symb ":"
+          t1 <- typTerm
+          return $ S.App (c t1) l1
+
+
 -- | Parser for inl sums
 termInl :: Parser S.SOLTerm
-termInl = do
-  spaces $ symb "inl"
-  l1 <- term
-  spaces $ symb ":"
-  t1 <- typTerm
-  return $ S.App (S.Inl t1) l1
+termInl = termIn True
 
 
 -- | Parser for inl sums
 termInr :: Parser S.SOLTerm
-termInr = do
-  spaces $ symb "inr"
-  l1 <- term
-  spaces $ symb ":"
-  t1 <- typTerm
-  return $ S.App (S.Inr t1) l1
+termInr = termIn False
 
 
 -- | Parser for case statements

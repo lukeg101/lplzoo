@@ -692,7 +692,7 @@ reduce1 (Rec l1)
 reduce1 (Pack ty1 t ty2)
   = do t' <- reduce1 t
        return $ Pack ty1 t' ty2
-reduce1 ((Unpack x1 y1 (Pack ty1 t1 _) t2))
+reduce1 (Unpack x1 y1 (Pack ty1 t1 _) t2)
   = let t2' = substitute t2 (Var x1, t1)
     in Just $ tSubUnder t2' (TVar y1, ty1)
 reduce1 (Unpack x y t1 t2)
