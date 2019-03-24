@@ -145,7 +145,7 @@ Some notes about the syntax:
 - Records are generalised products formed as comma-separated sequence of assignments of terms to labels `t=v`, nested inside curly braces `{u=1, idnat=\a:Nat.a}`. Record types are comma-separated assignments of typings to labels `t:v`, nested inside curly braces (such as `{1:Nat, f:Nat->Nat}`).
 - Types are uppercase strings as they must be distinct from term variables.
 - You can introduce a universal type with `Λ` or `L` much like you would use a function abstraction.
-- You can introduce existential types with the `pack {T2,t} as T2` construct. This construct takes a concrete type `T1` like `Nat`, a term `t`, and an existential type `T2`.
+- You can introduce existential types with the `pack {T1,t} as T2` construct. This construct takes a concrete type `T1` like `Nat`, a term `t`, and an existential type `T2`.
 - Products have the highest precedence, followed by sums, arrows, and then all other types.
 - Types are either type variables, abstractions, or nested arrow types: `T -> T`. Arrows associate to the right so that `T -> T -> T` is the same as `T -> (T -> T)` but not `((T -> T) -> T)`. The product binds weaker than arrows, so `∀X.X->X` is the same as `∀X.(X->X)`. 
 - Nested terms don't need brackets: `LX.LY.\x:X.\y:Y. y` unless enforcing application on the right. Whitespace does not matter `LX.\x:X.          x` unless it is between application where you need at least one space.
