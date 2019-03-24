@@ -260,7 +260,7 @@ typAbs = do
   return $ S.TForall x t
 
 
--- | Parsr for arrow types are "(X -> Y)" packaged up
+-- | Parser for arrow types are "(X -> Y)" packaged up
 typeArr :: Parser S.T
 typeArr = do
   x <- typExpr
@@ -308,8 +308,8 @@ typExists = do
 
 -- | Top level CFG for types are "(X -> Y)" packaged up
 typTerm :: Parser S.T
-typTerm = typAbs +++ typeArr
-  +++ typExists  +++ typExpr
+typTerm = typAbs +++ typExists 
+    +++ typeArr +++ typExpr
 
 
 -- | Second level CFG for sums
@@ -448,7 +448,7 @@ termTyp = S.Typ <$> sqbracket (spaces typTerm)
 -- | Parser for pack statements
 termPack :: Parser S.SOLTerm
 termPack
-  = let pair = do ty <- spaces typExpr
+  = let pair = do ty <- spaces typTerm
                   symb ","
                   t <- spaces term 
                   return (t,ty)

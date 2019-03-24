@@ -74,8 +74,8 @@ There is also a typing mechanism, which should display the type or fail as usual
 ∃X.{init:X, set:X->X}
 >   tLX.\x:X. x
 ∀X.X->X
->   tLX.\x:X. x x
-Cannot Type Term: LX.\x:X. x x
+>   unpack {B,b} = (pack {Bool, \b:Bool.b} as EX.X->X) in b true
+Cannot Type Term: unpack {"b", "B"} = pack {Bool, λb:Bool.b} as ∃X.X->X in b true
 ```
 where `∀Y.(Y->Y)->Y->Y` is equivalent to the System F/SOL type for `Nats`.
 
@@ -234,6 +234,11 @@ Finally, we have special introduction and elimination rules for existentials:
 As well as sensible reduction rules under pack/unpack statements. 
 
 - This means the typing context now also contains types, and types occur in terms. The phrase `X Type` means X is a type. We do not implement Agda style type hierarchies here.
+- Variables, abstraction, sums, products, booleans, and Nats follow semantics that are fairly standard in the literature.
+- Records are typeable only if all of their subterms are typeable and all of the labels are unique. We leverage the STLC typing rules and the subtyping relation to ensure record fields are typeable.
+- Projections are typeable only if it is applied to a term which is a well-typed record and the projection label (`x` in `{x=2}.x`) explicitly matches a label in that record.
+- The pack statement enables you to package up a witness type `T1` with a term `t`. The witness type here is known as the hidden representation type which must be provided as the type checker cannot infer the type of an existential in general. For instance `pack {Nat, {z=\x:Nat.x}} as EX.{z:X->X}` has existential type `∃X.{z:X->X}` but also `∃X.{z:Nat->X}`. We can then pass this into a function as a 'module' of sorts, where any term with a witness type to a given interface can be used.
+- We can use existential types by `unpack`ing them. This construct takes an existential type, binding them to the type variable `X` and a term variable `x`. We may then use `x` in the body of the expression. However, the representation type is hidden during typechecking so that we may only use operations allowed by the abstract type in the body. This enforces that uses adhere to an interface so that concrete implementations may be swapped out as needed without breaking abstraction boundaries.
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitutite` in SOL.hs). The variable convention is adopted for both types and terms.
 - Reductions include the one-step reduction (see `reduce1` in SOL.hs), the many-step reduction (see `reduce` in SOL.hs). 
 
@@ -245,6 +250,5 @@ As well as sensible reduction rules under pack/unpack statements.
 
 For contributions, see the project to-do list or submit a PR with something you think it needs.
 
-Work initially documented [here](https://gist.github.com/lukeg101/f1c13024cf9ccbeaff3c3553baca037f).
 
 
