@@ -157,24 +157,71 @@ The semantics implements beta-reduction on terms and alpha-equivalence as the `E
 
 for variables (adopted from STLC):
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;x:T},\quad&space;\mbox{(if&space;$x:T&space;\in&space;\Gamma$)}" title="\overline{\Gamma \vdash x:T},\quad \mbox{(if $x:T \in \Gamma$)}" /></a>
 
 for abstractions (adopted from STLC):
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;,x:A&space;\vdash&space;t:B}{\Gamma&space;\vdash&space;(\lambda&space;x&space;:&space;A.&space;t)&space;:&space;B&space;}" title="\frac{\Gamma ,x:A \vdash t:B}{\Gamma \vdash (\lambda x : A. t) : B }" /></a>
 
 and application (adopted from STLC):
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;A&space;\Rightarrow&space;B\quad&space;\Gamma&space;\vdash&space;x&space;:&space;A}{\Gamma&space;\vdash&space;(f&space;x)&space;:&space;B}" title="\frac{\Gamma \vdash f : A \Rightarrow B\quad \Gamma \vdash x : A}{\Gamma \vdash (f x) : B}" /></a>
 
 and the reduction relation (adopted from STLC):
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)N \rightsquigarrow M [x := N]" /></a>
 
 and special introduction, elimination, and reduction rules for types:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma\,,&space;X\,&space;Type&space;\vdash&space;t&space;:&space;T}{\Gamma&space;\vdash&space;(\Lambda&space;X.t):\Pi&space;X.T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma\,,&space;X\,&space;Type&space;\vdash&space;t&space;:&space;T}{\Gamma&space;\vdash&space;(\Lambda&space;X.t):\Pi&space;X.T}" title="\frac{\Gamma\,, X\, Type \vdash t : T}{\Gamma \vdash (\Lambda X.t):\Pi X.T}" /></a>
 
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;X.T}{\Gamma&space;\vdash&space;(f\,&space;A):T[X&space;:=&space;A]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;X.T}{\Gamma&space;\vdash&space;(f\,&space;A):T[X&space;:=&space;A]}" title="\frac{\Gamma \vdash f : \Pi X.T}{\Gamma \vdash (f\, A):T[X := A]}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\Lambda&space;X.t)\,A&space;\rightsquigarrow&space;t[X:=A]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\Lambda&space;X.t)\,A&space;\rightsquigarrow&space;t[X:=A]" title="(\Lambda X.t)\,A \rightsquigarrow t[X:=A]" /></a>
+
+We have special introduction, elimination and reduction rules for products:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;a&space;:&space;A\quad&space;\Gamma&space;\vdash&space;b&space;:&space;B}{\Gamma&space;\vdash&space;(a,b):A\times&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;a&space;:&space;A\quad&space;\Gamma&space;\vdash&space;b&space;:&space;B}{\Gamma&space;\vdash&space;(a,b):A\times&space;B}" title="\frac{\Gamma \vdash a : A\quad \Gamma \vdash b : B}{\Gamma \vdash (a,b):A\times B}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;p:A\times&space;B}{\Gamma&space;\vdash&space;\pi_{1}\,p:A}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;p:A\times&space;B}{\Gamma&space;\vdash&space;\pi_{1}\,p:A}" title="\frac{\Gamma \vdash p:A\times B}{\Gamma \vdash \pi_{1}\,p:A}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;p:A\times&space;B}{\Gamma&space;\vdash&space;\pi_{2}\,p:B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;p:A\times&space;B}{\Gamma&space;\vdash&space;\pi_{2}\,p:B}" title="\frac{\Gamma \vdash p:A\times B}{\Gamma \vdash \pi_{2}\,p:B}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\pi_{1}(a,b)&space;\rightsquigarrow&space;a" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\pi_{1}(a,b)&space;\rightsquigarrow&space;a" title="\pi_{1}(a,b) \rightsquigarrow a" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\pi_{2}(a,b)&space;\rightsquigarrow&space;b" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\pi_{2}(a,b)&space;\rightsquigarrow&space;b" title="\pi_{2}(a,b) \rightsquigarrow b" /></a>
+
+for sums:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;a:A}{\Gamma&space;\vdash&space;inl\,a&space;:&space;A&space;&plus;&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;a:A}{\Gamma&space;\vdash&space;inl\,a&space;:&space;A&space;&plus;&space;B}" title="\frac{\Gamma \vdash a:A}{\Gamma \vdash inl\,a : A + B}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;b:B}{\Gamma&space;\vdash&space;inr\,b&space;:&space;A&space;&plus;&space;B}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;b:B}{\Gamma&space;\vdash&space;inr\,b&space;:&space;A&space;&plus;&space;B}" title="\frac{\Gamma \vdash b:B}{\Gamma \vdash inr\,b : A + B}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;s:&space;A&plus;B\quad\Gamma\vdash&space;f&space;:A\rightarrow&space;X\quad\Gamma\vdash&space;g:B\rightarrow&space;X}{\Gamma&space;\vdash&space;case\,&space;s\,&space;f\,&space;g:X}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;s:&space;A&plus;B\quad\Gamma\vdash&space;f&space;:A\rightarrow&space;X\quad\Gamma\vdash&space;g:B\rightarrow&space;X}{\Gamma&space;\vdash&space;case\,&space;s\,&space;f\,&space;g:X}" title="\frac{\Gamma \vdash s: A+B\quad\Gamma\vdash f :A\rightarrow X\quad\Gamma\vdash g:B\rightarrow X}{\Gamma \vdash case\, s\, f\, g:X}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=case\,(inl\,&space;a)\,f\,g\rightsquigarrow\,f\,a" target="_blank"><img src="https://latex.codecogs.com/gif.latex?case\,(inl\,&space;a)\,f\,g\rightsquigarrow\,f\,a" title="case\,(inl\, a)\,f\,g\rightsquigarrow\,f\,a" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=case\,(inr\,&space;b)\,f\,g\rightsquigarrow\,g\,b" target="_blank"><img src="https://latex.codecogs.com/gif.latex?case\,(inr\,&space;b)\,f\,g\rightsquigarrow\,g\,b" title="case\,(inr\, b)\,f\,g\rightsquigarrow\,g\,b" /></a>
+
+Next, there is a special elimination rule for records:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t_i&space;:&space;T_i}{\forall&space;i.\,\Gamma&space;\vdash&space;\{l_i=t_i&space;\}:\{l_i:T_i\}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t_i&space;:&space;T_i}{\forall&space;i.\,\Gamma&space;\vdash&space;\{l_i=t_i&space;\}:\{l_i:T_i\}}" title="\frac{\forall i .\,\Gamma \vdash t_i : T_i}{\forall i.\,\Gamma \vdash \{l_i=t_i \}:\{l_i:T_i\}}" /></a>
+
+with sensible structural (internal) reduction rules for terms inside records. Lastly we have rules for record projections:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t&space;:&space;\{l_i:T_i\}}{\forall&space;i.\,\Gamma&space;\vdash&space;t.l_i&space;:&space;T_i}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\forall&space;i&space;.\,\Gamma&space;\vdash&space;t&space;:&space;\{l_i:T_i\}}{\forall&space;i.\,\Gamma&space;\vdash&space;t.l_i&space;:&space;T_i}" title="\frac{\forall i .\,\Gamma \vdash t : \{l_i:T_i\}}{\forall i.\,\Gamma \vdash t.l_i : T_i}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{t&space;\rightsquigarrow&space;t'}{t.l&space;\rightsquigarrow&space;t'.l}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{t&space;\rightsquigarrow&space;t'}{t.l&space;\rightsquigarrow&space;t'.l}" title="\frac{t \rightsquigarrow t'}{t.l \rightsquigarrow t'.l}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\{l_i=t_i\}.l&space;\rightsquigarrow&space;t_i" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\{l_i=t_i\}.l&space;\rightsquigarrow&space;t_i" title="\{l_i=t_i\}.l \rightsquigarrow t_i" /></a>
+
+We have standard rules for Booleans and if statements:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;n:Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;n:Nat}" title="\overline{\Gamma \vdash n:Nat}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;b&space;:&space;Bool\quad&space;\Gamma&space;\vdash&space;t_{1}&space;:&space;T\quad&space;\Gamma&space;\vdash&space;t_{2}&space;:&space;T}{\Gamma&space;\vdash&space;\tt{if}\,b\,\tt{then}\,t_{1}\,\tt{else}\,t_{2}&space;:&space;T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;b&space;:&space;Bool\quad&space;\Gamma&space;\vdash&space;t_{1}&space;:&space;T\quad&space;\Gamma&space;\vdash&space;t_{2}&space;:&space;T}{\Gamma&space;\vdash&space;\tt{if}\,b\,\tt{then}\,t_{1}\,\tt{else}\,t_{2}&space;:&space;T}" title="\frac{\Gamma \vdash b : Bool\quad \Gamma \vdash t_{1} : T\quad \Gamma \vdash t_{2} : T}{\Gamma \vdash \tt{if}\,b\,\tt{then}\,t_{1}\,\tt{else}\,t_{2} : T}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex={\tt&space;if}\,{\tt&space;false\,&space;then}\,M\,{\tt&space;else}N&space;\rightsquigarrow&space;N&space;\newline&space;{\tt&space;if}\,{\tt&space;true\,&space;then}\,M\,{\tt&space;else}N&space;\rightsquigarrow&space;M" target="_blank"><img src="https://latex.codecogs.com/gif.latex?{\tt&space;if}\,{\tt&space;false\,&space;then}\,M\,{\tt&space;else}N&space;\rightsquigarrow&space;N&space;\newline&space;{\tt&space;if}\,{\tt&space;true\,&space;then}\,M\,{\tt&space;else}N&space;\rightsquigarrow&space;M" title="{\tt if}\,{\tt false\, then}\,M\,{\tt else}N \rightsquigarrow N \newline {\tt if}\,{\tt true\, then}\,M\,{\tt else}N \rightsquigarrow M" /></a>
 
 - This means the typing context now also contains types, and types occur in terms. The phrase `X Type` means X is a type. We do not implement Agda style type hierarchies here.
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitutite` in SOL.hs). The variable convention is adopted for both types and terms.
