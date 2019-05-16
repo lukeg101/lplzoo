@@ -1,5 +1,5 @@
 # Edinburgh Logical Framework (first-order dependent types)
-Haskell implementation of Bob Harper, Furio Honsell, and Gordon Plotkin's [Edinburgh Logical Framework](https://dl.acm.org/citation.cfm?id=138060) which captures first-order dependent types. It is STLC, but with a generalised Pi type, type-level application of terms, and type families. Dependent type machinery isn't useful on its own so we add Nats, and size-dependent Vectors of Nats to demonstrate how to instantiate types based on the size of their terms. We do not want to conflate LF with System F, and so do not include term-level types or polymorphism.
+Haskell implementation of Bob Harper, Furio Honsell, and Gordon Plotkin's [Edinburgh Logical Framework](https://dl.acm.org/citation.cfm?id=138060) which captures first-order dependent types. It is STLC, but with a generalised Pi type, type-level application of terms, and type families. Dependent type machinery isn't useful on its own so we add Nats, and size-dependent Vectors of Nats to demonstrate how to instantiate types based on the size of their terms. We do not want to conflate LF with [System F](https://github.com/lukeg101/lplzoo/tree/master/SystemF), and so do not include term-level types or polymorphism.
 
 This strongly normalising calculus works on the notion of terms that depend on types under the banner of [propositions as types](https://www.youtube.com/watch?v=SknxggwRPzU). Dependent types allow us to encode predicate logic in a language with programs as witness or proof of propositions. 
 
@@ -54,7 +54,7 @@ There is also a reduction tracer, which should print each reduction step. prefix
 ~>  cons (succ 0) 42 (cons 0 42 nil)
 ~>  cons 1 42 (cons 0 42 nil)
 ```
-Note: `Succ n` stands for the `succ`essor of `n`, [Peano](https://en.wikipedia.org/wiki/Peano_axioms) style.
+Note: `succ n` stands for the `succ`essor of `n`, [Peano](https://en.wikipedia.org/wiki/Peano_axioms) style.
 
 There is also a typing mechanism, which should display the type or fail as usual.
 ```
@@ -83,7 +83,7 @@ Saved type: Vec Nat 0
 >   (\x:VecZ.x) nil
 ~>* nil
 ```
-Submit a PR with eliminators for Vectors and Natural numbers!
+Submit a PR with eliminators for Vectors and Natural numbers, or perhaps some machinery to introduce term constructors of a given type.
 
 This makes it easier to define both terms and types, but does not allow type-level application (See Omega) or type-based polymorphism (see SystemF). `lett` is also a keyword.
 
@@ -91,7 +91,9 @@ This makes it easier to define both terms and types, but does not allow type-lev
 
 We base the language on the BNF for the typed calculus:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;{\tt&space;nil}&space;\\&space;&|&&space;{\tt&space;cons}\,\tau\,\tau\,\tau&space;\\&|&{\tt&space;succ}\,&space;\tau\\&|&\eta&space;\\&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...\\&space;\eta&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;|&space;\tt{42}&space;|&space;...&space;\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\sigma&space;.&space;\mathbf{\tau}\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;{\tt&space;nil}&space;\\&space;&|&&space;{\tt&space;cons}\,\tau\,\tau\,\tau&space;\\&|&{\tt&space;succ}\,&space;\tau\\&|&\eta&space;\\&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;\tt{c}&space;|&space;...&space;|&space;\tt{aa}&space;|&space;...\\&space;\eta&space;&&space;::=&space;&&space;\tt{0}&space;|&space;\tt{1}&space;|&space;\tt{2}&space;|&space;...&space;|&space;\tt{42}&space;|&space;...&space;\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\sigma . \mathbf{\tau}\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& {\tt nil} \\ &|& {\tt cons}\,\tau\,\tau\,\tau \\&|&{\tt succ}\, \tau\\&|&\eta \\&&\\ \upsilon & ::= & \tt{a} | \tt{b} | \tt{c} | ... | \tt{aa} | ...\\ \eta & ::= & \tt{0} | \tt{1} | \tt{2} | ... | \tt{42} | ... \end{matrix}" /></a>
+
+https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\sigma&space;&&space;::=&space;&&space;\lambda&space;\mathbf{\theta&space;}\tt{::}\kappa.\sigma\\&|&&space;\sigma\,{\tt&space;space}\,\sigma\\&space;&|&&space;\theta\\&space;&&space;|&space;&&space;\sigma&space;\rightarrow&space;\sigma&space;\\&space;&|&&space;Nat\\&space;&|&&space;\Pi&space;\theta::\kappa&space;.&space;\sigma\\&space;\\&space;\theta&space;&&space;::=&space;&&space;\tt{A}&space;|&space;\tt{B}&space;|&space;\tt{C}&space;|&space;...&space;|&space;\tt{AA}&space;|&space;...&space;\\&space;\end{matrix}
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar for terms as follows:
 
