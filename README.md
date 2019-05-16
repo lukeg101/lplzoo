@@ -12,6 +12,8 @@ The languages are written in Haskell and are intentionally simple. That is, they
 
 The intention here is to maximise your understanding of language design whilst minimising the need to understand Haskell. Of course it helps if you know it!
 
+See the [blog](https://lukegeeson.com/blog/2018-03-03-Lukes-Programming-Languages-Zoo/) for some more pointers and a fish!
+
 ## Languages
 
 1. [_ULC_](ULC/): Alonzo Church's [Untyped Lambda Calculus](https://en.wikipedia.org/wiki/Lambda_calculus) (Church Style)
