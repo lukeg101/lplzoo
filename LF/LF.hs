@@ -272,7 +272,7 @@ kindof TVec _
   = return $ KPi "_" TNat $ KPi "_" TNat KVar
 kindof (TPi x t1 t2) ctx
   = do k1 <- kindof t1 ctx
-       k2 <- kindof t2 (M.insert x (Right k1) ctx)
+       k2 <- kindof t2 (M.insert x (Left t1) ctx)
        return $ KPi x t1 k2
 kindof (TApp ty1 ty2) ctx
   = do (KPi x ty3 k1) <- kindof ty1 ctx
@@ -280,8 +280,8 @@ kindof (TApp ty1 ty2) ctx
                  TTerm x -> typeof x ctx
                  _       -> return ty2
        C.guard (ty2' == ty3)
-       kindof ty2 ctx
-       return $ subTypeInKind k1 (TVar x, ty2)       
+       kindof ty2' ctx
+       return $ subTypeInKind k1 (TVar x, ty2')   
 kindof (TTerm t1) ctx
   = do t <- typeof t1 ctx
        kindof t ctx
@@ -433,7 +433,7 @@ typeVars (TTerm t1)     = typeVarsInTerm t1
 
 -- | Type vars in a term
 typeVarsInTerm :: LFTerm -> S.Set VarName
-typeVarsInTerm (Var _)      = S.empty
+typeVarsInTerm (Var x)      = S.singleton x
 typeVarsInTerm Nil          = S.empty
 typeVarsInTerm Cons         = S.empty
 typeVarsInTerm (Nat _)      = S.empty

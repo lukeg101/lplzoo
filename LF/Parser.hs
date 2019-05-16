@@ -203,23 +203,16 @@ typLevelTerm :: Parser LF.T
 typLevelTerm = LF.TTerm <$> expr
                   
 
--- | Abstraction allows escaped 
-typeLambdas :: [String]
-typeLambdas = ["\x3a0", "Pi"]
-
-
 -- | Type-level abstractions
 typPi :: Parser LF.T
 typPi = do
-  x <- spaces strT
-  if x `elem` typeLambdas
-    then do x <- str
-            spaces (symb ":")
-            ty1 <- typTerm
-            spaces (symb ".")
-            ty2 <- typTerm
-            return $ LF.TPi x ty1 ty2
-    else zerop
+  spaces (symb "Pi" +++ symb "\x3a0")
+  x <- str
+  spaces (symb ":")
+  ty1 <- typExpr
+  spaces (symb ".")
+  ty2 <- typTerm
+  return $ LF.TPi x ty1 ty2
 
 
 -- | arrow types are non-dependent pi types

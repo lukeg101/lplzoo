@@ -33,9 +33,10 @@ Where you can then have some fun, try these examples:
 - `cons 0 1 nil` the singleton list of type `Vec Nat 1`
 - `cons 1 42 (cons 0 43 nil)` a two element list.
 - `(\n:Nat.cons n) 2 42` a function that takes a number and instantiates `cons 2` with type `Nat->Vec Nat 2->Vec Nat (succ 2)`. 42 is then applied to return a term of type `Vec Nat (succ 2)` 
-- `(\n:Nat. cons (succ n)) 0 42 (cons 0 9001 nil)` Similar to the above but a two element set with 42 and 9001 in it
+- `(\n:Nat. cons (succ n)) 0 42 (cons 0 9001 nil)` Similar to the above but a two element set with 42 and 9001 in it.
+- `\x:(Pi n:Nat.Vec Nat n) 0.x`
 
-Note: `Π` is the dependent product type and `Πx:A.B` is the same as `A -> B` when `x` does not occur in `B`. `Π` is alternatively typed as `P`, respectively.
+Note: `Π` is the dependent product type and `Πx:A.B` is the same as `A -> B` when `x` does not occur in `B`. `Π` is alternatively typed as `Pi`, respectively.
 
 The parser is smart enough to recognise λ, Π , Nat, and Vec; so you can copy and paste from the output:
 ```
@@ -78,9 +79,9 @@ Note: We include introduction rules for Nats to show type-level term substitutio
 
 Additionally we have type level `lett` statements that allow you to define and use types:
 ```
->   lett VecZ = Vec Nat 0
+>   lett VECZ = Vec Nat 0
 Saved type: Vec Nat 0
->   (\x:VecZ.x) nil
+>   (\x:VECZ.x) nil
 ~>* nil
 ```
 Submit a PR with eliminators for Vectors and Natural numbers, or perhaps some machinery to introduce term constructors of a given type.
@@ -109,8 +110,9 @@ and types:
 Some notes about the syntax:
 
 - The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
-- Term and type variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar. Term variables are lower case whereas type variables are upper case.
-- TODO
+- Term variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar. Term variables are lower case.
+- Types are abstractions `Pi n:Nat.T`, applications `A t` (where `t` is a term), arrows `A -> B` (which is the same as a `Pi` type where the variable doesn't occur in `B`), `Nat`s, or size bounded vectors `Vec Nat t` where `t` is a term of type `Nat`.
+
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
