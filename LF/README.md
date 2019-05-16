@@ -111,8 +111,12 @@ Some notes about the syntax:
 
 - The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
 - Term variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar. Term variables are lower case.
+- Terms are variables, functions `\x:Nat.x`, applications `a b` (where `a` and `b` are in scope), empty lists `nil`, non-empty lists `cons 0 42 nil` which is a singleton list containing 42 of type `Vec Nat 1`, or a non-negative natural number `0,1,2,3,...`.
 - Types are abstractions `Pi n:Nat.T`, applications `A t` (where `t` is a term), arrows `A -> B` (which is the same as a `Pi` type where the variable doesn't occur in `B`), `Nat`s, or size bounded vectors `Vec Nat t` where `t` is a term of type `Nat`.
-
+- kinds are not part of the syntax, but play a role in typing. See `K`.
+- Type arrows associate to the right so that `X -> Y -> Z` is the same as `X -> (Y -> Z)` but not `((X -> Y) -> Z)`.
+- The Pi type binds weaker than arrows, so `ΠX::*.X->X` is the same as `ΠX::*.(X->X)`. 
+- Nested terms don't need brackets: `\x:Nat.\y:Nat. y` unless enforcing application on the right. Whitespace does not matter `(\x:Nat.          x)` unless it is between application where you need at least one space. Like term-level functions, Pi must be put in brackets when applied to a term: `\x:(Pi n:Nat.Vec Nat n) 0.x`.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics

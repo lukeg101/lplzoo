@@ -95,7 +95,7 @@ printType :: String -> IO ()
 printType s = case apply term $ tail s of
   (x:_) -> if null $ snd x
              then case typeof' $ fst x of
-                    Just y -> print y
+                    Just y -> print $ reduceT y
                     _      -> cannotType $ tail s
              else cannotParse s
   _     -> cannotParse s

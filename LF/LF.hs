@@ -523,6 +523,14 @@ reduce1T (TApp t1 t2)
       _        -> TApp t1 <$> reduce1T t2
 
 
+-- | Multi-step type reduction relation.
+-- NOT GUARANTEED TO TERMINATE if typing/kinding fails
+reduceT :: T -> T
+reduceT t = case reduce1T t of 
+    Just t' -> reduceT t'
+    Nothing -> t
+
+
 -- | Multi-step reduction relation.
 -- NOT GUARANTEED TO TERMINATE if typing fails
 reduce :: LFTerm -> LFTerm
