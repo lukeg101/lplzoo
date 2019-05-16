@@ -115,7 +115,7 @@ Some notes about the syntax:
 - Types are abstractions `Pi n:Nat.T`, applications `A t` (where `t` is a term), arrows `A -> B` (which is the same as a `Pi` type where the variable doesn't occur in `B`), `Nat`s, or size bounded vectors `Vec Nat t` where `t` is a term of type `Nat`.
 - kinds are not part of the syntax, but play a role in typing. See `K`.
 - Type arrows associate to the right so that `X -> Y -> Z` is the same as `X -> (Y -> Z)` but not `((X -> Y) -> Z)`.
-- The Pi type binds weaker than arrows, so `ΠX::*.X->X` is the same as `ΠX::*.(X->X)`. 
+- The Pi type binds weaker than arrows, so `Pi x:Nat. Nat->Nat` is the same as `Pi x:Nat. (Nat->Nat)`. 
 - Nested terms don't need brackets: `\x:Nat.\y:Nat. y` unless enforcing application on the right. Whitespace does not matter `(\x:Nat.          x)` unless it is between application where you need at least one space. Like term-level functions, Pi must be put in brackets when applied to a term: `\x:(Pi n:Nat.Vec Nat n) 0.x`.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
