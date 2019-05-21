@@ -69,9 +69,10 @@ Note: if you provide a non-normalizing term, the type checker will fail and redu
 
 You can save terms for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
 ```
->   let singleton = \x:Nat.cons 0 x nil
+>    let singleton = \x:Nat.cons 0 x nil
 Saved term: λx:Nat.cons 0 x nil
-```
+>   singleton 2
+~>* cons 0 2 nil```
 
 Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `Nat`, `succ`, `cons`, `nil`, and `Pi` are keywords in LF.
 
@@ -123,7 +124,45 @@ Some notes about the syntax:
 
 The semantics implements beta-reduction on terms and typed definitional equality as the `Eq` instance of `T`. The term semantics are the same as STLC with the addition of dependent abstraction of types over terms, term-dependent vectors and natural numbers. We reformulate the semantics as [typing judgements](https://existentialtype.wordpress.com/2011/03/27/the-holy-trinity/):
 
-TODO 
+Firstly, we have the standard rule for variables augmented with kinding information (variables must be of [proper type](https://en.wikipedia.org/wiki/Type_constructor)): 
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{v&space;:&space;T&space;::&space;*&space;\in\Gamma}{\Gamma&space;\vdash&space;v:T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{v&space;:&space;T&space;::&space;*&space;\in\Gamma}{\Gamma&space;\vdash&space;v:T}" title="\frac{v : T :: * \in\Gamma}{\Gamma \vdash v:T}" /></a>
+
+For term abstractions we replace `->` with a dependent `Π` type, which allows the type on the right-hand side of the type to depend on the value passed on the left (`Πn:Nat.Vec Nat n` for instance). When the right-hand side does not use the variable:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad&space;\Gamma&space;,x:T_1&space;\vdash&space;T_2}{\Gamma&space;\vdash&space;\lambda&space;x:T_1.M&space;:\,&space;\Pi&space;x:T_1.T_2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad&space;\Gamma&space;,x:T_1&space;\vdash&space;T_2}{\Gamma&space;\vdash&space;\lambda&space;x:T_1.M&space;:\,&space;\Pi&space;x:T_1.T_2}" title="\frac{\Gamma \vdash T_1 :: *\quad \Gamma ,x:T_1 \vdash T_2}{\Gamma \vdash \lambda x:T_1.M :\, \Pi x:T_1.T_2}" /></a>
+
+For term applications, we can now instantiate a type with a term provided to the application. The left-hand `Π` type must be parametrized by the same type as the value on the right-hand side of the application, and the value can then be substituted into the type. For instance in `(\n:Nat.cons n) 2 42`, `n` and 2 are of the same type and so the resultant expression has type `Vec Nat 2->Vec Nat 3` (see the typing rules below for nats.)
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;t:T_1&space;.&space;T_2\quad&space;\Gamma\,\vdash\,x&space;:&space;T_1}{\Gamma&space;\vdash&space;f\,x:T_2&space;[t&space;:=&space;x]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;t:T_1&space;.&space;T_2\quad&space;\Gamma\,\vdash\,x&space;:&space;T_1}{\Gamma&space;\vdash&space;f\,x:T_2&space;[t&space;:=&space;x]}" title="\frac{\Gamma \vdash f : \Pi t:T_1 . T_2\quad \Gamma\,\vdash\,x : T_1}{\Gamma \vdash f\,x:T_2 [t := x]}" /></a>
+
+
+We have the standard beta reduction from the untyped calculus at the term-level:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=(\lambda&space;x&space;:&space;T&space;.&space;M)\,N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" target="_blank"><img src="https://latex.codecogs.com/gif.latex?(\lambda&space;x&space;:&space;T&space;.&space;M)\,N&space;\rightsquigarrow&space;M&space;[x&space;:=&space;N]" title="(\lambda x : T . M)\,N \rightsquigarrow M [x := N]" /></a>
+
+We have standard typing rules for Nats (with standard reduction rules under terms omitted):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;n:Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;n:Nat}" title="\overline{\Gamma \vdash n:Nat}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;{\tt&space;succ}\,&space;n&space;:&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;n&space;:&space;Nat}{\Gamma&space;\vdash&space;{\tt&space;succ}\,&space;n&space;:&space;Nat}" title="\frac{\Gamma \vdash n : Nat}{\Gamma \vdash {\tt succ}\, n : Nat}" /></a>
+
+or put another way (see `typeof` in LF.hs):
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;{\tt&space;succ}:&space;\Pi&space;\_:Nat.&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;{\tt&space;succ}:&space;\Pi&space;\_:Nat.&space;Nat}" title="\overline{\Gamma \vdash {\tt succ}: \Pi \_:Nat. Nat}" /></a>
+
+where "Π _:Nat.Nat" is pretty printed as `Nat -> Nat` since `_` does not occur in the right-hand side of the type. 
+
+Similarly we have typing rules for size-bounded Vectors. Since this is the first-order dependent types, we do not have type abstraction as the intention of this language is to show off dependent types in action. As a result, Vector types are parametrised only by Nats:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;{\tt&space;nil}:&space;Vec\,Nat\,0}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;{\tt&space;nil}:&space;Vec\,Nat\,0}" title="\overline{\Gamma \vdash {\tt nil}: Vec\,Nat\,0}" /></a>
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;{\tt&space;cons}:\,&space;\Pi\,n&space;:&space;Nat&space;.&space;Nat\rightarrow\,Vec\,Nat\,n&space;\rightarrow&space;Vec\,&space;Nat\,({\tt&space;succ}\,&space;n)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;{\tt&space;cons}:\,&space;\Pi\,n&space;:&space;Nat&space;.&space;Nat\rightarrow\,Vec\,Nat\,n&space;\rightarrow&space;Vec\,&space;Nat\,({\tt&space;succ}\,&space;n)}" title="\overline{\Gamma \vdash {\tt cons}:\, \Pi\,n : Nat . Nat\rightarrow\,Vec\,Nat\,n \rightarrow Vec\, Nat\,({\tt succ}\, n)}" /></a>
+
+We now have term-dependent abstraction (Pi type), application, and type-constants (like Nat) at the type level with 'types of types' known as kinds and type families. Type families are kinds indexed by a term, which is also indexing types of this kind as a result of the term application rule above:
+
+TODO
+
 
 - TODO
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in LF.hs).

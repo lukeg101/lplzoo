@@ -242,7 +242,7 @@ typeof Cons _
         vecn' = TApp (TApp TVec TNat) (TTerm (App Succ (Var "n")))
     in return $ TPi "n" TNat $ TPi "_" TNat $ TPi "_ " vecn vecn'
 typeof (Abs x ty1 l1) ctx
-  = do kindof ty1 ctx
+  = do KVar <- kindof ty1 ctx
        ty2 <- typeof l1 (M.insert x (Left ty1) ctx)
        return $ TPi x ty1 ty2
 typeof (App Succ l2) ctx
