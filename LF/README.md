@@ -72,7 +72,8 @@ You can save terms for the life of the program with a `let` expression. Any time
 >    let singleton = \x:Nat.cons 0 x nil
 Saved term: λx:Nat.cons 0 x nil
 >   singleton 2
-~>* cons 0 2 nil```
+~>* cons 0 2 nil
+```
 
 Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these. Additionally `Nat`, `succ`, `cons`, `nil`, and `Pi` are keywords in LF.
 
