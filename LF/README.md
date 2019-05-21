@@ -129,11 +129,11 @@ Firstly, we have the standard rule for variables augmented with kinding informat
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{v&space;:&space;T&space;::&space;*&space;\in\Gamma}{\Gamma&space;\vdash&space;v:T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{v&space;:&space;T&space;::&space;*&space;\in\Gamma}{\Gamma&space;\vdash&space;v:T}" title="\frac{v : T :: * \in\Gamma}{\Gamma \vdash v:T}" /></a>
 
-For term abstractions we replace `->` with a dependent `Π` type, which allows the type on the right-hand side of the type to depend on the value passed on the left (`Πn:Nat.Vec Nat n` for instance). When the right-hand side does not use the variable:
+For term abstractions we replace `->` with a dependent `Π` type, which allows the type on the right-hand side of the type to depend on the value passed on the left (`Πn:Nat.Vec Nat n` for instance). When the right-hand side does not use the variable `Πx:Nat.Nat`, we pretty print it as `Nat -> Nat` (where `Π_:A.B` = `A -> B`):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad&space;\Gamma&space;,x:T_1&space;\vdash&space;T_2}{\Gamma&space;\vdash&space;\lambda&space;x:T_1.M&space;:\,&space;\Pi&space;x:T_1.T_2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad&space;\Gamma&space;,x:T_1&space;\vdash&space;T_2}{\Gamma&space;\vdash&space;\lambda&space;x:T_1.M&space;:\,&space;\Pi&space;x:T_1.T_2}" title="\frac{\Gamma \vdash T_1 :: *\quad \Gamma ,x:T_1 \vdash T_2}{\Gamma \vdash \lambda x:T_1.M :\, \Pi x:T_1.T_2}" /></a>
 
-For term applications, we can now instantiate a type with a term provided to the application. The left-hand `Π` type must be parametrized by the same type as the value on the right-hand side of the application, and the value can then be substituted into the type. For instance in `(\n:Nat.cons n) 2 42`, `n` and 2 are of the same type and so the resultant expression has type `Vec Nat 2->Vec Nat 3` (see the typing rules below for nats.)
+For term applications, we can now instantiate a type with a term provided to the application. The left-hand `Π` type must be parametrized by the same type as the value on the right-hand side of the application, and the value can then be substituted into the type. For instance in `(\n:Nat.cons n) 2 42`, `n` and `2` are of the same type and so the expression has type `Vec Nat 2->Vec Nat 3` (see the typing rules below for nats.)
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;t:T_1&space;.&space;T_2\quad&space;\Gamma\,\vdash\,x&space;:&space;T_1}{\Gamma&space;\vdash&space;f\,x:T_2&space;[t&space;:=&space;x]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;t:T_1&space;.&space;T_2\quad&space;\Gamma\,\vdash\,x&space;:&space;T_1}{\Gamma&space;\vdash&space;f\,x:T_2&space;[t&space;:=&space;x]}" title="\frac{\Gamma \vdash f : \Pi t:T_1 . T_2\quad \Gamma\,\vdash\,x : T_1}{\Gamma \vdash f\,x:T_2 [t := x]}" /></a>
 
@@ -152,7 +152,7 @@ or put another way (see `typeof` in LF.hs):
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overline{\Gamma&space;\vdash&space;{\tt&space;succ}:&space;\Pi&space;\_:Nat.&space;Nat}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overline{\Gamma&space;\vdash&space;{\tt&space;succ}:&space;\Pi&space;\_:Nat.&space;Nat}" title="\overline{\Gamma \vdash {\tt succ}: \Pi \_:Nat. Nat}" /></a>
 
-where "Π _:Nat.Nat" is pretty printed as `Nat -> Nat` since `_` does not occur in the right-hand side of the type. 
+where `Π _:Nat.Nat` is pretty printed as `Nat -> Nat` since `_` does not occur in the right-hand side of the type. 
 
 Similarly we have typing rules for size-bounded Vectors. Since this is the first-order dependent types, we do not have type abstraction as the intention of this language is to show off dependent types in action. As a result, Vector types are parametrised only by Nats:
 
