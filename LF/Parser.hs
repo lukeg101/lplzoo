@@ -215,6 +215,18 @@ typPi = do
   return $ LF.TPi x ty1 ty2
 
 
+-- | Lam parser parses type abstractions
+typLam :: Parser LF.T
+typLam = do
+  spaces $ identifier lambdas
+  x <- str
+  spaces (symb ":")
+  t1 <- typTerm
+  spaces (symb ".")
+  t2 <- spaces typTerm
+  return $ LF.TAbs x t1 t2
+
+
 -- | arrow types are non-dependent pi types
 typArr :: Parser LF.T
 typArr = do
@@ -237,8 +249,8 @@ typApp = chainl1 typExpr $ do
 
 -- | Top level CFG for types
 typTerm :: Parser LF.T
-typTerm = typPi +++ typArr 
-  +++ typApp
+typTerm = typPi +++ typLam 
+  +++ typArr +++ typApp
 
 
 -- | Final level of CFG for types

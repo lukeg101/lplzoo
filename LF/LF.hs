@@ -45,6 +45,7 @@ data T
   = TVar VarName
   | TNat
   | TVec
+  | TAbs VarName T T
   | TPi VarName T T
   | TTerm LFTerm -- purely to make parsing easier, typing allows only T t
   | TApp T T
@@ -88,6 +89,11 @@ typeEquality (TPi x1 a1 a2, TPi x2 b1 b2) c@(m1, m2) s
         newm2 = M.insert x2 s m2
     in typeEquality (a1, b1) c s
        && typeEquality (a2, b2) (newm1, newm2) (s+1)
+typeEquality (TAbs x1 a1 a2, TAbs x2 b1 b2) c@(m1, m2) s 
+  = let newm1 = M.insert x1 s m1
+        newm2 = M.insert x2 s m2
+    in typeEquality (a1, b1) c s
+       && typeEquality (a2, b2) (newm1, newm2) (s+1)
 typeEquality _ _ _ = False
 
 
@@ -100,11 +106,13 @@ instance Show T where
   show TVec            = "Vec"
   show ty@(TPi t t1 t2)  
     | isArr ty
-      = paren (isArr t1) (show t1) ++ "->" ++ show t2
+      = paren (isArr t1 || isTAbs t1) (show t1) ++ "->" ++ show t2
     | otherwise 
       = "\x3a0 " ++ t ++ ":" ++ show t1 ++ "." ++ show t2
+  show (TAbs t t1 t2)  
+    = "\x03bb" ++ t ++ ":" ++ show t1 ++ "." ++ show t2
   show (TApp ty1 t1)
-    = paren (isPi ty1) (show ty1)
+    = paren (isPi ty1 || isTAbs ty1) (show ty1)
         ++ ' ' :show t1
   show (TTerm t1)       
     = paren (isAbs t1 || isApp t1) (show t1)
@@ -118,10 +126,16 @@ paren True  x = "(" ++ x ++ ")"
 paren False x = x
 
 
--- | Helper function returns true if the term is an abstraction.
+-- | Helper function returns true if the term is a pi abstraction.
 isPi :: T -> Bool
 isPi TPi {} = True
 isPi _      = False
+
+
+-- | Helper function returns true if the term is an abstraction.
+isTAbs :: T -> Bool
+isTAbs TAbs {} = True
+isTAbs _       = False
 
 
 -- | Helper function returns true if the term is an non-dependent pi type.
@@ -266,14 +280,16 @@ kindof :: T -> Context -> Maybe K
 kindof TNat _     
   = Just KVar
 kindof (TVar v) ctx 
-  = do (Right k) <- M.lookup v ctx
-       return k
-kindof TVec _
-  = return $ KPi "_" TNat $ KPi "_" TNat KVar
+  = do (Left k) <- M.lookup v ctx
+       kindof k ctx
+kindof TVec ctx
+  = kindof (TAbs "_" TNat $ TAbs "_" TNat TNat) ctx
 kindof (TPi x t1 t2) ctx
-  = do k1 <- kindof t1 ctx
-       k2 <- kindof t2 (M.insert x (Left t1) ctx)
-       return $ KPi x t1 k2
+  = do KVar <- kindof t1 ctx
+       KVar <- kindof t2 (M.insert x (Left t1) ctx)
+       return KVar
+kindof (TAbs x ty1 ty2) ctx
+  = KPi x ty1 <$> kindof ty2 (M.insert x (Left ty1) ctx)
 kindof (TApp ty1 ty2) ctx
   = do (KPi x ty3 k1) <- kindof ty1 ctx
        ty2' <- case ty2 of
@@ -299,6 +315,9 @@ subTermInType l@(TVar x) (Var y, z)
   | otherwise = l
 subTermInType l@(TPi x t1 t2) c@(Var y, _)
   | x /= y    = TPi x (subTermInType t1 c) (subTermInType t2 c)
+  | otherwise = l
+subTermInType l@(TAbs x t1 t2) c@(Var y, _)
+  | x /= y    = TAbs x (subTermInType t1 c) (subTermInType t2 c)
   | otherwise = l
 subTermInType (TApp ty1 t1) c 
   = TApp (subTermInType ty1 c) (subTermInType t1 c)
@@ -343,8 +362,11 @@ subTypeInType l@(TVar x) (TVar y, t)
   | x == y             = t
   | otherwise          = l
 subTypeInType l@TNat _ = l
+subTypeInType l@TVec _ = l
 subTypeInType (TPi x t1 t2) c 
   = TPi x (subTypeInType t1 c) (subTypeInType t2 c)
+subTypeInType (TAbs x t1 t2) c 
+  = TAbs x (subTypeInType t1 c) (subTypeInType t2 c)
 subTypeInType (TApp t1 t2) c 
   = TApp (subTypeInType t1 c) (subTypeInType t2 c)
 subTypeInType (TTerm t1) c
@@ -427,6 +449,7 @@ typeVars TNat           = S.empty
 typeVars (TVar x)       = S.singleton x
 typeVars TVec           = S.empty
 typeVars (TPi _ t1 t2)  = S.union (typeVars t1) (typeVars t2)
+typeVars (TAbs _ t1 t2) = S.union (typeVars t1) (typeVars t2)
 typeVars (TApp t1 t2)   = S.union (typeVars t1) (typeVars t2)
 typeVars (TTerm t1)     = typeVarsInTerm t1
 
@@ -507,7 +530,7 @@ reduce1 (App l1 l2)
 
 
 -- | One-step reduction relation for types
---This is reduce1 for STLC but one level up
+-- This is reduce1 for STLC but one level up
 reduce1T :: T -> Maybe T
 reduce1T TNat      = Nothing
 reduce1T (TVar _)  = Nothing
@@ -517,6 +540,12 @@ reduce1T (TPi x t1 t2)
   = case reduce1T t1 of
       Just t1' -> Just $ TPi x t1' t2
       _        -> TPi x t1 <$> reduce1T t2
+reduce1T (TApp (TAbs x _ l1) l2) --beta conversion
+  = Just $ subTypeInType l1 (TVar x, l2)  
+reduce1T (TAbs x t1 t2) 
+  = case reduce1T t1 of
+      Just t1' -> Just $ TAbs x t1' t2
+      _        -> TAbs x t1 <$> reduce1T t2
 reduce1T (TApp t1 t2) 
   = case reduce1T t1 of
       Just t1' -> Just $ TApp t1' t2
