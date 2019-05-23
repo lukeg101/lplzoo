@@ -181,7 +181,16 @@ And kinding rules for type-level application:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;T_1&space;::&space;\Pi&space;t:T_2&space;.&space;K\quad&space;\Gamma\,\vdash\,x&space;::&space;T_2}{\Gamma&space;\vdash&space;T_1\,x::K[t&space;:=&space;x]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;T_1&space;::&space;\Pi&space;t:T_2&space;.&space;K\quad&space;\Gamma\,\vdash\,x&space;::&space;T_2}{\Gamma&space;\vdash&space;T_1\,x::K[t&space;:=&space;x]}" title="\frac{\Gamma \vdash T_1 :: \Pi t:T_2 . K\quad \Gamma\,\vdash\,x :: T_2}{\Gamma \vdash T_1\,x::K[t := x]}" /></a>
 
-- TODO
+`Nat` is a proper type `*`, and `cons`, `succ` make use of the typing rules, and kinding rules as necessary.
+
+- This means the typing context now also contains types, and types occur in terms. The phrase `X :: K` means X is has kind K. We do not implement Agda style type hierarchies here.
+- There is the additional constraint that any term abstractions must take a term of proper type. This prevents nonsensical or partially-applied types terms such as `Vec Nat`.
+- This reflects the principle that any typeable term has a kindable type.
+- The base calculus on its own does not have any proper types (such as Nat, Bool or Unit), or any dependent types, and so it is unusable as no terms can be introduced. To demonstrate dependent types, we add the proper type `Nat`, with constructors `succ` and `0,1,2,3` as well as the type `Vec` with `nil` and `cons` as constructors.
+- Type-level application is identical to term-level application in STLC, except it makes uses of dependent typing from terms to types. In applying a term `t` of type `T` to a term `f` of type `Pi x:T.T2` we substitute `t` into `T2` wherever `x` is bound.
+- Arrows/Pi types have the constraint that both the domain and co-domain must be proper types. This prevents non-nonsensical types such as `Pair Nat _ -> Nat`.
+- LF provides a mean to define _types_ from _terms_. By using abstraction and application to form types from terms. Type operators themselves do not define _terms_ (there is no term of type `\x:Nat.Vec Nat x`) but are used to form proper types which do have terms: `(\x:Nat.Vec Nat x) 0 ~>* Vec Nat 0` which has term `nil`.
+- Unlike type operators, Pi types do have terms, Pi types are introduced by term-level abstractions and their type depends on the term applied to this abstraction. For instance `\x:Nat.cons x 42` has type `Π x:Nat.Vec Nat x->Vec Nat (succ x)`.
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in LF.hs).
 - Reductions include the one-step reduction (see `reduce1` in LF.hs), the many-step reduction (see `reduce` in LF.hs). Additionally there is a one-step type-level reduction (see `reduce1T` in LF.hs).
 

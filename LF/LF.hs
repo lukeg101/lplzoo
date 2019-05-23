@@ -328,7 +328,9 @@ subTermInType l _ = l
 
 -- | Function used to do type substitution on types in a term
 subTypeInTerm :: LFTerm -> (T,T) -> LFTerm
-subTypeInTerm l@(Var _) _ = l
+subTypeInTerm l@(Var x) (TVar y, TTerm l2)
+  | x == y    = l2
+  | otherwise = l
 subTypeInTerm l@(Nat _) _ = l
 subTypeInTerm l@Succ    _ = l
 subTypeInTerm l@Nil     _ = l
