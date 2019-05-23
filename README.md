@@ -4,13 +4,13 @@ Fine-grain (Small Step) implementations of common lambda calculi in Haskell.
 ## Motivation
 I've been studying the Foundations of Programming Languages, Semantics, and Type Theory. I decided to implement some of the common Lambda Calculi to solidify my understanding. 
 
-The naming of this repo was inspired in part by Andrej Bauer's [plzoo](https://github.com/andrejbauer/plzoo).
+The naming of this repo was inspired in part by Andrej Bauer's [plzoo](https://github.com/andrejbauer/plzoo) but with a focus on the underlying calculus and semantics of functional languages.
 
 One aim of the repo is to implement popular (functional) languages and extensions to portray how the theory translates into practice. 
 
 The languages are written in Haskell and are intentionally simple. That is, they do not use advanced features of Haskell but rather minimal use of [type constructors](https://en.wikipedia.org/wiki/Algebraic_data_type), [recursion](https://www.google.co.uk/search?ei=MbCyWrPmOeWWgAbLr4TwCg&q=recursion&oq=recursion&gs_l=psy-ab.3..35i39k1l2j0i67k1l8.6142.7685.0.7949.10.7.0.0.0.0.543.543.5-1.1.0....0...1c.1.64.psy-ab..9.1.541.0...0.9MwCQCbDFwA), and [functional programming](https://learnxinyminutes.com/docs/haskell/). 
 
-The intention here is to maximise your understanding of language design whilst minimising the need to understand Haskell. Of course it helps if you know it!
+The intention here is to maximise your understanding of language design whilst minimising the need to understand Haskell. Of course it helps if you know [it](http://learnyouahaskell.com/)!
 
 See the [blog](https://lukegeeson.com/blog/2018-03-03-Lukes-Programming-Languages-Zoo/) for some more pointers and a fish!
 
