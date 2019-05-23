@@ -91,6 +91,8 @@ Submit a PR with eliminators for Vectors and Natural numbers, or perhaps some ma
 
 This makes it easier to define both terms and types, but does not allow type-level application (See Omega) or type-based polymorphism (see SystemF). `lett` is also a keyword.
 
+Note: we do not allow the ability to add types, constructors, or type families (something like `assume (Bool::*) (True:Bool)`) as this would allow us to encode term-level types which is the remit of FOmega, and indeed may allow us to encode [Girard's Paradox](https://www.quora.com/What-is-Girards-paradox).
+
 ## Syntax 
 
 We base the language on the BNF for the typed calculus:
@@ -115,7 +117,7 @@ Some notes about the syntax:
 - The above syntax only covers the core calculus, and not the repl extensions (such as let bindings above). The extensions are simply added on in the repl.
 - Term variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar. Term variables are lower case.
 - Terms are variables, functions `\x:Nat.x`, applications `a b` (where `a` and `b` are in scope), empty lists `nil`, non-empty lists `cons 0 42 nil` which is a singleton list containing 42 of type `Vec Nat 1`, or a non-negative natural number `0,1,2,3,...`.
-- Types are abstractions `Pi n:Nat.T`, applications `A t` (where `t` is a term), arrows `A -> B` (which is the same as a `Pi` type where the variable doesn't occur in `B`), `Nat`s, or size bounded vectors `Vec Nat t` where `t` is a term of type `Nat`.
+- Types are dependent abstractions `Pi n:Nat.T`, type-level abstractions `\x:Nat.x` applications `A t` (where `t` is a term), arrows `A -> B` (which is the same as a `Pi` type where the variable doesn't occur in `B`), `Nat`s, or size bounded vectors `Vec Nat t` where `t` is a term of type `Nat`.
 - kinds are not part of the syntax, but play a role in typing. See `K`.
 - Type arrows associate to the right so that `X -> Y -> Z` is the same as `X -> (Y -> Z)` but not `((X -> Y) -> Z)`.
 - The Pi type binds weaker than arrows, so `Pi x:Nat. Nat->Nat` is the same as `Pi x:Nat. (Nat->Nat)`. 
@@ -137,7 +139,6 @@ For term abstractions we replace `->` with a dependent `Π` type, which allows t
 For term applications, we can now instantiate a type with a term provided to the application. The left-hand `Π` type must be parametrized by the same type as the value on the right-hand side of the application, and the value can then be substituted into the type. For instance in `(\n:Nat.cons n) 2 42`, `n` and `2` are of the same type and so the expression has type `Vec Nat 2->Vec Nat 3` (see the typing rules below for nats.)
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;t:T_1&space;.&space;T_2\quad&space;\Gamma\,\vdash\,x&space;:&space;T_1}{\Gamma&space;\vdash&space;f\,x:T_2&space;[t&space;:=&space;x]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;f&space;:&space;\Pi&space;t:T_1&space;.&space;T_2\quad&space;\Gamma\,\vdash\,x&space;:&space;T_1}{\Gamma&space;\vdash&space;f\,x:T_2&space;[t&space;:=&space;x]}" title="\frac{\Gamma \vdash f : \Pi t:T_1 . T_2\quad \Gamma\,\vdash\,x : T_1}{\Gamma \vdash f\,x:T_2 [t := x]}" /></a>
-
 
 We have the standard beta reduction from the untyped calculus at the term-level:
 
@@ -172,9 +173,13 @@ We have `Pi` abstractions of proper type:
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad&space;\Gamma&space;,&space;x:T_1\vdash&space;T_2&space;::&space;*}{\Gamma&space;\vdash&space;\Pi&space;x:T_1.T_2&space;::&space;*}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;T_1&space;::&space;*\quad&space;\Gamma&space;,&space;x:T_1\vdash&space;T_2&space;::&space;*}{\Gamma&space;\vdash&space;\Pi&space;x:T_1.T_2&space;::&space;*}" title="\frac{\Gamma \vdash T_1 :: *\quad \Gamma , x:T_1\vdash T_2 :: *}{\Gamma \vdash \Pi x:T_1.T_2 :: *}" /></a>
 
 
+We have type-level abstractions:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;,&space;x:T_1\vdash&space;T_2&space;::&space;K}{\Gamma&space;\vdash&space;\lambda&space;x:T_1.T_2&space;::&space;(\Pi&space;x:&space;T_1.K)}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;,&space;x:T_1\vdash&space;T_2&space;::&space;K}{\Gamma&space;\vdash&space;\lambda&space;x:T_1.T_2&space;::&space;(\Pi&space;x:&space;T_1.K)}" title="\frac{\Gamma , x:T_1\vdash T_2 :: K}{\Gamma \vdash \lambda x:T_1.T_2 :: (\Pi x: T_1.K)}" /></a>
 
+And kinding rules for type-level application:
+
+<a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;T_1&space;::&space;\Pi&space;t:T_2&space;.&space;K\quad&space;\Gamma\,\vdash\,x&space;::&space;T_2}{\Gamma&space;\vdash&space;T_1\,x::K[t&space;:=&space;x]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;T_1&space;::&space;\Pi&space;t:T_2&space;.&space;K\quad&space;\Gamma\,\vdash\,x&space;::&space;T_2}{\Gamma&space;\vdash&space;T_1\,x::K[t&space;:=&space;x]}" title="\frac{\Gamma \vdash T_1 :: \Pi t:T_2 . K\quad \Gamma\,\vdash\,x :: T_2}{\Gamma \vdash T_1\,x::K[t := x]}" /></a>
 
 - TODO
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in LF.hs).
