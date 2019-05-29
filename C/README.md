@@ -1,7 +1,7 @@
 # The Calculus of Constructions
-Haskell implementation of Thierry Coquand and Gerard Huet's [Calculus of Constructions](https://core.ac.uk/download/pdf/82038778.pdf). In essence it is the apex of Berendregt's [lambda cube](https://en.wikipedia.org/wiki/Lambda_cube), capturing the expressiveness of STLC, System F, Omega, and LF. This calculus is presented in a [pure type system](https://www.researchgate.net/publication/216300104_An_Introduction_to_Generalized_Type_Systems) and is hence incredibly simple in representation with universal quantification doubling up as the Pi type, abstraction, 2 sorts (* and box), and application.  
+Haskell implementation of Thierry Coquand and Gerard Huet's [Calculus of Constructions](https://core.ac.uk/download/pdf/82038778.pdf). In essence it is the apex of Berendregt's [lambda cube](https://en.wikipedia.org/wiki/Lambda_cube), capturing the expressiveness of STLC, System F, Omega, and LF. This calculus is presented as a [pure type system](https://www.researchgate.net/publication/216300104_An_Introduction_to_Generalized_Type_Systems) and is hence incredibly simple in representation with universal quantification doubling up as the Pi type, abstraction, 2 sorts (* and box), and application.  
 
-This strongly normalising calculus This allows us to model [higher-order predicate logic](https://en.wikipedia.org/wiki/Higher-order_logic) in a language, and hence do proof in programs. 
+This strongly normalising calculus This allows us to model [higher-order predicate logic](https://en.wikipedia.org/wiki/Higher-order_logic) in a language, and hence do proof in programs. More importantly it can serve as a constructive foundation of mathematics and hence make the link between proof and program explicit.
 
 ## Prerequisites
 You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at least (Stack resolver: lts-11.0).
