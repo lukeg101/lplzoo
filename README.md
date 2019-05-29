@@ -30,6 +30,7 @@ See the [blog](https://lukegeeson.com/blog/2018-03-03-Lukes-Programming-Language
 12. [_Omega_](Omega/): Renardel de Lavalette's [L(or λω)](https://core.ac.uk/download/pdf/82628447.pdf). In essence it's STLC with kinding and [type-operators](https://en.wikipedia.org/wiki/Type_constructor).
 13. [_FOmega_](FOmega/): Jean Yves-Girard's [FOmega](https://en.wikipedia.org/wiki/Lambda_cube). In essence it's SystemF + Omega which enables higher-order polymorphism.
 14. [_LF_](LF/): Bob Harper, Furio Honsell, and Gordon Plotkin's [Edinburgh Logical Framework](https://dl.acm.org/citation.cfm?id=138060). In essence it's STLC with pure first-order [dependent types](https://en.wikipedia.org/wiki/Dependent_type).
+15. [_C_](C/): Thierry Coquand and Gerard Huet's [Calculus of Constructions](https://www.sciencedirect.com/science/article/pii/0890540188900053?via%3Dihub). In essence it is FOmega + LF written in a [pure type systems](https://ttic.uchicago.edu/~dreyer/course/papers/barendregt.pdf) style. This serves as the apex of the lambda cube and a [constructive](https://en.wikipedia.org/wiki/Constructivism_(philosophy_of_mathematics)#Mathematicians_who_have_made_major_contributions_to_constructivism) foundation of mathematics.
 
 See each repo for details on installation/use.
 
