@@ -136,7 +136,7 @@ apply = parse
 keywords :: [String]
 keywords = ["let", "=", ".", ":", "Pi",
   "(", ")", "\x3a0", "\x03bb", "\x25A1", "*"
-  , "assume", "_  "] 
+  , "assume", "_"] 
 
 
 -- | 1 or more chars

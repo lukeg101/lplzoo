@@ -125,19 +125,21 @@ this allows us to encode new types and their constructors. Consequently `assume`
 
 We base the language on the BNF for the typed calculus:
 
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\tau&space;.&space;\mathbf{\tau}\\&space;&|&&space;\Pi&space;\mathbf{\upsilon}{\tt&space;:}\tau&space;.&space;\mathbf{\tau}\\&space;&|&&space;\tau&space;\rightarrow&space;\tau\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;*\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;...&space;|&space;\tt{A}&space;|&space;{\tt&space;B}&space;|...&space;|0|1|...\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}{\tt&space;:}\tau&space;.&space;\mathbf{\tau}\\&space;&|&&space;\Pi&space;\mathbf{\upsilon}{\tt&space;:}\tau&space;.&space;\mathbf{\tau}\\&space;&|&&space;\tau&space;\rightarrow&space;\tau\\&space;&&space;|&space;&&space;\tau\,&space;\tau\\&space;&&space;|&space;&&space;\upsilon&space;\\&space;&|&&space;*\\&space;&&\\&space;\upsilon&space;&&space;::=&space;&&space;\tt{a}&space;|&space;\tt{b}&space;|&space;...&space;|&space;\tt{A}&space;|&space;{\tt&space;B}&space;|...&space;|0|1|...\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}{\tt :}\tau . \mathbf{\tau}\\ &|& \Pi \mathbf{\upsilon}{\tt :}\tau . \mathbf{\tau}\\ &|& \tau \rightarrow \tau\\ & | & \tau\, \tau\\ & | & \upsilon \\ &|& *\\ &&\\ \upsilon & ::= & \tt{a} | \tt{b} | ... | \tt{A} | {\tt B} |... |0|1|...\end{matrix}" /></a>
 
 However we adopt standard bracketing conventions to eliminate ambiguity in the parser. Concretely, the parser implements the non-ambiguous grammar for terms as follows:
 
-TODO
-
-and types:
-
-TODO
+<a href="https://www.codecogs.com/eqnedit.php?latex=\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&|&\Pi\upsilon:&space;\tau\\&space;&|&&space;\alpha&space;\rightarrow&space;\tau\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon\end{matrix}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\begin{matrix}&space;\mathbf{\tau}&&space;::=&space;&&space;\lambda&space;\mathbf{\upsilon}\tt{:}\sigma&space;.&space;\mathbf{\tau}\\&space;&|&\Pi\upsilon:&space;\tau\\&space;&|&&space;\alpha&space;\rightarrow&space;\tau\\&space;&&space;|&space;&&space;\alpha\\&space;&&\\&space;\alpha&space;&&space;::=&space;&&space;\beta&space;\\&space;&|&space;&\mathbf{\alpha\,&space;\tt{space}\,&space;\beta}&space;\\&space;&&\\&space;\beta&space;&&space;::=&space;&&space;\tt{(}\tau&space;\tt{)}\\&space;&|&&space;\upsilon\end{matrix}" title="\begin{matrix} \mathbf{\tau}& ::= & \lambda \mathbf{\upsilon}\tt{:}\sigma . \mathbf{\tau}\\ &|&\Pi\upsilon: \tau\\ &|& \alpha \rightarrow \tau\\ & | & \alpha\\ &&\\ \alpha & ::= & \beta \\ &| &\mathbf{\alpha\, \tt{space}\, \beta} \\ &&\\ \beta & ::= & \tt{(}\tau \tt{)}\\ &|& \upsilon\end{matrix}" /></a>
 
 Some notes about the syntax:
 
-TODO
+- The above syntax only covers the core calculus, and not the repl extensions (such as let/assume bindings above). The extensions are simply added on in the repl.
+- Term variables are strings, as this is isomorphic to a whiteboard treatment and hence the most familiar. Unlike previous languages in the zoo the constraint on variables is relaxed so that you may make alpha-numeric terms.
+- In line with pure type systems, the type/term abstraction is collapsed so that we have a single syntactic category of terms. Terms are variables (`a,b,c,...`), abstractions (`\x:t1.t2`), Pi abstractions (`Pi n:t1.t2`), applications `t1 t2`, and sorts (`*`).
+- Typing is thus a transformation from terms to terms, where variables parametrise terms through abstraction, and instantiate others through application. 
+- To prevent cyclic and otherwise theoretical complications there is a sort `*` of well-typed terms, box for well-formed kinds. This allows us to establish a hierarchy of terms.
+- Arrows `A -> B` terms `Pi x:A.B` where x doesn't occur in `B`. This is syntactic shorthand and is only present in the pretty printer. 
+- Box is not part of the syntax as it is only used in typing.
 - To quit use `Ctrl+C` or whatever your machine uses to interrupt computations.
 
 ## Semantics
