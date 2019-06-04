@@ -146,11 +146,19 @@ Some notes about the syntax:
 
 The semantics implements beta-reduction on terms and structural equality as the `Eq` instance of `CTerm`. The term semantics are the same as STLC with the addition of dependent abstraction of types over terms, and kinds. We reformulate the semantics as [typing judgements](https://existentialtype.wordpress.com/2011/03/27/the-holy-trinity/):
 
+Firstly we have the typical rule for variables (that they must be in scope, and typed bys the Abs rule or in the context):
+
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{v&space;:&space;T&space;\in\Gamma}{\Gamma&space;\vdash&space;v:T}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{v&space;:&space;T&space;\in\Gamma}{\Gamma&space;\vdash&space;v:T}" title="\frac{v : T \in\Gamma}{\Gamma \vdash v:T}" /></a>
+
+Next we have a rule that states proper types are well-formed kinds:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\overbar{\Gamma\vdash*:\Box}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\overbar{\Gamma\vdash*:\Box}" title="\overbar{\Gamma\vdash*:\Box}" /></a>
 
+The abstraction rule then states that we parametrize over terms of proper type as is standard in LF, FOmega etc... 
+
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;t_1&space;::&space;*\quad&space;\Gamma&space;,x:t_1&space;\vdash&space;t_2:T_2}{\Gamma&space;\vdash&space;\lambda&space;x:t_1.t_2&space;:\,&space;\Pi&space;x:t_1.T_2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;t_1&space;::&space;*\quad&space;\Gamma&space;,x:t_1&space;\vdash&space;t_2:T_2}{\Gamma&space;\vdash&space;\lambda&space;x:t_1.t_2&space;:\,&space;\Pi&space;x:t_1.T_2}" title="\frac{\Gamma \vdash t_1 :: *\quad \Gamma ,x:t_1 \vdash t_2:T_2}{\Gamma \vdash \lambda x:t_1.t_2 :\, \Pi x:t_1.T_2}" /></a>
+
+The Pi rule then states that we must parametrize over terms of proper type/kind (from the set `sj` below). The pure type system approach specifies what values of `sx` and `sy` we may pick, and the calculus of constructions is maximally expressive (allowing all combinations of both sorts). In less expressive languages such as STLC `sx` is `*` and `sy` is `*` only.
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;t_1&space;:&space;s_x\quad&space;\Gamma&space;,x:t_1&space;\vdash&space;t_2&space;:&space;s_y}{\Gamma&space;\vdash&space;\Pi&space;x:t_1.t_2&space;:&space;s_y}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;t_1&space;:&space;s_x\quad&space;\Gamma&space;,x:t_1&space;\vdash&space;t_2&space;:&space;s_y}{\Gamma&space;\vdash&space;\Pi&space;x:t_1.t_2&space;:&space;s_y}" title="\frac{\Gamma \vdash t_1 : s_x\quad \Gamma ,x:t_1 \vdash t_2 : s_y}{\Gamma \vdash \Pi x:t_1.t_2 : s_y}" /></a>
 
@@ -158,11 +166,15 @@ where:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=s_j&space;=&space;\{\Box,&space;*\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?s_j&space;=&space;\{\Box,&space;*\}" title="s_j = \{\Box, *\}" /></a>
 
-and finally application:
+Finally application:
 
 <a href="https://www.codecogs.com/eqnedit.php?latex=\frac{\Gamma&space;\vdash&space;t_1&space;:&space;\Pi&space;x:T_3&space;.&space;T_4\quad&space;\Gamma\,\vdash\,t_2&space;:&space;T_3}{\Gamma&space;\vdash&space;t_1\,t_2:T_4&space;[x&space;:=&space;t_2]}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\frac{\Gamma&space;\vdash&space;t_1&space;:&space;\Pi&space;x:T_3&space;.&space;T_4\quad&space;\Gamma\,\vdash\,t_2&space;:&space;T_3}{\Gamma&space;\vdash&space;t_1\,t_2:T_4&space;[x&space;:=&space;t_2]}" title="\frac{\Gamma \vdash t_1 : \Pi x:T_3 . T_4\quad \Gamma\,\vdash\,t_2 : T_3}{\Gamma \vdash t_1\,t_2:T_4 [x := t_2]}" /></a>
 
-- TODO
+- The use of Pure Type Systems means the typing context contains mappings from variables to terms only. The phrase X : T thus means term X is has type T (which is also a term). We do not implement Agda style type hierarchies here.
+- There is the additional constraint that any term abstractions must take a term of proper type. This prevents nonsensical or partially-applied types terms such as `Vec nat`.
+- The base calculus on its own does not have any base types (such as `Nat`, `Bool` or `Unit`) however you can use church encodings and terms as types to get this directly, or otherwise introduce symbolic representations using the `assume` statement provided by the parser.
+- Type-level application is identical to term-level application. In applying a term `t` of type `T` to a term `f` of type `Pi x:T.T2` we substitute `t` into `T2` wherever `x` is bound.
+
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in C.hs).
 - Reductions include the one-step reduction (see `reduce1` in C.hs), the many-step reduction (see `reduce` in C.hs). Additionally there is a one-step type-level reduction (see `reduce1T` in C.hs).
 
