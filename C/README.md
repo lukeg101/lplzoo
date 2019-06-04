@@ -174,7 +174,8 @@ Finally application:
 - There is the additional constraint that any term abstractions must take a term of proper type. This prevents nonsensical or partially-applied types terms such as `Vec nat`.
 - The base calculus on its own does not have any base types (such as `Nat`, `Bool` or `Unit`) however you can use church encodings and terms as types to get this directly, or otherwise introduce symbolic representations using the `assume` statement provided by the parser.
 - Type-level application is identical to term-level application. In applying a term `t` of type `T` to a term `f` of type `Pi x:T.T2` we substitute `t` into `T2` wherever `x` is bound.
-
+- Arrows/Pi types have the constraint that both the domain and co-domain must be proper types. This prevents non-nonsensical types such as `Pair Nat _ -> Nat`.
+- Equality is of academic interest in the calculus of constructions and so we have deliberately not included it. Instead we only implement standard alpha equivalence of terms and encourage the user to implement equality as a structure in C, and a proof.
 - This implementation follows a [small-step](https://cs.stackexchange.com/questions/43294/difference-between-small-and-big-step-operational-semantics) operational semantics and Berendregt's [variable convention](https://cs.stackexchange.com/questions/69323/barendregts-variable-convention-what-does-it-mean) (see `substitution` in C.hs).
 - Reductions include the one-step reduction (see `reduce1` in C.hs), the many-step reduction (see `reduce` in C.hs). Additionally there is a one-step type-level reduction (see `reduce1T` in C.hs).
 
