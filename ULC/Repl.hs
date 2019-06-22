@@ -23,6 +23,7 @@ import Parser
 import qualified Data.Map.Lazy as M
 
 -- Haskeline imports
+import Data.List
 import Control.Monad.Trans
 import Control.Monad.Trans.State.Strict
 import System.Console.Haskeline
@@ -34,15 +35,21 @@ replMain = do
   putStrLn "Type some terms or press Enter to leave."
   evalStateT (runInputT settings repl) M.empty
 
-settings :: MonadException m => Settings m
-settings = Settings noCompletion Nothing True
-
-interruptible :: MonadException m => a -> InputT m a -> InputT m a
-interruptible d x = handle (\Interrupt -> outputStrLn "interrupted" >> pure d) (withInterrupt x)
-
 -- | Stores variables from let expressions at runtime
 type Environment = M.Map String ULC.Term
 type Interpreter = InputT (StateT Environment IO)
+
+settings :: Settings (StateT Environment IO)
+settings = Settings contextCompletion Nothing True
+
+contextCompletion :: CompletionFunc (StateT Environment IO)
+contextCompletion = completeWord Nothing " ()\\." completions
+  where
+    completions :: String -> StateT Environment IO [Completion]
+    completions xs = map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . M.keys <$> get
+
+interruptible :: MonadException m => a -> InputT m a -> InputT m a
+interruptible d x = handle (\Interrupt -> outputStrLn "interrupted" >> pure d) (withInterrupt x)
 
 -- | REPL loop, takes input reduces and prints result, or exits out.
 repl :: Interpreter ()
