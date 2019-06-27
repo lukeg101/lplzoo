@@ -22,11 +22,13 @@ import Parser
 -- Tool Imports.
 import qualified Data.Map.Lazy as M
 
+
 -- Haskeline imports
 import Data.List
 import Control.Monad.Trans
 import Control.Monad.Trans.State.Strict
 import System.Console.Haskeline
+
 
 -- | Top-level repl function
 replMain :: IO ()
@@ -35,21 +37,28 @@ replMain = do
   putStrLn "Type some terms or press Enter to leave."
   evalStateT (runInputT settings repl) M.empty
 
+
 -- | Stores variables from let expressions at runtime
 type Environment = M.Map String ULC.Term
 type Interpreter = InputT (StateT Environment IO)
 
+
+-- | Settings defining how tab-completion and input history work for the Haskeline session.
 settings :: Settings (StateT Environment IO)
 settings = Settings contextCompletion Nothing True
-
-contextCompletion :: CompletionFunc (StateT Environment IO)
-contextCompletion = completeWord Nothing " ()\\." completions
   where
+    contextCompletion :: CompletionFunc (StateT Environment IO)
+    contextCompletion = completeWord Nothing " ()\\." completions
+
     completions :: String -> StateT Environment IO [Completion]
     completions xs = map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . M.keys <$> get
 
+
+-- | Marks an InputT action as interruptible, so that pressing Ctrl+C will terminate
+-- the action, returning a default value, instead of terminating the program.
 interruptible :: MonadException m => a -> InputT m a -> InputT m a
 interruptible d x = handle (\Interrupt -> outputStrLn "interrupted" >> pure d) (withInterrupt x)
+
 
 -- | REPL loop, takes input reduces and prints result, or exits out.
 repl :: Interpreter ()
@@ -61,6 +70,7 @@ repl = do ms <- getInputLine ">   "
                           env' <- interruptible env (liftIO (parseTerm s env))
                           lift (put env')
                           repl
+
 
 -- | Takes a term and context and substitutes env terms
 -- into all free occurrences in the term
