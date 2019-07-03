@@ -20,15 +20,15 @@ import Parser
 
 
 -- Tool Imports.
+import           Data.Char
+import           Data.List
+import           Data.Foldable
 import qualified Data.Map.Lazy as M
 
-
--- Haskeline imports
-import Data.List
 import Control.Monad.Trans
 import Control.Monad.Trans.State.Strict
 import System.Console.Haskeline
-
+import System.Directory
 
 -- | Top-level repl function
 replMain :: IO ()
@@ -93,10 +93,14 @@ prependTerm :: ULC.Term -> ULC.Term -> String
 prependTerm x y = if x == y then "=   " ++ show x else "~>* " ++ show y
 
 
--- | Error message for parse failure
-cannotParse :: String -> IO ()
-cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
-
+-- | Helper function parses the term as either a Let expression or a raw term.
+-- Let expressions update the environment with new variables, using any existing
+-- variables in scope. For a raw term, evaluation is attempted after substituting
+-- in bound terms from the environment. For ULC termination is not guaranteed.
+parseTerm :: String -> Environment -> IO Environment
+parseTerm ('\'':s) env = printReductions s >> pure env
+parseTerm ( 'f':s) env = handleFile (dropWhile isSpace s) env
+parseTerm       s  env = handleTerm s env
 
 -- | Helper function to print the reduction steps of a term
 printReductions :: String -> IO ()
@@ -108,20 +112,24 @@ printReductions s
                     else cannotParse s
          _     -> cannotParse s
 
+-- | Helper function to run a script of interpreter commands
+handleFile :: FilePath -> Environment -> IO Environment
+handleFile path env = do exists <- doesFileExist path
+                         if exists
+                           then lines <$> readFile path >>= foldlM (flip parseTerm) env
+                           else putStrLn "File doesn't exist!" >> pure env
 
--- | Helper function parses the term as either a Let expression or a raw term.
--- Let expressions update the environment with new variables, using any existing
--- variables in scope. For a raw term, evaluation is attempted after substituting
--- in bound terms from the environment. For ULC termination is not guaranteed.
-parseTerm :: String -> Environment -> IO Environment
-parseTerm s env
-  = if head s == '\''
-      then printReductions s >> pure env
-      else case apply (pLet +++ pTerm) s of
-             [(("",t),"")] -> do let t' = formatTerm t env
-                                 putStrLn (prependTerm t' $ reduce t')
-                                 pure env
-             [((v,t),"")]  -> do let t' = formatTerm t env
-                                 putStrLn $ "Saved: " ++ show t'
-                                 pure (M.insert v t' env)
-             _             -> cannotParse s >> pure env
+-- | Helper function to parse a term, and either reduce it or to add it to the environment
+handleTerm :: String -> Environment -> IO Environment
+handleTerm s env = case apply (pLet +++ pTerm) s of
+                     [(("",t),"")] -> do let t' = formatTerm t env
+                                         putStrLn (prependTerm t' $ reduce t')
+                                         pure env
+                     [((v,t),"")]  -> do let t' = formatTerm t env
+                                         putStrLn $ "Saved: " ++ show t'
+                                         pure (M.insert v t' env)
+                     _             -> cannotParse s >> pure env
+
+-- | Error message for parse failure
+cannotParse :: String -> IO ()
+cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
