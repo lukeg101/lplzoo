@@ -116,7 +116,7 @@ printReductions s
 handleFile :: FilePath -> Environment -> IO Environment
 handleFile path env = do exists <- doesFileExist path
                          if exists
-                           then lines <$> readFile path >>= foldlM (flip parseTerm) env
+                           then filter (not . null) . lines <$> readFile path >>= foldlM (flip parseTerm) env
                            else putStrLn "File doesn't exist!" >> pure env
 
 -- | Helper function to parse a term, and either reduce it or to add it to the environment

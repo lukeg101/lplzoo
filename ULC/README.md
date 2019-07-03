@@ -64,6 +64,27 @@ Saved: y
 ```
 Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these.
 
+You can read and run a file of commands by prefixing the filepath with `f`. This will behave as if each non-empty line of the file were entered into the REPL manually. Terms previously added to the environment via `let` commands will be in scope for later commands, so this can be used for building a library of term definitions. For example, if the file `bool.ulc` contains the following:
+```
+let true  = \t.\f.t
+let false = \t.\f.f
+
+let not = \b.b false true
+let and = \a.\b.a b false
+let or  = \a.\b.a true b
+```
+We can import these definitions in the REPL:
+```
+>   f bool.ulc
+Saved: λt.λf.t
+Saved: λt.λf.f
+Saved: λb.b (λt.λf.f) (λt.λf.t)
+Saved: λa.λb.a b (λt.λf.f)
+Saved: λa.λb.a (λt.λf.t) b
+>   not true
+~>* λt.λf.f
+```
+
 Note: We do capture avoiding substitution if a bound variable is the same as one we are substituting in. We rename the bound term to a new variable.
 
 ## Syntax
