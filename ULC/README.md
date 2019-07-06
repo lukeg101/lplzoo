@@ -119,7 +119,8 @@ The semantics implements beta-reduction on terms and alpha-equivalence as the `E
 - Parser.hs contains the monadic parser combinators needed to parse input strings into term ASTs for the calculus. It follows the grammar above.
 - Repl.hs contains a simple read-eval-print loop which hooks into main, and into the parser. It uses [Haskeline](https://hackage.haskell.org/package/haskeline) to provide a line-editing interface, input history, and tab-completion of named terms saved in the environment.
 - Main.hs is needed for GHC to compile without any flags, it also invokes the repl.
-- Tests.hs is the test suite. We run have unit tests for terms in the language. QuickCheck is used to generate arbitrary trees and test they are parsed and printed correctly.
+- Tests.hs is the test suite. We run have unit tests for terms in the language. QuickCheck is used to generate arbitrary trees and test they are parsed and printed correctly. Load the module and run the tests with `runTests`.
+- examples.ulc, bool.ulc contain common examples in the untyped calculus, you can load and use them following the `:load` example above.
 
 For contributions, see the [project to-do list](https://github.com/lukeg101/lplzoo/projects/1), [Contributions](https://github.com/lukeg101/lplzoo#contributions), and submit a PR with something you think it needs.
 

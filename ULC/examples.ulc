@@ -1,0 +1,64 @@
+; Basic Combinators
+
+:let s = λx.λy.λz.x z (y z)
+:let k = λx.λy.x
+:let i = λx.x
+
+; Booleans
+
+:let true  = λt.λf.t
+:let false = λt.λf.f
+
+:let not = λb.b false true
+:let and = λa.λb.a b false
+:let or  = λa.λb.a true b
+:let xor = λa.λb.a (not b) b
+
+; Church Numeral Operations
+
+:let zero   = false
+:let one    = λf.λx.f x
+
+:let iszero = λn.n (λx.false) true
+:let succ   = λn.λf.λx.f (n f x)
+:let pred   = λn.λf.λx.n (λg.λh.h (g f)) (λu.x) (λu.u)
+:let plus   = λm.λn.λf.λx.m f (n f x)
+:let minus  = λm.λn.n pred m
+:let mult   = λm.λn.λf.m (n f)
+:let exp    = λm.λn.(iszero n) one (n m)
+
+:let leq = λm.λn.iszero (minus m n)
+:let geq = λm.λn.iszero (minus n m)
+:let lt  = λm.λn.not (geq m n)
+:let gt  = λm.λn.not (leq m n)
+:let eq  = λm.λn.and (geq m n) (leq m n)
+:let neq = λm.λn.not (eq  m n)
+
+:let min = λn.λm. leq n m n m
+:let max = λn.λm. geq n m n m
+
+
+; Pairs
+
+:let pair = λa.λb.λp.p a b
+
+:let fst  = λp.p true
+:let snd  = λp.p false
+:let swap = λp.pair (snd p) (fst p)
+
+; Lists
+
+:let nil  = λx.true
+:let cons = pair
+:let head = fst
+:let tail = snd
+
+:let null  = λl.l (λh.λt.false)
+:let drop  = λn.n tail
+:let index = λl.λn.head (drop n l)
+
+; Fixed-point Combinators 
+
+:let y = λf.(λx.f (x x)) (λx.f (x x))
+
+
