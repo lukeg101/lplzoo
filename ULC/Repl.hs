@@ -65,7 +65,7 @@ repl = do ms <- getInputLine ">   "
             Nothing -> repl
             Just "" -> outputStrLn "Goodbye."
             Just s  -> do case parseReplCommand s of
-                            Nothing -> outputStrLn "Could not parse!"
+                            Nothing -> outputStrLn ("could not parse " ++ show s)
                             Just  c -> do env <- lift get
                                           interruptible () (handleCommand (formatCommand env c))
                           repl
@@ -76,7 +76,7 @@ handleCommand (T     t) = outputStrLn (prependTerm t (reduce t))
 handleCommand (Reds  t) = mapM_ outputStrLn (prependedReductions t)
 handleCommand (Load fp) = handleLoad fp
 handleCommand (Let v t) = do lift get >>= lift . put . M.insert v t
-                             outputStrLn ("Saved term " ++ show t)
+                             outputStrLn ("saved " ++ v ++ " = " ++ show t)
 
 -- | Substitutes named terms from the environment into
 -- free occurrences of those names within command terms
@@ -106,12 +106,12 @@ handleLoad fp = do exists <- liftIO (doesFileExist fp)
                    if exists
                      then do e <- parseCommands <$> liftIO (readFile fp)
                              case e of
-                               Left  n  -> outputStrLn ("Could not parse line " ++ show n ++ "!")
-                               Right cs -> mapM_ handleCommand cs
-                     else outputStrLn "File doesn't exist!"
+                               Left (n,l) -> outputStrLn ("could not parse " ++ show l ++ " on line " ++ show n)
+                               Right cs   -> mapM_ handleCommand cs
+                     else outputStrLn ("file " ++ fp ++ " does not exist")
   where
-    parseCommands :: String -> Either Int [Command]
-    parseCommands = mapM (toEither . fmap parseReplCommand) . filter (not . null . snd) . zip [1..] . lines
+    parseCommands :: String -> Either (Int,String) [Command]
+    parseCommands = mapM (toEither . fmap parseReplCommand) . filter (not . null . snd) . zipWith (\n l -> ((n,l),l)) [1..] . lines
 
     toEither :: (a, Maybe b) -> Either a b
     toEither (a, Nothing) = Left  a
