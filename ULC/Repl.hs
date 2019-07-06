@@ -30,7 +30,7 @@ import System.Directory
 -- | Top-level repl function
 replMain :: IO ()
 replMain = do
-  putStrLn "Welcome to the Untyped \x03bb-calculus REPL"
+  putStrLn "Welcome to the Untyped λ-calculus REPL"
   putStrLn "Type some terms or press Enter to leave."
   evalStateT (runInputT settings repl) M.empty
 
@@ -45,11 +45,13 @@ settings :: Settings (StateT Environment IO)
 settings = Settings contextCompletion Nothing True
   where
     contextCompletion :: CompletionFunc (StateT Environment IO)
-    contextCompletion = completeWord Nothing " ()\\." completions
+    contextCompletion = completeWord Nothing " ()λ\\." completions
 
     completions :: String -> StateT Environment IO [Completion]
-    completions xs = map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . M.keys <$> get
+    completions xs = map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . (comms ++) . M.keys <$> get
 
+    comms :: [String]
+    comms = [":reductions", ":let", ":load"]
 
 -- | Marks an InputT action as interruptible, so that pressing Ctrl+C will terminate
 -- the action, returning a default value, instead of terminating the program.
@@ -109,7 +111,7 @@ handleLoad fp = do exists <- liftIO (doesFileExist fp)
                      else outputStrLn "File doesn't exist!"
   where
     parseCommands :: String -> Either Int [Command]
-    parseCommands = sequence . map (toEither . fmap parseReplCommand) . filter (not . null . snd) . zip [1..] . lines
+    parseCommands = mapM (toEither . fmap parseReplCommand) . filter (not . null . snd) . zip [1..] . lines
 
     toEither :: (a, Maybe b) -> Either a b
     toEither (a, Nothing) = Left  a
