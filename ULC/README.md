@@ -45,24 +45,44 @@ Type some terms or press Enter to leave.
 ```
 `>` denotes the REPL waiting for input, `=` means no reductions occurred (it's the same term), `~>` denotes one reduction, and `~>*` denotes 0 or more reductions (although in practice this is 1 or more due to `=`).
 
-There is also a reduction tracer, which should print each reduction step. prefix any string with `'` in order to see the reductions:
+There is also a reduction tracer, which should print each reduction step. prefix any term with `:reductions` in order to see the reductions:
 ```
->   '(\x.x) (\y.y) z
+>   :reductions (\x.x) (\y.y) z
 ~>  (λy.y) z
 ~>  z
 ```
 Note: if you provide a non-normalizing term, reductions will not terminate. Use STLC for termination guarantees.
 
-You can save variables for the life of the program with a `let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
+You can save variables for the life of the program with a `:let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
 ```
->   let x = y
+>   :let x = y
 Saved: y
 >   x
 =   y
 >   \y.x
 =   λz.y
 ```
-Note: Consequently `let` and `=` are keywords, and so you cannot name variables with these.
+
+You can read and run a file of commands by prefixing the filepath with `:load`. This will behave as if each non-empty line of the file were entered into the REPL manually. Terms previously added to the environment via `:let` commands will be in scope for later commands, so this can be used for building a library of term definitions. For example, if the file `bool.ulc` contains the following:
+```
+:let true  = \t.\f.t
+:let false = \t.\f.f
+
+:let not = \b.b false true
+:let and = \a.\b.a b false
+:let or  = \a.\b.a true b
+```
+We can import these definitions in the REPL:
+```
+>   :load bool.ulc
+Saved: λt.λf.t
+Saved: λt.λf.f
+Saved: λb.b (λt.λf.f) (λt.λf.t)
+Saved: λa.λb.a b (λt.λf.f)
+Saved: λa.λb.a (λt.λf.t) b
+>   not true
+~>* λt.λf.f
+```
 
 Note: We do capture avoiding substitution if a bound variable is the same as one we are substituting in. We rename the bound term to a new variable.
 
@@ -78,11 +98,11 @@ However we adopt the standard bracketing conventions to eliminate ambiguity in t
 
 Some notes about the syntax:
 
-- The above syntax only covers the core calculus, and not the repl extensions (such as `let` bindings above). The extensions are simply added on in the repl.
+- The above syntax only covers the core calculus, and not the repl extensions (such as `:let` bindings above). The extensions are simply added on in the repl.
 - Variables are strings (excluding numbers), as this is isomorphic to a whiteboard treatment and hence the most familiar.
 - Nested terms may not require brackets: `\x.x x` and follows the convention of abstractions being left associative, application being right associative, and application having higher precedence than abstraction.
 - Whitespace does not matter `\x.(x    x)`, except in between application where a minimum of one space is needed.
-- Non-terminating terms require you to quit with `Ctrl+C` or whatever your machine uses to interrupt computations.
+- Non-terminating terms may be interrupted with `Ctrl+C` or whatever your machine uses to interrupt computations.
 - This grammar left-recursive and non-ambiguous.
 
 ## Semantics

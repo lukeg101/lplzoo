@@ -3,7 +3,7 @@ Module      : Tests
 Description : The Testing for ULC.
 Copyright   : (c) Luke Geeson, 2018
 License     : GPL-3
-Maintainer  : mail@lukegeeson.com 
+Maintainer  : mail@lukegeeson.com
 Stability   : stable
 Portability : POSIX
 
@@ -103,7 +103,7 @@ unittest8 = let term = omega
             in mkUnitTest (exp==got) exp got
 
 
--- | Testing pretty printing for (\x.x) (\y.y) z  
+-- | Testing pretty printing for (\x.x) (\y.y) z
 unittest9 :: UnitTest
 unittest9 = let term = App (App (Abs "x" (Var "x")) (Abs "y" (Var "y"))) (Var "z")
                 exp  = "(λx.x) (λy.y) z"
@@ -136,7 +136,7 @@ instance QC.Arbitrary Term where
                         return $ Abs s t
           genApp n = do t1 <- term n
                         t2 <- term n
-                        return $ App t1 t2 
+                        return $ App t1 t2
           term n | n == 0    = Var <$> varname
                  | n > 0     = QC.oneof [genAbs (n-1), genApp (n-1)]
                  | otherwise = term (abs n)
@@ -148,7 +148,7 @@ instance QC.Arbitrary Term where
 -- | QuickCheck predicate to show that parsing a printed term
 --produces the same term.
 propShow :: Term -> Bool
-propShow t = let parsed = snd . fst . head $ P.apply P.pTerm (show t)
+propShow t = let parsed = fst . head $ P.apply P.pTerm (show t)
              in parsed == t
 
 
@@ -156,8 +156,8 @@ propShow t = let parsed = snd . fst . head $ P.apply P.pTerm (show t)
 propParse :: Term -> Bool
 propParse t = let parse = P.apply P.pTerm (show t)
               in case parse of
-                  [(("", _), "")] -> True
-                  _               -> False
+                  [(_,"")] -> True
+                  _        -> False
 
 
 -- | Helper function to run the above unit tests, and the quickCheck tests
@@ -165,11 +165,8 @@ runTests :: IO ()
 runTests = let tests = all (\(a,_,_)->a) ppunittests
            in do M.unless tests (putStrLn "unit tests failed!")
                  QC.quickCheck (QC.withMaxSuccess 20 propShow)
-                 QC.quickCheck (QC.withMaxSuccess 20 propParse) 
+                 QC.quickCheck (QC.withMaxSuccess 20 propParse)
 
 -- deep diving syntax trees is slow! run this a couple of times if you can!
 
 -- TODO implement testing reduction for terms
-
-
-

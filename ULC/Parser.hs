@@ -3,7 +3,7 @@ Module      : Parser
 Description : Monadic Parser Combinators for the untyped lambda calculus in Haskell.
 Copyright   : (c) Luke Geeson, 2018
 License     : GPL-3
-Maintainer  : mail@lukegeeson.com 
+Maintainer  : mail@lukegeeson.com
 Stability   : stable
 Portability : POSIX
 
@@ -12,12 +12,11 @@ The "Parser" module provides the monadic parser combinators, grammars, and top-l
 module Parser where
 
 -- ULC Imports.
-import qualified ULC     
+import qualified ULC
 
--- Tool Imports.     
-import qualified Control.Applicative (Applicative(..))
-import qualified Control.Monad as M  (liftM, ap)
-import qualified Data.Char     as C
+-- Tool Imports.
+import Data.Char
+import Control.Monad
 
 {-
 Implementation based on ideas in Monadic Parser Combinators paper
@@ -30,13 +29,13 @@ newtype Parser a = Parser (String -> [(a, String)])
 
 -- | Necessary AMP additions for Parser instance.
 instance Functor Parser where
-  fmap   = M.liftM
+  fmap   = liftM
 
 
 -- | Necessary AMP additions for Parser instance.
 instance Applicative Parser where
   pure a = Parser (\cs -> [(a,cs)])
-  (<*>)  = M.ap
+  (<*>)  = ap
 
 
 -- | Monad instance, generators use the first parser then apply f to the result
@@ -64,19 +63,20 @@ item = let split cs = case cs of
 p +++ q = let apply cs = case parse p cs ++ parse q cs of
                           []    -> []
                           (x:_) -> [x]
-          in Parser apply 
+          in Parser apply
 
 
 -- | Failure parser.
+zerop :: Parser a
 zerop = Parser (const [])
 
 
 -- | Parses an element and returns if they satisfy a predicate.
 sat :: (Char -> Bool) -> Parser Char
-sat p = do 
+sat p = do
   c <- item
-  if p c 
-    then return c 
+  if p c
+    then return c
     else zerop
 
 
@@ -104,15 +104,15 @@ many1 p = do
 
 -- | Parses 0 or more whitespace.
 space :: Parser String
-space = many (sat C.isSpace)
+space = many (sat isSpace)
 
 -- | Parsers 1 or more whitespace.
 space1 :: Parser String
-space1 = many1 (sat C.isSpace)
+space1 = many1 (sat isSpace)
 
 
 -- | Trims whitespace between an expression.
-spaces :: Parser a -> Parser a 
+spaces :: Parser a -> Parser a
 spaces p = do
   space
   x <- p
@@ -129,24 +129,19 @@ apply :: Parser a -> String -> [(a,String)]
 apply = parse
 
 
--- | Left recursion. 
+-- | Left recursion.
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 p `chainl1` op = let rest a = (do f <- op
                                   b <- p
                                   rest (f a b)) +++ return a
 
                  in do a <- p
-                       rest a 
+                       rest a
 
 
 -- | Parser 1 or more chars (a string).
 str :: Parser String
-str = do 
-  s <- many1 $ sat C.isLower
-  if s `elem` ["let", "="] 
-    then zerop 
-    else return s
-
+str = many1 (sat isLower)
 
 -- | Parses away brackets as you'd expect.
 bracket :: Parser a -> Parser a
@@ -156,53 +151,64 @@ bracket p = do
   symb ")"
   return x
 
--- | Vars are strings packaged up.
-var :: Parser ULC.Term
-var = ULC.Var <$> str
+-- | Type of possible inputs to the REPL
+data Command = T    ULC.Term
+             | Reds ULC.Term
+             | Let  String ULC.Term
+             | Load FilePath
 
+-- | Top-level function for parsing a REPL command, failing if the parse is ambiguous or doesn't consume the entire input.
+parseReplCommand :: String -> Maybe Command
+parseReplCommand s = case parse pCommand s of
+                       [(a,"")] -> Just a
+                       _        -> Nothing
 
--- | Abstraction allows escaped backslash or lambda
-lambdas :: [Char]
-lambdas = ['\x03bb','\\']
+-- | Parse a command prefixed by a colon, or parse a raw term.
+pCommand :: Parser Command
+pCommand = pReds +++ pLet +++ pLoad +++ (T <$> pTerm)
+  where
+    pReds :: Parser Command
+    pReds = do symb ":reductions"
+               space1
+               Reds <$> pTerm
 
+    pLet :: Parser Command
+    pLet = do symb ":let"
+              space1
+              v <- str
+              spaces $ symb "="
+              Let v <$> pTerm
+
+    pLoad :: Parser Command
+    pLoad = do symb ":load"
+               space1
+               fp <- many1 (sat (not . isSpace))
+               space
+               pure (Load fp)
+
+-- | Top-level of CFG Grammar.
+pTerm :: Parser ULC.Term
+pTerm = spaces (lam +++ app)
 
 -- | Lam parser parses abstractions
 lam :: Parser ULC.Term
-lam = do 
-  spaces $ identifier lambdas
+lam = do
+  spaces $ sat (`elem` "λ\\")
   x <- spaces str
   symb "."
-  e <- spaces term
+  e <- spaces pTerm
   return $ ULC.Abs x e
-
 
 -- | App parses application terms, with one or more spaces in between terms.
 app :: Parser ULC.Term
 app = chainl1 expr $ do
   space1
-  return ULC.App 
-
--- | Parser for let expressions
-pLet = do
-  space
-  symb "let"
-  space1
-  v <- str
-  spaces $ symb "="
-  t <- term 
-  return (v,t)
-
--- | Parser for regular terms.
-pTerm = do
-  t <- term 
-  return ("", t)
+  return ULC.App
 
 -- | Expression follows CFG form with bracketing convention.
-expr = bracket term +++ var
+expr :: Parser ULC.Term
+expr = bracket pTerm +++ var
 
--- | Top-level of CFG Grammar.
-term = lam +++ app
-
--- | Identifies key words.
-identifier :: String -> Parser Char 
-identifier xs = sat (`elem` xs)
+-- | Vars are strings packaged up.
+var :: Parser ULC.Term
+var = ULC.Var <$> str

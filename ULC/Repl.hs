@@ -14,26 +14,23 @@ module Repl where
 
 -- ULC Imports.
 import ULC
-  (Term(Var), substitute, vars, reductions, reduce)
 import Parser
-  (apply, term, pLet, pTerm, (+++))
+  (Command(..), parseReplCommand)
 
 
 -- Tool Imports.
-import qualified Data.Map.Lazy as M
+import           Data.List
+import qualified Data.Map as M
 
-
--- Haskeline imports
-import Data.List
 import Control.Monad.Trans
 import Control.Monad.Trans.State.Strict
 import System.Console.Haskeline
-
+import System.Directory
 
 -- | Top-level repl function
 replMain :: IO ()
 replMain = do
-  putStrLn "Welcome to the Untyped \x03bb-calculus REPL"
+  putStrLn "Welcome to the Untyped λ-calculus REPL"
   putStrLn "Type some terms or press Enter to leave."
   evalStateT (runInputT settings repl) M.empty
 
@@ -48,17 +45,18 @@ settings :: Settings (StateT Environment IO)
 settings = Settings contextCompletion Nothing True
   where
     contextCompletion :: CompletionFunc (StateT Environment IO)
-    contextCompletion = completeWord Nothing " ()\\." completions
+    contextCompletion = completeWord Nothing " ()λ\\." completions
 
     completions :: String -> StateT Environment IO [Completion]
-    completions xs = map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . M.keys <$> get
+    completions xs = map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . (comms ++) . M.keys <$> get
 
+    comms :: [String]
+    comms = [":reductions", ":let", ":load"]
 
 -- | Marks an InputT action as interruptible, so that pressing Ctrl+C will terminate
 -- the action, returning a default value, instead of terminating the program.
 interruptible :: MonadException m => a -> InputT m a -> InputT m a
 interruptible d x = handle (\Interrupt -> outputStrLn "interrupted" >> pure d) (withInterrupt x)
-
 
 -- | REPL loop, takes input reduces and prints result, or exits out.
 repl :: Interpreter ()
@@ -66,62 +64,55 @@ repl = do ms <- getInputLine ">   "
           case ms of
             Nothing -> repl
             Just "" -> outputStrLn "Goodbye."
-            Just s  -> do env  <- lift get
-                          env' <- interruptible env (liftIO (parseTerm s env))
-                          lift (put env')
+            Just s  -> do case parseReplCommand s of
+                            Nothing -> outputStrLn ("could not parse " ++ show s)
+                            Just  c -> do env <- lift get
+                                          interruptible () (handleCommand (formatCommand env c))
                           repl
 
+-- Dispatches a procedure for each type of command.
+handleCommand :: Command -> Interpreter ()
+handleCommand (T     t) = outputStrLn (prependTerm t (reduce t))
+handleCommand (Reds  t) = mapM_ outputStrLn (prependedReductions t)
+handleCommand (Load fp) = handleLoad fp
+handleCommand (Let v t) = do lift get >>= lift . put . M.insert v t
+                             outputStrLn ("saved " ++ v ++ " = " ++ show t)
 
--- | Takes a term and context and substitutes env terms
--- into all free occurrences in the term
-formatTerm :: ULC.Term -> Environment -> ULC.Term
-formatTerm t1 env = foldl
-  (\t (v,t2) ->
-    if v `elem` ULC.vars t1
-      then ULC.substitute t (ULC.Var v, t2)
-      else t) t1 $ M.assocs env
-
+-- | Substitutes named terms from the environment into
+-- free occurrences of those names within command terms
+formatCommand :: Environment -> Command -> Command
+formatCommand env c = case c of
+                        T     t -> T     (formatTerm t)
+                        Reds  t -> Reds  (formatTerm t)
+                        Let s t -> Let s (formatTerm t)
+                        c       -> c
+  where
+    formatTerm :: Term -> Term
+    formatTerm = flip (M.foldlWithKey (\t1 v t2 -> ULC.substitute t1 (ULC.Var v, t2))) env
 
 -- | Function prepends ~> arrows or prints existing term if no reds occur
-prependReductions :: ULC.Term -> [ULC.Term] -> [String]
-prependReductions x xs = if null xs then ["=   "++show x] else
-  map (\x -> "~>  " ++ show x) xs
-
+prependedReductions :: Term -> [String]
+prependedReductions t = let xs = reductions t in if null xs
+                                                   then ["=   " ++ show t]
+                                                   else map (\x -> "~>  " ++ show x) xs
 
 -- | Function prepends reduction ops for one multi-step reduction
 prependTerm :: ULC.Term -> ULC.Term -> String
 prependTerm x y = if x == y then "=   " ++ show x else "~>* " ++ show y
 
+-- | Helper function to load and run a script of interpreter commands
+handleLoad :: FilePath -> Interpreter ()
+handleLoad fp = do exists <- liftIO (doesFileExist fp)
+                   if exists
+                     then do e <- parseCommands <$> liftIO (readFile fp)
+                             case e of
+                               Left (n,l) -> outputStrLn ("could not parse " ++ show l ++ " on line " ++ show n)
+                               Right cs   -> mapM_ handleCommand cs
+                     else outputStrLn ("file " ++ fp ++ " does not exist")
+  where
+    parseCommands :: String -> Either (Int,String) [Command]
+    parseCommands = mapM (toEither . fmap parseReplCommand) . filter (not . null . snd) . zipWith (\n l -> ((n,l),l)) [1..] . lines
 
--- | Error message for parse failure
-cannotParse :: String -> IO ()
-cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
-
-
--- | Helper function to print the reduction steps of a term
-printReductions :: String -> IO ()
-printReductions s
-  = let prepend x = prependReductions (fst x) . ULC.reductions $ fst x
-    in case apply term (tail s) of
-         (x:_) -> if null (snd x)
-                    then mapM_ putStrLn $ prepend x
-                    else cannotParse s
-         _     -> cannotParse s
-
-
--- | Helper function parses the term as either a Let expression or a raw term.
--- Let expressions update the environment with new variables, using any existing
--- variables in scope. For a raw term, evaluation is attempted after substituting
--- in bound terms from the environment. For ULC termination is not guaranteed.
-parseTerm :: String -> Environment -> IO Environment
-parseTerm s env
-  = if head s == '\''
-      then printReductions s >> pure env
-      else case apply (pLet +++ pTerm) s of
-             [(("",t),"")] -> do let t' = formatTerm t env
-                                 putStrLn (prependTerm t' $ reduce t')
-                                 pure env
-             [((v,t),"")]  -> do let t' = formatTerm t env
-                                 putStrLn $ "Saved: " ++ show t'
-                                 pure (M.insert v t' env)
-             _             -> cannotParse s >> pure env
+    toEither :: (a, Maybe b) -> Either a b
+    toEither (a, Nothing) = Left  a
+    toEither (_, Just  b) = Right b
