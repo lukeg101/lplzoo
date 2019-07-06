@@ -1,0 +1,6 @@
+:let true  = \t.\f.t
+:let false = \t.\f.f
+
+:let not = \b.b false true
+:let and = \a.\b.a b false
+:let or  = \a.\b.a true b
