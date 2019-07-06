@@ -141,12 +141,7 @@ p `chainl1` op = let rest a = (do f <- op
 
 -- | Parser 1 or more chars (a string).
 str :: Parser String
-str = do
-  s <- many1 $ sat isLower
-  if s `elem` ["let", "="]
-    then zerop
-    else return s
-
+str = many1 (sat isLower)
 
 -- | Parses away brackets as you'd expect.
 bracket :: Parser a -> Parser a
