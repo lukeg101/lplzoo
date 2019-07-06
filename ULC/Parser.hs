@@ -143,6 +143,7 @@ p `chainl1` op = let rest a = (do f <- op
 str :: Parser String
 str = many1 (sat isLower)
 
+
 -- | Parses away brackets as you'd expect.
 bracket :: Parser a -> Parser a
 bracket p = do
@@ -151,11 +152,22 @@ bracket p = do
   symb ")"
   return x
 
+
+-- | Parser for comments
+comment :: Parser ()
+comment =  do
+  symb ";"
+  many (sat isPrint)
+  return ()
+
+
 -- | Type of possible inputs to the REPL
 data Command = T    ULC.Term
              | Reds ULC.Term
              | Let  String ULC.Term
              | Load FilePath
+             | None  -- needed for comments
+
 
 -- | Top-level function for parsing a REPL command, failing if the parse is ambiguous or doesn't consume the entire input.
 parseReplCommand :: String -> Maybe Command
@@ -163,9 +175,10 @@ parseReplCommand s = case parse pCommand s of
                        [(a,"")] -> Just a
                        _        -> Nothing
 
+
 -- | Parse a command prefixed by a colon, or parse a raw term.
 pCommand :: Parser Command
-pCommand = pReds +++ pLet +++ pLoad +++ (T <$> pTerm)
+pCommand = pReds +++ pLet +++ pLoad +++ (T <$> pTerm) +++ pComment
   where
     pReds :: Parser Command
     pReds = do symb ":reductions"
@@ -185,10 +198,16 @@ pCommand = pReds +++ pLet +++ pLoad +++ (T <$> pTerm)
                fp <- many1 (sat (not . isSpace))
                space
                pure (Load fp)
+    pComment :: Parser Command
+    pComment = do () <- comment
+                  return None
+
+
 
 -- | Top-level of CFG Grammar.
 pTerm :: Parser ULC.Term
 pTerm = spaces (lam +++ app)
+
 
 -- | Lam parser parses abstractions
 lam :: Parser ULC.Term
@@ -199,15 +218,18 @@ lam = do
   e <- spaces pTerm
   return $ ULC.Abs x e
 
+
 -- | App parses application terms, with one or more spaces in between terms.
 app :: Parser ULC.Term
 app = chainl1 expr $ do
   space1
   return ULC.App
 
+
 -- | Expression follows CFG form with bracketing convention.
 expr :: Parser ULC.Term
 expr = bracket pTerm +++ var
+
 
 -- | Vars are strings packaged up.
 var :: Parser ULC.Term

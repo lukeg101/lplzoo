@@ -1,6 +1,12 @@
+; Test file for boolean example in the readme
+
+; This is a comment
+
+; true and false values
 :let true  = \t.\f.t
 :let false = \t.\f.f
 
+; common boolean operators
 :let not = \b.b false true
 :let and = \a.\b.a b false
 :let or  = \a.\b.a true b

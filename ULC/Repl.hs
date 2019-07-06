@@ -53,10 +53,12 @@ settings = Settings contextCompletion Nothing True
     comms :: [String]
     comms = [":reductions", ":let", ":load"]
 
+
 -- | Marks an InputT action as interruptible, so that pressing Ctrl+C will terminate
 -- the action, returning a default value, instead of terminating the program.
 interruptible :: MonadException m => a -> InputT m a -> InputT m a
 interruptible d x = handle (\Interrupt -> outputStrLn "interrupted" >> pure d) (withInterrupt x)
+
 
 -- | REPL loop, takes input reduces and prints result, or exits out.
 repl :: Interpreter ()
@@ -70,13 +72,16 @@ repl = do ms <- getInputLine ">   "
                                           interruptible () (handleCommand (formatCommand env c))
                           repl
 
+
 -- Dispatches a procedure for each type of command.
 handleCommand :: Command -> Interpreter ()
+handleCommand None      = return ()
 handleCommand (T     t) = outputStrLn (prependTerm t (reduce t))
 handleCommand (Reds  t) = mapM_ outputStrLn (prependedReductions t)
 handleCommand (Load fp) = handleLoad fp
 handleCommand (Let v t) = do lift get >>= lift . put . M.insert v t
                              outputStrLn ("saved " ++ v ++ " = " ++ show t)
+
 
 -- | Substitutes named terms from the environment into
 -- free occurrences of those names within command terms
@@ -90,15 +95,18 @@ formatCommand env c = case c of
     formatTerm :: Term -> Term
     formatTerm = flip (M.foldlWithKey (\t1 v t2 -> ULC.substitute t1 (ULC.Var v, t2))) env
 
+
 -- | Function prepends ~> arrows or prints existing term if no reds occur
 prependedReductions :: Term -> [String]
 prependedReductions t = let xs = reductions t in if null xs
                                                    then ["=   " ++ show t]
                                                    else map (\x -> "~>  " ++ show x) xs
 
+
 -- | Function prepends reduction ops for one multi-step reduction
 prependTerm :: ULC.Term -> ULC.Term -> String
 prependTerm x y = if x == y then "=   " ++ show x else "~>* " ++ show y
+
 
 -- | Helper function to load and run a script of interpreter commands
 handleLoad :: FilePath -> Interpreter ()
