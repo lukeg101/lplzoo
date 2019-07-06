@@ -56,7 +56,7 @@ Note: if you provide a non-normalizing term, reductions will not terminate. Use 
 You can save variables for the life of the program with a `:let` expression. Any time a saved variable appears in a term, it will be substituted for the saved term:
 ```
 >   :let x = y
-Saved: y
+saved x = y
 >   x
 =   y
 >   \y.x
@@ -75,11 +75,11 @@ You can read and run a file of commands by prefixing the filepath with `:load`. 
 We can import these definitions in the REPL:
 ```
 >   :load bool.ulc
-Saved: λt.λf.t
-Saved: λt.λf.f
-Saved: λb.b (λt.λf.f) (λt.λf.t)
-Saved: λa.λb.a b (λt.λf.f)
-Saved: λa.λb.a (λt.λf.t) b
+saved true = λt.λf.t
+saved false = λt.λf.f
+saved not = λb.b (λt.λf.f) (λt.λf.t)
+saved and = λa.λb.a b (λt.λf.f)
+saved or = λa.λb.a (λt.λf.t) b
 >   not true
 ~>* λt.λf.f
 ```

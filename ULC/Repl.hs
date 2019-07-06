@@ -107,7 +107,7 @@ handleLoad fp = do exists <- liftIO (doesFileExist fp)
                      then do e <- parseCommands <$> liftIO (readFile fp)
                              case e of
                                Left (n,l) -> outputStrLn ("could not parse " ++ show l ++ " on line " ++ show n)
-                               Right cs   -> mapM_ handleCommand cs
+                               Right cs   -> mapM_ (\c -> lift get >>= handleCommand . flip formatCommand c) cs
                      else outputStrLn ("file " ++ fp ++ " does not exist")
   where
     parseCommands :: String -> Either (Int,String) [Command]
