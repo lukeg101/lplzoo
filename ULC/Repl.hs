@@ -51,7 +51,7 @@ settings = Settings contextCompletion Nothing True
     completions :: String -> String -> StateT Environment IO [Completion]
     completions prev xs = if "daol:" `isPrefixOf` dropWhile isSpace prev -- check if previous word (in reverse) is ":load"
                             then listFiles xs
-                            else map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . (comms ++) . M.keys <$> get
+                            else map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . (if all isSpace prev then (comms ++) else id) . M.keys <$> get
 
     comms :: [String]
     comms = [":reductions", ":let", ":load"]
