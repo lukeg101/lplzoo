@@ -178,7 +178,7 @@ parseReplCommand s = case parse pCommand s of
 
 -- | Parse a command prefixed by a colon, or parse a raw term.
 pCommand :: Parser Command
-pCommand = pReds +++ pLet +++ pLoad +++ (T <$> pTerm) +++ pComment
+pCommand = spaces (pReds +++ pLet +++ pLoad +++ (T <$> pTerm) +++ pComment)
   where
     pReds :: Parser Command
     pReds = do symb ":reductions"
@@ -206,7 +206,7 @@ pCommand = pReds +++ pLet +++ pLoad +++ (T <$> pTerm) +++ pComment
 
 -- | Top-level of CFG Grammar.
 pTerm :: Parser ULC.Term
-pTerm = spaces (lam +++ app)
+pTerm = lam +++ app
 
 
 -- | Lam parser parses abstractions
