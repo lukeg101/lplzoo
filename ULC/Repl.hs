@@ -19,6 +19,7 @@ import Parser
 
 
 -- Tool Imports.
+import           Data.Char
 import           Data.List
 import qualified Data.Map as M
 
@@ -45,10 +46,12 @@ settings :: Settings (StateT Environment IO)
 settings = Settings contextCompletion Nothing True
   where
     contextCompletion :: CompletionFunc (StateT Environment IO)
-    contextCompletion = completeWord Nothing " ()λ\\." completions
+    contextCompletion = completeWordWithPrev Nothing " " completions
 
-    completions :: String -> StateT Environment IO [Completion]
-    completions xs = map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . (comms ++) . M.keys <$> get
+    completions :: String -> String -> StateT Environment IO [Completion]
+    completions prev xs = if "daol:" `isPrefixOf` dropWhile isSpace prev -- check if previous word (in reverse) is ":load"
+                            then listFiles xs
+                            else map (\x -> Completion x x True) . filter (xs `isPrefixOf`) . (comms ++) . M.keys <$> get
 
     comms :: [String]
     comms = [":reductions", ":let", ":load"]
