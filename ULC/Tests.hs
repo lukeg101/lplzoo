@@ -170,9 +170,7 @@ runTests = let tests    = all (\(a,_,_)->a) ppunittests
            in do M.unless tests (do {putStrLn "unit tests failed!"; exitFailure})
                  r1 <- QC.quickCheckResult (QC.withMaxSuccess 20 propShow)
                  r2 <- QC.quickCheckResult (QC.withMaxSuccess 20 propParse)
-                 if any failed [r1, r2]
-                   then exitFailure
-                   else return ()
+                 M.when (any failed [r1, r2]) exitFailure
 
 -- | Main function to run the tests
 hs :: IO ()
