@@ -9,7 +9,6 @@ author:              Luke Geeson
 maintainer:          6547672+lukeg101@users.noreply.github.com
 copyright:           Copyright (c) 2019 Luke Geeson
 category:            Language
-build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
 cabal-version:       >=1.10
 build-type:          Simple

@@ -290,7 +290,7 @@ substitute l@(Abs y t l1) c@(Var x, l2)
   | y == x = l
   | y `notfree` l2 = Abs y t $ substitute l1 c
   | otherwise = Abs z t $ substitute (rename l1 (y,z)) c
-  where z = max (newlabel l1) (newlabel l2)
+  where z     = foldr1 biggest [newlabel l1, newlabel l2, newlabel (Var x)]
 substitute l@(PiAbs x t) c@(Var y, l2)
   | x /= y = PiAbs x $ substitute t c
 

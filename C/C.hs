@@ -192,14 +192,14 @@ substitute (Abs y t l1) c@(Var x, l2)
   | y `notfree` l2 = Abs y (substitute t c) (substitute l1 c)
   | otherwise      = Abs z (substitute t c) l1'
   where l1' = substitute (rename l1 (Var y,Var z)) c
-        z          = max (newlabel l1) (newlabel l2)
+        z          = foldr1 biggest [newlabel l1, newlabel l2]
 substitute (Pi y t l1) c@(Var x, l2)
   | y == x         = Pi y (substitute t c) l1 -- sub under the 'type'
   | y `notfree` l2 = Pi y (substitute t c) (substitute l1 c)
   | otherwise      = Pi z (substitute t c) l1'
   where l1' = substitute (rename l1 (Var y,Var z)) c
-        z          = max (newlabel l1) (newlabel l2)
-substitute l _ = l
+        z          = foldr1 biggest [newlabel l1, newlabel l2]
+substitute l _     = l
 
 
 -- | Function returns a set of free variables of a term.

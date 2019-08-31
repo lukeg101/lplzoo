@@ -312,7 +312,7 @@ typeSub l@(TAbs y k t1) c@(TVar x, t2)
   | y == x = l
   | y `notfreeT` t2 = TAbs y k $ typeSub t1 c
   | otherwise = TAbs x k $ typeSub (renameT t1 (y,z)) c
-  where z = max (newTLabel t1) (newTLabel t2)
+  where z = foldr1 biggest [newTLabel t1, newTLabel t2, newTLabel (TVar x)]
 
 -- function used to do type substitution on types in a term
 tSubUnder :: OTerm -> (T,T) -> OTerm
@@ -358,7 +358,7 @@ substitute l@(Abs y t l1) c@(Var x, l2)
   | y == x = l
   | y `notfree` l2 = Abs y t $ substitute l1 c
   | otherwise = Abs z t $ substitute (rename l1 (y,z)) c
-  where z = max (newlabel l1) (newlabel l2)
+  where z = foldr1 biggest [newlabel l1, newlabel l2, newlabel (Var x)]
 
 
 --one-step reduction relation, TODO implement other reduction strats

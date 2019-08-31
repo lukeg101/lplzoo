@@ -354,7 +354,7 @@ subTermInTerm (Abs y t l1) c@(Var x, l2)
   | y == x         = Abs y t l1
   | y `notfree` l2 = Abs y t $ subTermInTerm l1 c
   | otherwise      = Abs z t $ subTermInTerm (rename l1 (y,z)) c
-  where z          = max (newlabel l1) (newlabel l2)
+  where z          = foldr1 biggest [newlabel l1, newlabel l2, newlabel (Var x)]
 subTermInTerm s _  = s
 
 
