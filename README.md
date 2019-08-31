@@ -62,10 +62,10 @@ Type some terms or press Enter to leave.
 ```
 Alternatively you can build each language with vanilla GHC. First by navigating into a language directory, you can do e.g:
 ```
-cd ulc
-ghc -O2 -o ulc Main -W
+⇒ cd ulc
+⇒ ghc -O2 -o ulc Main -W
 ... Compilation bits ...
-./ulc
+⇒ ./ulc
 Welcome to the Untyped λ-calculus REPL
 Type some terms or press Enter to leave.
 >
@@ -75,7 +75,7 @@ Type some terms or press Enter to leave.
 
 The languages in the zoo are tested using unit tests in the form of example terms, QuickCheck to test parsing of randomly generated terms. This is a work in progress but for the testsuites that exist you can use cabal to run the tests:
 ```
-cabal new-test test-ulc
+⇒ cabal new-test test-ulc
 ... Build bits ...
 Test suite test-ulc: RUNNING...
 +++ OK, passed 20 tests.
