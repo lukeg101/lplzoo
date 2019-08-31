@@ -71,4 +71,19 @@ Type some terms or press Enter to leave.
 >
 ```
 
+## Testing
+
+The languages in the zoo are tested using unit tests in the form of example terms, QuickCheck to test parsing of randomly generated terms. This is a work in progress but for the testsuites that exist you can use cabal to run the tests:
+```
+cabal new-test test-ulc
+```
+Alternatively you can use vanilla GHC to test each langauge (you'll need a local version of QuickCheck), using:
+```
+⇒  ghci Tests.hs
+*Tests> runTests
++++ OK, passed 20 tests.
++++ OK, passed 20 tests.
+```
+
+See the Cabal file for the testsuites.
 
