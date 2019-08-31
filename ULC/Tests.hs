@@ -129,7 +129,7 @@ testPP = let passed = filter (\(a,_,_)->a) ppunittests
 instance QC.Arbitrary Term where
   arbitrary = QC.sized term
     where varname  = do s <- QC.listOf1 (QC.choose ('a', 'z'))
-                        if s `elem` ["let", "="] --make more general
+                        if s `elem` P.keywords
                           then varname
                           else return s
           genAbs n = do s <- varname

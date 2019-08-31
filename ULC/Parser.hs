@@ -17,6 +17,7 @@ import qualified ULC
 -- Tool Imports.
 import Data.Char
 import Control.Monad
+import qualified Data.Char           as C
 
 {-
 Implementation based on ideas in Monadic Parser Combinators paper
@@ -128,6 +129,19 @@ symb = string
 apply :: Parser a -> String -> [(a,String)]
 apply = parse
 
+-- | set of reserved words for ULC
+keywords :: [String]
+keywords = ["let", "="]
+
+
+-- | 1 or more chars
+str :: Parser String
+str = do 
+  s <- many1 $ sat C.isLower
+  if s `elem` keywords 
+     then zerop 
+     else return s
+
 
 -- | Left recursion.
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
@@ -137,11 +151,6 @@ p `chainl1` op = let rest a = (do f <- op
 
                  in do a <- p
                        rest a
-
-
--- | Parser 1 or more chars (a string).
-str :: Parser String
-str = many1 (sat isLower)
 
 
 -- | Parses away brackets as you'd expect.
