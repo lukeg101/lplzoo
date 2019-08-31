@@ -15,6 +15,7 @@ module Tests where
 -- Tool Imports.
 import qualified Test.QuickCheck as QC
 import qualified Control.Monad   as M
+import System.Exit (exitFailure)
 
 
 -- PCF Imports.
@@ -171,10 +172,16 @@ propParse t = let parse = P.apply P.pTerm (show t)
 
 -- | Helper function to run the above unit tests, and the quickCheck tests
 runTests :: IO ()
-runTests = let tests = all (\(a,_,_)->a) ppunittests
-           in do M.unless tests (putStrLn "unit tests failed!")
-                 QC.quickCheck (QC.withMaxSuccess 20 propShow)
-                 QC.quickCheck (QC.withMaxSuccess 20 propParse) 
+runTests = let tests    = all (\(a,_,_)->a) ppunittests
+               failed t = case t of
+                           QC.Failure {} -> True
+                           _             -> False
+           in do M.unless tests (do {putStrLn "unit tests failed!"; exitFailure})
+                 r1 <- QC.quickCheckResult (QC.withMaxSuccess 20 propShow)
+                 r2 <- QC.quickCheckResult (QC.withMaxSuccess 20 propParse)
+                 if any failed [r1, r2]
+                   then exitFailure
+                   else return ()
 
 -- deep diving syntax trees is slow! run this a couple of times if you can!
 
