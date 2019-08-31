@@ -159,5 +159,9 @@ runTests = let tests = all (\(a,_,_)->a) ppunittests
 
 -- deep diving syntax trees is slow! run this a couple of times if you can!
 
+-- | Main function to run the tests
+hs :: IO ()
+hs = runTests
+
 -- TODO implement testing reduction for terms
 

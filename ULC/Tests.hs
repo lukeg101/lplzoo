@@ -167,6 +167,11 @@ runTests = let tests = all (\(a,_,_)->a) ppunittests
                  QC.quickCheck (QC.withMaxSuccess 20 propShow)
                  QC.quickCheck (QC.withMaxSuccess 20 propParse)
 
+
+-- | Main function to run the tests
+hs :: IO ()
+hs = runTests
+
 -- deep diving syntax trees is slow! run this a couple of times if you can!
 
 -- TODO implement testing reduction for terms

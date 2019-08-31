@@ -39,8 +39,36 @@ Submit a PR if there's something you want to add or fix! Bearing in mind a few t
 1. Compile your code with `-W`, This catches any warnings. There shouldn't be any warnings 
 2. Use [hlint](http://hackage.haskell.org/package/hlint), to handle code linting and suggestions. Like wall, there should be no suggesstions for file `Foo.hs` when running `hlint Foo.hs`.
 3. Ensure code has 100% [Haddock](https://www.haskell.org/haddock/) coverage. This helps to document things if ever we want to.
-4. Keep in mind the motivations above, this code is not meant to be advanced Haskell, but rather simple (for demonstration) so try not to use advanced technologies if you can.
+4. All of this can be run automatically using Cabal (see below). Make sure to run these locally before you commit.
+5. Keep in mind the motivations above, this code is not meant to be advanced Haskell, but rather simple (for demonstration) so try not to use advanced technologies if you can.
 
+## Building
 
+Each language in the zoo can be built using cabal nix-style build systems, or just using ghc in each directory. You can build a language from this directory using e.g:
+```
+cabal new-build ulc
+```
+and run it using:
+```
+cabal new-run ulc
+```
+and you will see something like:
+```
+⇒  cabal new-run ulc
+Up to date
+Welcome to the Untyped λ-calculus REPL
+Type some terms or press Enter to leave.
+>
+```
+Alternatively you can build each language with vanilla GHC. First by navigating into a language directory, you can do e.g:
+```
+cd ulc
+ghc -O2 -o ulc Main -W
+... Compilation bits ...
+./ulc
+Welcome to the Untyped λ-calculus REPL
+Type some terms or press Enter to leave.
+>
+```
 
 

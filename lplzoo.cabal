@@ -1,0 +1,274 @@
+name:                lplzoo
+version:             0.1.0.0
+synopsis:            Fine-grain implementations of common lambda calculi in Haskell, tested with QuickCheck
+-- description:
+homepage:            https://github.com/lukeg101/lplzoo
+license:             GPL-3
+license-file:        LICENSE
+author:              Luke Geeson
+maintainer:          6547672+lukeg101@users.noreply.github.com
+copyright:           Copyright (c) 2019 Luke Geeson
+category:            Language
+build-type:          Simple
+extra-source-files:  CHANGELOG.md, README.md
+cabal-version:       >=1.10
+build-type:          Simple
+bug-reports:         https://github.com/lukeg101/lplzoo/issues
+extra-source-files:  CHANGELOG
+
+source-repository head
+  type:     git
+  location: https://github.com/lukeg101/lplzoo/issues
+
+-- Executables, run these with cabal new-run foo
+
+executable ulc
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      ULC
+  other-modules:       Parser,
+                       ULC,
+                       Repl
+  default-language:    Haskell2010
+
+executable ski
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      SKI
+  other-modules:       Parser,
+                       SKI,
+                       Repl
+  default-language:    Haskell2010
+
+executable stlc
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      STLC
+  other-modules:       Parser,
+                       STLC,
+                       Repl
+  default-language:    Haskell2010
+
+executable systemt
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      SystemT
+  other-modules:       Parser,
+                       SystemT,
+                       Repl
+  default-language:    Haskell2010
+
+executable pcf
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      PCF
+  other-modules:       Parser,
+                       PCF,
+                       Repl
+  default-language:    Haskell2010
+
+executable systemf
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      SystemF
+  other-modules:       Parser,
+                       SystemF,
+                       Repl
+  default-language:    Haskell2010
+
+executable sol
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      SOL
+  other-modules:       Parser,
+                       SOL,
+                       Repl
+  default-language:    Haskell2010
+
+executable cata
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      Cata
+  other-modules:       Parser,
+                       Cata,
+                       Repl
+  default-language:    Haskell2010
+
+executable ana
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      Ana
+  other-modules:       Parser,
+                       Ana,
+                       Repl
+  default-language:    Haskell2010
+
+executable sub
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      Sub
+  other-modules:       Parser,
+                       Sub,
+                       Repl
+  default-language:    Haskell2010
+
+executable omega
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      Omega
+  other-modules:       Parser,
+                       Omega,
+                       Repl
+  default-language:    Haskell2010
+
+executable fomega
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      FOmega
+  other-modules:       Parser,
+                       FOmega,
+                       Repl
+  default-language:    Haskell2010
+
+executable lf
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      LF
+  other-modules:       Parser,
+                       LF,
+                       Repl
+  default-language:    Haskell2010
+
+executable c
+  main-is:             Main.hs
+  ghc-options:         -W -O2 -fwarn-tabs
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4
+  hs-source-dirs:      C
+  other-modules:       Parser,
+                       C,
+                       Repl
+  default-language:    Haskell2010
+
+-- Testsuites, run these with cabal new-test foo
+
+test-suite test-ulc
+  type:                exitcode-stdio-1.0
+  main-is:             Tests.hs
+  ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
+  hs-source-dirs:      ULC
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4,
+                       QuickCheck
+  other-modules:       Parser,
+                       ULC,
+                       Repl
+  default-language:    Haskell2010
+
+test-suite test-systemt
+  type:                exitcode-stdio-1.0
+  main-is:             Tests.hs
+  ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
+  hs-source-dirs:      SystemT
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4,
+                       QuickCheck
+  other-modules:       Parser,
+                       SystemT,
+                       Repl
+  default-language:    Haskell2010
+
+
+
+
+
