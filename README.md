@@ -84,7 +84,8 @@ Test suite test-ulc: PASS
 Test suite logged to:
 ... Log dir ...
 ```
-To run the tests for ulc (See the cabal file for the names of each testsuite). You can run all the testsuites at once with `cabal new-test`
+To run the tests for ulc (See the cabal file for the names of each testsuite). You can run all the testsuites at once with `cabal new-test`.
+
 Alternatively you can use vanilla GHC to test each langauge (you'll need a local version of QuickCheck), using:
 ```
 ⇒  ghci Tests.hs
