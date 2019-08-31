@@ -267,6 +267,28 @@ test-suite test-systemt
                        Repl
   default-language:    Haskell2010
 
+test-suite test-pcf
+  type:                exitcode-stdio-1.0
+  main-is:             Tests.hs
+  ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
+  hs-source-dirs:      PCF
+  build-depends:       base >=4.11 && <4.12, 
+                       containers >=0.5 && <0.6, 
+                       mtl >=2.2 && <2.3, 
+                       transformers >=0.5 && <0.6, 
+                       haskeline >=0.7 && <0.8, 
+                       directory >=1.3 && <1.4,
+                       QuickCheck
+  other-modules:       Parser,
+                       PCF,
+                       Repl
+  default-language:    Haskell2010
+
+
+
+
+
+
 
 
 
