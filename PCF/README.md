@@ -10,6 +10,8 @@ _Optional_: If you want to run the tests for this module, you'll need [QuickChec
 
 ## To Build & Run
 
+You can use cabal to build and run this, see this [README](../README.md), alternatively you can use vanilla ghc to build:
+
 To compile and run do:
 `ghc -O2 -o pcf Main`
 then run `./pcf`

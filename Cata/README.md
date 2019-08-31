@@ -8,6 +8,8 @@ You need [Haskell](https://www.haskell.org/), this compiles with GHC 8.2.2 at le
 
 ## To Build & Run
 
+You can use cabal to build and run this, see this [README](../README.md), alternatively you can use vanilla ghc to build:
+
 To compile and run do:
 `ghc -O2 -o cata Main`
 then run `./cata`
