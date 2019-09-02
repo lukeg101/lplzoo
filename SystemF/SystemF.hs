@@ -143,7 +143,7 @@ instance Show SFTerm where
   show (Typ t)      = "[" ++ show t ++"]"
   show (App t1 t2)  = 
     paren (isAbs t1 || isPiAbs t1 ) (show t1) 
-      ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
+      ++ ' ' : paren (isAbs t2 || isPiAbs t2 || isApp t2) (show t2)
   show (Abs x t l1) = 
     "\x03bb" ++ x ++ ":" ++ show t ++ "." ++ show l1
   show (PiAbs t l1) = 

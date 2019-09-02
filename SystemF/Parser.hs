@@ -293,6 +293,13 @@ pTerm = do
   return ("", Left t)
 
 
+-- | Parser for types
+pType :: Parser (String, SystemF.T)
+pType = do
+  t <- typTerm
+  return ("", t)
+
+
 -- | Expression follows CFG form with bracketing convention.
 expr :: Parser SystemF.SFTerm
 expr = bracket term +++ termVar +++ termTyp
