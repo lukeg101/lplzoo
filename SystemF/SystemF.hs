@@ -24,7 +24,7 @@ import Control.Monad (guard)
 data T 
   = TVar String
   | TArr T T
-  | Pi String T
+  | TPi String T
   deriving Ord
 
 
@@ -46,7 +46,7 @@ typeEquality (TVar x, TVar y) (m1, m2) _
     in Maybe.fromMaybe (x == y) testEq
 typeEquality (TArr a1 b1, TArr a2 b2) c s 
   = typeEquality (a1, a2) c s && typeEquality (b1, b2) c s
-typeEquality (Pi x1 t1, Pi x2 t2) (m1, m2) s 
+typeEquality (TPi x1 t1, TPi x2 t2) (m1, m2) s 
   = let newm1 = M.insert (Right x1) s m1
         newm2 = M.insert (Right x2) s m2
     in typeEquality (t1, t2) (newm1, newm2) (s+1) 
@@ -61,7 +61,7 @@ instance Show T where
   show (TArr a b)  = 
     paren (isArr a || isPi a) (show a)
       ++ "->" ++ show b
-  show (Pi t1 t2)  = 
+  show (TPi t1 t2)  = 
       "\x3a0" ++ t1 ++ "." ++ show t2
 
 
@@ -80,8 +80,8 @@ isArr _          = False
 
 -- | Helper function returns true if the term is a Pi type.
 isPi :: T -> Bool
-isPi (Pi _ _) = True
-isPi _        = False
+isPi (TPi _ _) = True
+isPi _         = False
 
 
 -- | System F Term
@@ -198,11 +198,11 @@ typeof (App l1 l2) ctx
          (TArr t2 t3)-> do t1 <- typeof l2 ctx
                            guard (t1 == t2)
                            return t3
-         (Pi x t)    -> do let (Typ a) = l2
-                           return $ typeSub t (TVar x, a) -- type substitution under 2nd-order abstraction
+         (TPi x t)    -> do let (Typ a) = l2
+                            return $ typeSub t (TVar x, a) -- type substitution under 2nd-order abstraction
          _ -> Nothing
 typeof (PiAbs t l1) ctx
-  = Pi t <$> typeof l1 (M.insert t Nothing ctx)
+  = TPi t <$> typeof l1 (M.insert t Nothing ctx)
 
 
 -- | Top level typing function providing empty context
@@ -216,10 +216,10 @@ typeSub l@(TVar x) (TVar y,z)
   | otherwise = l
 typeSub (TArr t1 t2) c 
   = TArr (typeSub t1 c) (typeSub t2 c)
-typeSub l@(Pi x t) c@(TVar y, z)
+typeSub l@(TPi x t) c@(TVar y, z)
   | x == y         = l
-  | x `notfreeT` z = Pi x $ typeSub t c
-  | otherwise      = Pi n $ typeSub (renameT t (x, n)) c
+  | x `notfreeT` z = TPi x $ typeSub t c
+  | otherwise      = TPi n $ typeSub (renameT t (x, n)) c
   where n = foldr1 
               biggest 
               [newTLabel t, newTLabel z, newTLabel (TVar x)]
@@ -235,14 +235,14 @@ notfreeT x = not . S.member x . freeTVars
 freeTVars :: T -> Set VarName
 freeTVars (TVar c)     = S.singleton c
 freeTVars (TArr t1 t2) = S.union (freeTVars t1) (freeTVars t2) 
-freeTVars (Pi x t1)    = S.delete x (freeTVars t1)
+freeTVars (TPi x t1)   = S.delete x (freeTVars t1)
 
 
 -- | Set of variables in a type
 typeVars :: T -> Set VarName
 typeVars (TVar x)     = S.singleton x
 typeVars (TArr t1 t2) = S.union (typeVars t1) (typeVars t2)
-typeVars (Pi x t)     = S.insert x $ typeVars t
+typeVars (TPi x t)    = S.insert x $ typeVars t
 
 
 -- | Type vars in a term
@@ -266,10 +266,10 @@ renameT (TVar a) (x,y)
   = if a == x 
       then TVar y 
       else TVar a
-renameT l@(Pi a t) c@(x,_) 
+renameT l@(TPi a t) c@(x,_) 
   = if a == x 
       then l 
-      else Pi a $ renameT t c
+      else TPi a $ renameT t c
 renameT (TArr t1 t2) c 
   = TArr (renameT t1 c) (renameT t2 c)
 
@@ -430,7 +430,7 @@ ident = PiAbs "X" (Abs "x" (TVar "X") (Var "x"))
 
 
 -- | Nat type 
-natType = Pi "X" (TArr (TArr (TVar "X") (TVar "X")) (TArr (TVar "X") (TVar "X")))
+natType = TPi "X" (TArr (TArr (TVar "X") (TVar "X")) (TArr (TVar "X") (TVar "X")))
 
 -- | Church Numeral for zero
 zero = PiAbs "X" (Abs "x" (TArr (TVar "X") (TVar "X")) (Abs "y" (TVar "X") (Var "y")))

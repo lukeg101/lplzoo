@@ -194,7 +194,7 @@ typAbs = do
   x <- strT
   spaces (symb ".")
   t <- typTerm
-  return $ SystemF.Pi x t
+  return $ SystemF.TPi x t
 
 
 -- | Parser for arrows
