@@ -47,14 +47,20 @@ mkUnitTest result exp got = (result, exp, got)
 --Printing align.
 instance QC.Arbitrary SKTerm where
   arbitrary = QC.sized term
-    where term n | even n 
-                   = QC.oneof [term (n-1), term (n+1)]
-                 | odd n
+    where genApp n = do t1 <- term n
+                        t2 <- term n
+                        return $ App t1 t2
+          varname  = do s <- QC.listOf1 (QC.choose ('a', 'z')) 
+                        if s `elem` P.keywords
+                          then varname
+                          else return $ Var s
+          term n | n == 0
                    = QC.oneof [return S, 
                                return K, 
                                return I, 
-                               Var <$> QC.listOf1 (QC.choose ('a', 'z'))]
-                 | otherwise = term (abs n) -- not needed!
+                               varname]
+                 | n > 0 = genApp (n - 1)
+                 | otherwise = term (abs n)
   shrink (Var _)     = []
   shrink S           = []
   shrink K           = []
@@ -86,8 +92,8 @@ runTests = let {-tests    = all (\(a,_,_)->a) ppunittests-}
                            _             -> False
            in do {-M.unless tests (do {putStrLn "unit tests failed!"; exitFailure})-}
                  -- todo add unit tests
-                 r1 <- QC.quickCheckResult (QC.withMaxSuccess 20 propShow)
-                 r2 <- QC.quickCheckResult (QC.withMaxSuccess 20 propParse)
+                 r1 <- QC.quickCheckWithResult QC.stdArgs (QC.withMaxSuccess 20 propShow)
+                 r2 <- QC.quickCheckWithResult QC.stdArgs (QC.withMaxSuccess 20 propParse)
                  M.when (any failed [r1, r2]) exitFailure
 
 -- | Main function to run the tests
