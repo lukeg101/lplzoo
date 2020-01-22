@@ -92,8 +92,8 @@ runTests = let {-tests    = all (\(a,_,_)->a) ppunittests-}
                            _             -> False
            in do {-M.unless tests (do {putStrLn "unit tests failed!"; exitFailure})-}
                  -- todo add unit tests
-                 r1 <- QC.quickCheckWithResult QC.stdArgs (QC.withMaxSuccess 20 propShow)
-                 r2 <- QC.quickCheckWithResult QC.stdArgs (QC.withMaxSuccess 20 propParse)
+                 r1 <- QC.quickCheckResult (QC.withMaxSuccess 20 propShow)
+                 r2 <- QC.quickCheckResult (QC.withMaxSuccess 20 propParse)
                  M.when (any failed [r1, r2]) exitFailure
 
 -- | Main function to run the tests
