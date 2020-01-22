@@ -47,13 +47,14 @@ mkUnitTest result exp got = (result, exp, got)
 --Printing align.
 instance QC.Arbitrary SKTerm where
   arbitrary = QC.sized term
-    where term n | n `mod` 10 == 0
-                   = Var <$> QC.listOf1 (QC.choose ('a', 'z'))
-                 | even n 
+    where term n | even n 
                    = QC.oneof [term (n-1), term (n+1)]
                  | odd n
-                   = QC.oneof [return S, return K, return I]
-                 | otherwise = term (abs n)
+                   = QC.oneof [return S, 
+                               return K, 
+                               return I, 
+                               Var <$> QC.listOf1 (QC.choose ('a', 'z'))]
+                 | otherwise = term (abs n) -- not needed!
   shrink (Var _)     = []
   shrink S           = []
   shrink K           = []
