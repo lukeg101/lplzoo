@@ -132,11 +132,15 @@ apply :: Parser a -> String -> [(a,String)]
 apply = parse
 
 
+-- | set of reserved words for STLC
+keywords :: [String]
+keywords = ["let", "=", "O", ":"] 
+
 -- | 1 or more chars
 str :: Parser String
 str = do 
   s <- many1 $ sat C.isLower
-  if s `elem` ["let", "=", "O", ":"] 
+  if s `elem` keywords
     then zerop 
     else return s
 
