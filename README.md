@@ -44,22 +44,32 @@ Submit a PR if there's something you want to add or fix! Bearing in mind a few t
 
 ## Building
 
-Each language in the zoo can be built using cabal nix-style build systems, or just using ghc in each directory. You can build a language from this directory using e.g:
+First make sure your cabal is up to date:
 ```
-cabal new-build ulc
+cabal update
+```
+
+Each language in the zoo can be built using cabal, or just using ghc in each directory. You can build a language from this directory using e.g:
+```
+cabal build ulc
 ```
 and run it using:
 ```
-cabal new-run ulc
+cabal run ulc
 ```
 and you will see something like:
 ```
-⇒  cabal new-run ulc
+⇒  cabal run ulc
 Up to date
 Welcome to the Untyped λ-calculus REPL
 Type some terms or press Enter to leave.
 >
 ```
+You can build all of the languages with:
+```
+cabal build
+```
+
 Alternatively you can build each language with vanilla GHC. First by navigating into a language directory, you can do e.g:
 ```
 ⇒ cd ulc
@@ -75,7 +85,7 @@ Type some terms or press Enter to leave.
 
 The languages in the zoo are tested using unit tests in the form of example terms, QuickCheck to test parsing of randomly generated terms. This is a work in progress but for the testsuites that exist you can use cabal to run the tests:
 ```
-⇒ cabal new-test test-ulc
+⇒ cabal test test-ulc
 ... Build bits ...
 Test suite test-ulc: RUNNING...
 +++ OK, passed 20 tests.
@@ -95,4 +105,18 @@ Alternatively you can use vanilla GHC to test each langauge (you'll need a local
 ```
 
 See the Cabal file for the testsuites.
+
+## Documentation
+
+We use haddock to generate developer documentation for a particular language use:
+```
+⇒  cabal haddock stlc
+... build things ...
+Haddock coverage:
+... checks all functions are covered ...
+Documentation created:
+... location where dev docs are stored ...
+```
+You can then open the `index.html` file in a browser to see the documentation
+
 

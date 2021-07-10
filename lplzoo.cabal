@@ -24,11 +24,12 @@ source-repository head
 executable ulc
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7,
+                       exceptions >= 0.10.4,
                        directory >=1.3 && <1.4
   hs-source-dirs:      ULC
   other-modules:       Parser,
@@ -39,11 +40,11 @@ executable ulc
 executable ski
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      SKI
   other-modules:       Parser,
@@ -54,11 +55,11 @@ executable ski
 executable stlc
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      STLC
   other-modules:       Parser,
@@ -69,11 +70,11 @@ executable stlc
 executable systemt
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      SystemT
   other-modules:       Parser,
@@ -84,11 +85,11 @@ executable systemt
 executable pcf
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      PCF
   other-modules:       Parser,
@@ -99,11 +100,11 @@ executable pcf
 executable systemf
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      SystemF
   other-modules:       Parser,
@@ -114,11 +115,11 @@ executable systemf
 executable sol
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      SOL
   other-modules:       Parser,
@@ -129,11 +130,11 @@ executable sol
 executable cata
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      Cata
   other-modules:       Parser,
@@ -144,11 +145,11 @@ executable cata
 executable ana
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      Ana
   other-modules:       Parser,
@@ -159,11 +160,11 @@ executable ana
 executable sub
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      Sub
   other-modules:       Parser,
@@ -174,11 +175,11 @@ executable sub
 executable omega
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      Omega
   other-modules:       Parser,
@@ -189,11 +190,11 @@ executable omega
 executable fomega
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      FOmega
   other-modules:       Parser,
@@ -204,11 +205,11 @@ executable fomega
 executable lf
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      LF
   other-modules:       Parser,
@@ -219,11 +220,11 @@ executable lf
 executable c
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4
   hs-source-dirs:      C
   other-modules:       Parser,
@@ -238,11 +239,11 @@ test-suite test-ulc
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
   hs-source-dirs:      ULC
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4,
                        QuickCheck
   other-modules:       Parser,
@@ -255,11 +256,11 @@ test-suite test-ski
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
   hs-source-dirs:      SKI
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4,
                        QuickCheck
   other-modules:       Parser,
@@ -272,11 +273,11 @@ test-suite test-stlc
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
   hs-source-dirs:      STLC
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4,
                        QuickCheck
   other-modules:       Parser,
@@ -289,11 +290,11 @@ test-suite test-systemt
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
   hs-source-dirs:      SystemT
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4,
                        QuickCheck
   other-modules:       Parser,
@@ -306,11 +307,11 @@ test-suite test-pcf
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
   hs-source-dirs:      PCF
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4,
                        QuickCheck
   other-modules:       Parser,
@@ -323,11 +324,11 @@ test-suite test-systemf
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
   hs-source-dirs:      SystemF
-  build-depends:       base >=4.11 && <4.12, 
+  build-depends:       base >=4.11, 
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
-                       haskeline >=0.7 && <0.8, 
+                       haskeline >=0.7, 
                        directory >=1.3 && <1.4,
                        QuickCheck
   other-modules:       Parser,

@@ -24,6 +24,7 @@ import qualified Data.Map as M
 
 import Control.Monad.Trans
 import Control.Monad.Trans.State.Strict
+import Control.Monad.Catch
 import System.Console.Haskeline
 import System.Directory
 
@@ -56,7 +57,7 @@ settings = Settings contextCompletion Nothing True
 
 -- | Marks an InputT action as interruptible, so that pressing Ctrl+C will terminate
 -- the action, returning a default value, instead of terminating the program.
-interruptible :: MonadException m => a -> InputT m a -> InputT m a
+interruptible :: (MonadIO m, MonadMask m) => a -> InputT m a -> InputT m a
 interruptible d x = handle (\Interrupt -> outputStrLn "interrupted" >> pure d) (withInterrupt x)
 
 
