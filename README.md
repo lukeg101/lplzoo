@@ -119,4 +119,16 @@ Documentation created:
 ```
 You can then open the `index.html` file in a browser to see the documentation
 
+## Code Quality
+
+We do the following to keep code quality up:
+1. Document every function using Haddock - see [Documentation](Documentation)
+2. Lint all implementations using hlint:
+```
+⇒  cabal install hlint
+... install things ...
+⇒  hlint ULC/
+```
+3. Ensure testing is kept up to date - see [Testing](Testing)
+
 
