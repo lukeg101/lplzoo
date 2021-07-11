@@ -55,7 +55,7 @@ make build LANGUAGE=ULC
 ```
 and run it using:
 ```
-make run LANGUAGE=ulc
+make run LANGUAGE=ULC
 ```
 and you will see something like:
 ```
