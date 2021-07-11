@@ -108,9 +108,9 @@ See the Cabal file for the testsuites.
 
 ## Documentation
 
-We use haddock to generate developer documentation for a particular language use:
+We use haddock to generate developer documentation:
 ```
-⇒  cabal haddock stlc
+⇒  make docs
 ... build things ...
 Haddock coverage:
 ... checks all functions are covered ...
@@ -118,6 +118,8 @@ Documentation created:
 ... location where dev docs are stored ...
 ```
 You can then open the `index.html` file in a browser to see the documentation
+
+Note: when you build a single language with `make build LANGUAGE=<lang>` it will generate docs for that language only.
 
 ## Code Quality
 
@@ -127,6 +129,7 @@ We do the following to keep code quality up:
 ```
 ⇒  make quality-check
 ```
-3. Ensure testing is kept up to date - see [Testing](Testing)
+
+Note: when you build a single language with `make build LANGUAGE=<lang>` it will lint source code for that language only.
 
 
