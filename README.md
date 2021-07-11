@@ -39,7 +39,7 @@ Submit a PR if there's something you want to add or fix! Bearing in mind a few t
 1. Compile your code with `-W`, This catches any warnings. There shouldn't be any warnings 
 2. Use [hlint](http://hackage.haskell.org/package/hlint), to handle code linting and suggestions. Like wall, there should be no suggesstions for file `Foo.hs` when running `hlint Foo.hs`.
 3. Ensure code has 100% [Haddock](https://www.haskell.org/haddock/) coverage. This helps to document things if ever we want to.
-4. All of this can be run automatically using Cabal (see below). Make sure to run these locally before you commit.
+4. All of this can be run automatically (see below). Make sure to run these locally before you commit.
 5. Keep in mind the motivations above, this code is not meant to be advanced Haskell, but rather simple (for demonstration) so try not to use advanced technologies if you can.
 
 ## Building
@@ -51,11 +51,11 @@ make check-deps
 
 Each language in the zoo can be built using cabal, or just using ghc in each directory. You can build a language from this directory using e.g:
 ```
-make build LANGUAGE=ULC
+⇒  make build LANGUAGE=ULC
 ```
 and run it using:
 ```
-make run LANGUAGE=ULC
+⇒  make run LANGUAGE=ULC
 ```
 and you will see something like:
 ```
@@ -67,7 +67,7 @@ Type some terms or press Enter to leave.
 ```
 You can build all of the languages with:
 ```
-make build-all
+⇒  make build-all
 ```
 
 Alternatively you can build each language with vanilla GHC. First by navigating into a language directory, you can do e.g:
@@ -95,7 +95,6 @@ Test suite test-ulc: PASS
 Test suite logged to:
 ... Log dir ...
 ```
-To run the tests for ulc (See the cabal file for the names of each testsuite). You can run all the testsuites at once with `cabal new-test`.
 
 Alternatively you can use vanilla GHC to test each langauge (you'll need a local version of QuickCheck), using:
 ```
@@ -126,9 +125,7 @@ We do the following to keep code quality up:
 1. Document every function using Haddock - see [Documentation](Documentation)
 2. Lint all implementations using hlint:
 ```
-⇒  cabal install hlint
-... install things ...
-⇒  hlint ULC/
+⇒  make quality-check
 ```
 3. Ensure testing is kept up to date - see [Testing](Testing)
 
