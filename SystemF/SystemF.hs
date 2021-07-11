@@ -403,18 +403,16 @@ tSubUnder l@(Var _) _    = l
 tSubUnder (Typ t) c      = Typ $ typeSub t c
 tSubUnder (Abs x t l2) c = Abs x (typeSub t c) $ tSubUnder l2 c
 tSubUnder (App l1 l2) c  = App (tSubUnder l1 c) (tSubUnder l2 c)
-tSubUnder l@(PiAbs x t) c@(TVar y, _) 
-  | x /= y = PiAbs x (tSubUnder t c)  
+tSubUnder l@(PiAbs x t) c@(TVar y, _)
+  | x /= y = PiAbs x (tSubUnder t c)
   | otherwise = l
 tSubUnder l _ = l
 
 
--- | Multi-step reduction relation 
+-- | Multi-step reduction relation
 -- NOT GUARANTEED TO TERMINATE if it doesn't type check
 reduce :: SFTerm -> SFTerm
-reduce t = case reduce1 t of 
-  Just t' -> reduce t'
-  Nothing -> t
+reduce t = maybe t reduce (reduce1 t)
 
 
 -- | Multi-step reduction relation that accumulates all reduction steps

@@ -15,7 +15,6 @@ module Parser where
 import qualified PCF
 
 -- Tool Imports.
-import qualified Control.Applicative as A (Applicative(..))
 import qualified Control.Monad       as M (liftM, ap)
 import qualified Data.Char           as C
 
@@ -168,8 +167,7 @@ typTerm :: Parser PCF.T
 typTerm = (do
   x <- typExpr
   spaces (symb "->")
-  y <- typTerm
-  return $ PCF.TArr x y) +++ typExpr
+  PCF.TArr x <$> typTerm) +++ typExpr
 
 
 -- | type vars are "Nat" packaged up 

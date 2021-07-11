@@ -1,8 +1,7 @@
 module Parser where
 
 import Omega
-import Control.Applicative (Applicative(..))
-import Control.Monad       (liftM, ap, guard)
+import Control.Monad       (liftM, ap)
 import Data.Char
 
 {-
@@ -30,7 +29,7 @@ parse (Parser p) = p
 
 -- takes a string and splits on the first char or fails
 item :: Parser Char
-item = Parser (\cs -> case cs of
+item = Parser (\x -> case x of
   "" -> []
   (c:cs) -> [(c,cs)])
 
@@ -39,10 +38,10 @@ item = Parser (\cs -> case cs of
 (+++) :: Parser a -> Parser a -> Parser a
 p +++ q = Parser (\cs -> case parse p cs ++ parse q cs of
   [] -> []
-  (x:xs) -> [x])
+  (x:_) -> [x])
 
 -- failure parser
-zerop = Parser (\cs -> [])
+zerop = Parser (const [])
 
 -- parses an element and returns if they satisfy a predicate
 sat :: (Char -> Bool) -> Parser Char
@@ -95,21 +94,21 @@ keywords = ["let", "lett", "=", ".", ":", "::", "Nat", "z", "s"]
 
 -- 1 or more chars
 str :: Parser String
-str = do 
+str = do
   s <- many1 $ sat isLower
-  if elem s keywords then zerop else return s
+  if s `elem` keywords then zerop else return s
 
 -- 1 or more chars
 strT :: Parser String
-strT = do 
+strT = do
   s <- many1 $ sat (\x -> isUpper x && isAlpha x)
-  if elem s keywords then zerop else return s
+  if s `elem` keywords then zerop else return s
 
--- left recursion 
+-- left recursion
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 p `chainl1` op = do {a <- p; rest a}
   where
-    rest a = (do 
+    rest a = (do
       f <- op
       b <- p
       rest (f a b)) +++ return a
@@ -129,45 +128,43 @@ kindVar = do
 
 -- arrow kinds are kinds surrounded by arrows
 kindArr = do
-  x <- spaces $ kindExpr 
+  x <- spaces kindExpr
   symb "=>"
-  y <- spaces $ kindTerm 
+  y <- spaces kindTerm
   return $ KArr x y
 
 -- top level CFG for kinds
 kindTerm = kindArr +++ kindExpr
 
 -- second level CFG for kinds
-kindExpr = (bracket kindTerm) +++ kindVar
+kindExpr = bracket kindTerm +++ kindVar
 
 -- abstraction allows escaped backslash or lambda
-typeLam = do 
+typeLam = do
   spaces $ identifier lambdas
-  x <- strT 
+  x <- strT
   spaces (symb "::")
   t <- kindTerm
   spaces (symb ".")
-  e <- spaces $ typeTerm
+  e <- spaces typeTerm
   return $ TAbs x t e
 
 -- arrow type parser
 typeArr = do
-  x <- spaces $ typeApp
+  x <- spaces typeApp
   symb "->"
-  y <- spaces $ type2
+  y <- spaces type2
   return $ TArr x y
 
 -- app has zero or more spaces
 typeApp = chainl1 type4 $ do
   space1
-  return $ TApp
+  return TApp
 
--- type vars are Strings 
-typeVar = do
-  x <- strT
-  return $ TVar x
+-- type vars are Strings
+typeVar = do TVar <$> strT
 
--- type vars are "o" packaged up 
+-- type vars are "o" packaged up
 typeNat = do
   symb "Nat"
   return TNat
@@ -178,16 +175,14 @@ typeTerm = type2 +++ typeLam
 type2 = typeArr +++ typeApp
 
 -- bottom level of cfg for types
-type4 = (bracket typeTerm) 
-  +++ typeNat 
+type4 = bracket typeTerm
+  +++ typeNat
   +++ typeVar
 
 -- parser for term variables
-termVar = do
-  x <- str
-  return $ Var x
+termVar = do Var <$> str
 
-zero = do 
+zero = do
   char 'z'
   return Zero
 
@@ -197,9 +192,9 @@ succ = do
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\', 'λ']
-lam = do 
+lam = do
   spaces $ identifier lambdas
-  x <- str 
+  x <- str
   spaces (symb ":")
   t <- typeTerm
   spaces (symb ".")
@@ -209,7 +204,7 @@ lam = do
 -- app has zero or more spaces
 app = chainl1 expr $ do
   space1
-  return $ App 
+  return App
 
 -- parser for let expressions
 pLet = do
@@ -218,7 +213,7 @@ pLet = do
   space1
   v <- str
   spaces $ symb "="
-  t <- term 
+  t <- term
   return (v, Left t)
 
 -- parser for type let expressions
@@ -228,22 +223,21 @@ pTypeLet = do
   space1
   v <- strT
   spaces $ symb "="
-  t <- typeTerm 
+  t <- typeTerm
   return (v,Right t) --right signify type let
 
 pTerm = do
-  t <- spaces $ term 
+  t <- spaces term
   return ("", Left t)
 
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termVar
+expr = bracket term +++ termVar
   +++ zero +++ Parser.succ
 
 -- top level of CFG Grammar
 term = lam +++ app
 
 -- identifies key words
-identifier :: [Char] -> Parser Char 
+identifier :: [Char] -> Parser Char
 identifier xs = do
-  x <- sat (\x -> elem x xs)
-  return x
+  sat (`elem` xs)

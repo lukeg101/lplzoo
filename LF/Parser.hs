@@ -17,7 +17,6 @@ import qualified LF
 
 
 -- Tool Imports.
-import qualified Control.Applicative as A (Applicative(..))
 import qualified Control.Monad       as M (liftM, ap)
 import qualified Data.Char           as C
 
@@ -64,7 +63,7 @@ item = let split cs = case cs of
 p +++ q = let apply cs = case parse p cs ++ parse q cs of
                           []    -> []
                           (x:_) -> [x]
-          in Parser apply 
+          in Parser apply
 
 
 -- | Failure parser.
@@ -73,10 +72,10 @@ zerop = Parser (const [])
 
 -- | Parses an element and returns if they satisfy a predicate.
 sat :: (Char -> Bool) -> Parser Char
-sat p = do 
+sat p = do
   c <- item
-  if p c 
-    then return c 
+  if p c
+    then return c
     else zerop
 
 
@@ -96,7 +95,7 @@ digit = sat (\x -> '0' <= x && x <= '9')
 
 
 -- | Parsers a natural number
-nat :: Parser Int 
+nat :: Parser Int
 nat = do n <- many1 digit
          let maybeInt = read n :: Int
          return maybeInt
@@ -126,7 +125,7 @@ space1 = many1 (sat C.isSpace)
 
 
 -- | Trims whitespace between an expression.
-spaces :: Parser a -> Parser a 
+spaces :: Parser a -> Parser a
 spaces p = do
   space
   x <- p
@@ -147,26 +146,26 @@ apply = parse
 -- | set of reserved words for LF
 keywords :: [String]
 keywords = ["let", "lett", "=", ".", ":", "Pi",
-  "Nat", "Vec", "(", ")", "\x3a0", "cons", "nil", "succ"] 
+  "Nat", "Vec", "(", ")", "\x3a0", "cons", "nil", "succ"]
 
 
 -- | 1 or more chars
 str :: Parser String
-str = do 
+str = do
   s <- many1 $ sat C.isLower
-  if s `elem` keywords 
-     then zerop 
+  if s `elem` keywords
+     then zerop
      else return s
 
 
 -- | 1 or more chars
 strT :: Parser String
-strT = do 
+strT = do
   s1  <- many1 $ sat C.isUpper
   s2 <- many  $ sat C.isAlpha
   let ss = s1 ++ s2
-  if ss `elem` keywords 
-     then zerop 
+  if ss `elem` keywords
+     then zerop
      else return ss
 
 
@@ -176,7 +175,7 @@ p `chainl1` op = let rest a = (do f <- op
                                   b <- p
                                   rest (f a b)) +++ return a
                  in do a <- p
-                       rest a 
+                       rest a
 
 
 -- | Parses away brackets as you'd expect.
@@ -201,7 +200,7 @@ typNat = symb "Nat" >> return LF.TNat
 -- | Parser for type-level terms
 typLevelTerm :: Parser LF.T
 typLevelTerm = LF.TTerm <$> expr
-                  
+
 
 -- | Type-level abstractions
 typPi :: Parser LF.T
@@ -211,8 +210,7 @@ typPi = do
   spaces (symb ":")
   ty1 <- typExpr
   spaces (symb ".")
-  ty2 <- typTerm
-  return $ LF.TPi x ty1 ty2
+  LF.TPi x ty1 <$> typTerm
 
 
 -- | Lam parser parses type abstractions
@@ -232,8 +230,7 @@ typArr :: Parser LF.T
 typArr = do
   x <- typExpr
   spaces (symb "->")
-  y <- typTerm
-  return $ LF.TPi "_" x y -- show inst. prints ->
+  LF.TPi "_" x <$> typTerm -- show inst. prints ->
 
 
 -- | Parser for Vector types
@@ -249,14 +246,14 @@ typApp = chainl1 typExpr $ do
 
 -- | Top level CFG for types
 typTerm :: Parser LF.T
-typTerm = typPi +++ typLam 
+typTerm = typPi +++ typLam
   +++ typArr +++ typApp
 
 
 -- | Final level of CFG for types
 typExpr :: Parser LF.T
 typExpr = typVar +++ typNat +++ typVec
-  +++ typLevelTerm +++ bracket typTerm 
+  +++ typLevelTerm +++ bracket typTerm
 
 -- | Parser for term variables
 termVar :: Parser LF.LFTerm
@@ -304,7 +301,7 @@ lam = do
 app :: Parser LF.LFTerm
 app = chainl1 expr $ do
   space1
-  return LF.App 
+  return LF.App
 
 
 -- | Parsed expressions are either terms or terms in lets
@@ -321,8 +318,8 @@ pLet = do
   space1
   v <- str
   spaces $ symb "="
-  t <- term 
-  return (v, PTerm t) 
+  t <- term
+  return (v, PTerm t)
 
 
 -- | Parser for type let expressions
@@ -333,30 +330,30 @@ pTypeLet = do
   space1
   v <- strT
   spaces $ symb "="
-  t <- typTerm 
+  t <- typTerm
   return (v, PType t)
 
 
 -- | Parser for regular terms.
 pTerm :: Parser (String, PExpr)
 pTerm = do
-  t <- term 
+  t <- term
   return ("", PTerm t)
 
 
 -- | Expression follows CFG form with bracketing convention.
 expr :: Parser LF.LFTerm
-expr = termNat +++ termNil 
+expr = termNat +++ termNil
   +++ termCons +++ termVar
   +++ termSucc +++ bracket term
 
 
 -- | Top level of CFG Grammar
 term :: Parser LF.LFTerm
-term = lam +++ app 
+term = lam +++ app
 
 
 -- | Identifies key words.
-identifier :: String -> Parser Char 
+identifier :: String -> Parser Char
 identifier xs = sat (`elem` xs)
 

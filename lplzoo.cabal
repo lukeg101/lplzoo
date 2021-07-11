@@ -21,7 +21,7 @@ source-repository head
 
 -- Executables, run these with cabal new-run foo
 
-executable ulc
+executable ULC
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -37,7 +37,7 @@ executable ulc
                        Repl
   default-language:    Haskell2010
 
-executable ski
+executable SKI
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -52,7 +52,7 @@ executable ski
                        Repl
   default-language:    Haskell2010
 
-executable stlc
+executable STLC
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -67,7 +67,7 @@ executable stlc
                        Repl
   default-language:    Haskell2010
 
-executable systemt
+executable SystemT
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -82,7 +82,7 @@ executable systemt
                        Repl
   default-language:    Haskell2010
 
-executable pcf
+executable PCF
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -97,7 +97,7 @@ executable pcf
                        Repl
   default-language:    Haskell2010
 
-executable systemf
+executable SystemF
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -112,7 +112,7 @@ executable systemf
                        Repl
   default-language:    Haskell2010
 
-executable sol
+executable SOL
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -127,7 +127,7 @@ executable sol
                        Repl
   default-language:    Haskell2010
 
-executable cata
+executable Cata
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -142,7 +142,7 @@ executable cata
                        Repl
   default-language:    Haskell2010
 
-executable ana
+executable Ana
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -157,7 +157,7 @@ executable ana
                        Repl
   default-language:    Haskell2010
 
-executable sub
+executable Sub
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -172,7 +172,7 @@ executable sub
                        Repl
   default-language:    Haskell2010
 
-executable omega
+executable Omega
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -187,7 +187,7 @@ executable omega
                        Repl
   default-language:    Haskell2010
 
-executable fomega
+executable FOmega
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -202,7 +202,7 @@ executable fomega
                        Repl
   default-language:    Haskell2010
 
-executable lf
+executable LF
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -217,7 +217,7 @@ executable lf
                        Repl
   default-language:    Haskell2010
 
-executable c
+executable C
   main-is:             Main.hs
   ghc-options:         -W -O2 -fwarn-tabs
   build-depends:       base >=4.11, 
@@ -234,7 +234,7 @@ executable c
 
 -- Testsuites, run these with cabal new-test foo
 
-test-suite test-ulc
+test-suite test-ULC
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
@@ -243,6 +243,7 @@ test-suite test-ulc
                        containers >=0.5 && <0.6, 
                        mtl >=2.2 && <2.3, 
                        transformers >=0.5 && <0.6, 
+                       exceptions >= 0.10.4,
                        haskeline >=0.7, 
                        directory >=1.3 && <1.4,
                        QuickCheck
@@ -251,7 +252,7 @@ test-suite test-ulc
                        Repl
   default-language:    Haskell2010
 
-test-suite test-ski
+test-suite test-SKI
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
@@ -268,7 +269,7 @@ test-suite test-ski
                        Repl
   default-language:    Haskell2010
 
-test-suite test-stlc
+test-suite test-STLC
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
@@ -285,7 +286,7 @@ test-suite test-stlc
                        Repl
   default-language:    Haskell2010
 
-test-suite test-systemt
+test-suite test-SystemT
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
@@ -302,7 +303,7 @@ test-suite test-systemt
                        Repl
   default-language:    Haskell2010
 
-test-suite test-pcf
+test-suite test-PCF
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 
@@ -319,7 +320,7 @@ test-suite test-pcf
                        Repl
   default-language:    Haskell2010
 
-test-suite test-systemf
+test-suite test-SystemF
   type:                exitcode-stdio-1.0
   main-is:             Tests.hs
   ghc-options:         -W -fwarn-tabs -main-is Tests.hs 

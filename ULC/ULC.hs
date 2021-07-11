@@ -222,9 +222,7 @@ reduce1 (App t1 t2)
 -- | Multi-step reduction relation.
 -- NOT GUARANTEED TO TERMINATE
 reduce :: Term -> Term
-reduce t = case reduce1 t of
-  Just t' -> reduce t'
-  Nothing -> t
+reduce t = maybe t reduce (reduce1 t)
 
 
 -- | Multi-step reduction relation that accumulates all reduction steps.

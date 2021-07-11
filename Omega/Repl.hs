@@ -22,23 +22,23 @@ repl env = do
   putStr ">   "
   hFlush stdout
   s <- getLine
-  if Prelude.null s 
+  if Prelude.null s
   then putStrLn "Goodbye."
   else do
-    if head s == '\'' 
+    if head s == '\''
     then case apply term (tail s) of
-      (x:xs) -> do
-        if (null $ snd x)
+      (x:_) -> do
+        if null $ snd x
         then case typeof' x' of
-          Just y -> mapM_ putStrLn . prependReductions x' $ reductions x'
+          Just _ -> mapM_ putStrLn . prependReductions x' $ reductions x'
           _ -> cannotType $ tail s
         else cannotParse s
           where x' = formatTerm (fst x) env
       _ -> cannotParse s
     else if head s == 't'
     then case apply term $ tail s of
-      (x:xs) -> do 
-        if (null $ snd x)
+      (x:_) -> do
+        if null $ snd x
         then case typeof' $ fst x of
           Just y -> print y
           _ -> cannotType $ tail s
@@ -47,12 +47,12 @@ repl env = do
     else case apply (pLet +++ pTypeLet +++ pTerm) s of
       [(("", Left t),"")] -> do      -- reducing a term
         case typeof' t' of
-          Just y -> putStrLn . prependTerm t' $ reduce t'
+          Just _ -> putStrLn . prependTerm t' $ reduce t'
           _ -> cannotType $ show t'
-          where t' = formatTerm t env 
+          where t' = formatTerm t env
       [((v,Left t),"")] -> do       -- let expression
         case typeof' t' of
-          Just y -> do 
+          Just _ -> do
             putStrLn $ "Saved term: " ++ show t'
             repl $ M.insert v (Left t') env
           _ -> cannotType s
@@ -67,30 +67,30 @@ repl env = do
 -- takes a term and context and substitutes env terms
 -- all free occurrences in the term
 formatTerm :: OTerm -> Environment -> OTerm
-formatTerm t1 env = foldl 
-  (\t (v,t2) -> case t2 of 
-    Left t2 ->  
-      if elem v (vars t) 
-      then substitute t (Var v, t2) 
+formatTerm t1 env = foldl
+  (\t (v,t2) -> case t2 of
+    Left t2 ->
+      if v `elem` vars t
+      then substitute t (Var v, t2)
       else t
-    Right t2 -> 
-      if elem v (typeVarsInTerm t)
+    Right t2 ->
+      if v `elem` typeVarsInTerm t
       then tSubUnder t (TVar v, t2)
       else t) t1 $ M.assocs env
 
 -- takes a type and context and substitutes env terms
 -- all free occurrences in the term
 formatType :: T -> Environment -> T
-formatType t1 env = foldl 
-  (\t (v,t2) -> case t2 of 
-    Right t2 -> if elem v (typeVars t1) 
-      then typeSub t (TVar v, t2) 
+formatType t1 env = foldl
+  (\t (v,t2) -> case t2 of
+    Right t2 -> if v `elem` typeVars t1
+      then typeSub t (TVar v, t2)
       else t
     _ -> t) t1 $ M.assocs env
 
 --function prepends ~> arrows or prints existing term if no reds occur
 prependReductions :: OTerm -> [OTerm] -> [String]
-prependReductions x xs = if null xs then ["=   "++show x] else 
+prependReductions x xs = if null xs then ["=   "++show x] else
   map (\x -> "~>  " ++ show x) xs
 
 --function prepends reduction ops for one multi-step reduction
@@ -101,4 +101,4 @@ cannotParse :: String -> IO ()
 cannotParse s = putStrLn $ (++) "Cannot Parse Term: " s
 
 cannotType :: String -> IO ()
-cannotType s = putStrLn $ (++) "Cannot Type Term: " $ s
+cannotType s = putStrLn $ (++) "Cannot Type Term: " s

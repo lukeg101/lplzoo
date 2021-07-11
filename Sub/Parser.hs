@@ -1,8 +1,7 @@
 module Parser where
 
 import Sub
-import Control.Applicative (Applicative(..))
-import Control.Monad       (liftM, ap, guard)
+import Control.Monad       (liftM, ap)
 import Data.Char
 import Data.List           (group, sort)
 
@@ -40,10 +39,10 @@ item = Parser (\cs -> case cs of
 (+++) :: Parser a -> Parser a -> Parser a
 p +++ q = Parser (\cs -> case parse p cs ++ parse q cs of
   [] -> []
-  (x:xs) -> [x])
+  (x:_) -> [x])
 
 -- failure parser
-zerop = Parser (\cs -> [])
+zerop = Parser (const [])
 
 -- parses an element and returns if they satisfy a predicate
 sat :: (Char -> Bool) -> Parser Char
@@ -76,7 +75,7 @@ space1 :: Parser String
 space1 = many1 (sat isSpace)
 
 -- trims whitespace between an expression
-spaces :: Parser a -> Parser a 
+spaces :: Parser a -> Parser a
 spaces p = do
   space
   x <- p
@@ -87,7 +86,7 @@ spaces p = do
 symb :: String -> Parser String
 symb = string
 
-keywords = ["let", "lett", "=", ".", ":", "()"] 
+keywords = ["let", "lett", "=", ".", ":", "()"]
 
 -- apply a parser to a string
 apply :: Parser a -> String -> [(a,String)]
@@ -95,21 +94,21 @@ apply p = parse (do {space; p})
 
 -- 1 or more chars
 str :: Parser String
-str = do 
+str = do
   s <- many1 $ sat isLower
-  if elem s keywords then zerop else return s
+  if s `elem` keywords then zerop else return s
 
 -- 1 or more chars
 strT :: Parser String
-strT = do 
-  s <- many1 $ sat (\x -> isUpper x && isAlpha x && not (elem x ['X','M']))
-  if elem s keywords then zerop else return s
+strT = do
+  s <- many1 $ sat (\x -> isUpper x && isAlpha x && notElem x ['X','M'])
+  if s `elem` keywords then zerop else return s
 
 -- left recursion 
 chainl1 :: Parser a -> Parser (a -> a -> a) -> Parser a
 p `chainl1` op = do {a <- p; rest a}
   where
-    rest a = (do 
+    rest a = (do
       f <- op
       b <- p
       rest (f a b)) +++ return a
@@ -124,19 +123,17 @@ bracket p = do
 
 -- type vars are uppercase alphabetical terms packaged up 
 typVar = do
-  x <- strT
-  return $ TVar x
+  TVar <$> strT
 
 typeArr = (do
   x <- typExpr
   spaces (symb "->")
-  y <- typTerm
-  return $ TArr x y) +++ typExpr
+  TArr x <$> typTerm) +++ typExpr
 
 -- units are simply 1
 typUnit = do
   spaces $ identifier ['1','⊤']
-  return $ TUnit
+  return TUnit
 
 -- record types are simply tuples of types with  ":"
 typRec = do
@@ -161,12 +158,11 @@ typRecField = do
 typTerm = typeArr
 
 -- second level of CFG for types
-typExpr = (bracket typTerm) +++ typVar +++ typUnit +++ typRec
+typExpr = bracket typTerm +++ typVar +++ typUnit +++ typRec
 
 -- parser for term variables
 termVar = do
-  x <- str
-  return $ Var x
+  Var <$> str
 
 -- unit terms are simply ()
 termUnit = do
@@ -175,7 +171,7 @@ termUnit = do
 
 -- abstraction allows escaped backslash or lambda
 lambdas = ['\x03bb','\\']
-lam = do 
+lam = do
   spaces $ identifier lambdas
   x <- str
   spaces (symb ":")
@@ -187,7 +183,7 @@ lam = do
 -- app has one or more spaces
 app = chainl1 expr $ do
   space1
-  return $ App 
+  return App
 
 -- parser for let expressions
 pLet = do
@@ -196,7 +192,7 @@ pLet = do
   space1
   v <- str
   spaces $ symb "="
-  t <- term 
+  t <- term
   return (v,Left t) --left signifies terms
 
 -- parser for type let expressions
@@ -206,11 +202,11 @@ pTypeLet = do
   space1
   v <- strT
   spaces $ symb "="
-  t <- typTerm 
+  t <- typTerm
   return (v,Right t) --right signify type let
 
 pTerm = do
-  t <- term 
+  t <- term
   return ("", Left t)
 
 -- records
@@ -218,7 +214,7 @@ termRec = do
   symb "{"
   x  <- termRecField
   xs <- many (do {symb ","; (x,t) <- termRecField; return (x,t)})
-  if uniqs (x:xs) 
+  if uniqs (x:xs)
   then do -- checks if each record is unique
     symb "}"
     return $ Rec $ x:xs
@@ -234,20 +230,18 @@ termRecField = do
 
 --projection
 termProj = do
-  r <- termRec +++ termVar 
+  r <- termRec +++ termVar
   symb "."
-  x <- str
-  return $ App r (Proj x)
+  App r . Proj <$> str
 
 -- expression follows CFG form with bracketing convention
-expr = (bracket term) +++ termProj +++ termRec 
+expr = bracket term +++ termProj +++ termRec
   +++ termVar +++ termUnit
 
 -- top level of CFG Grammar
 term = lam +++ app
 
 -- identifies key words
-identifier :: [Char] -> Parser Char 
+identifier :: [Char] -> Parser Char
 identifier xs = do
-  x <- sat (\x -> elem x xs)
-  return x
+  sat (`elem` xs)

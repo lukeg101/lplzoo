@@ -15,7 +15,7 @@ module C where
 -- Tool Imports.
 import qualified Data.Map      as M
 import qualified Data.Set      as S
-import qualified Data.Maybe    as Maybe 
+import qualified Data.Maybe    as Maybe
 import qualified Control.Monad as C
 
 
@@ -29,7 +29,7 @@ data S
 -- | Simple show instance for kinds
 instance Show S where
   show SStar = "*"
-  show SBox  = "\x25A1" 
+  show SBox  = "\x25A1"
 
 
 -- Since we adopt the Pure Type system approach, typing is squashed into terms
@@ -62,20 +62,20 @@ type VarName = String
 
 -- | Simple show instance for C
 instance Show CTerm where
-  show (Var x)      
+  show (Var x)
     = x
-  show (Abs x t1 l1) 
-    = "\x03bb" ++ x ++ ":" 
+  show (Abs x t1 l1)
+    = "\x03bb" ++ x ++ ":"
         ++ show t1
         ++ "." ++ show l1
-  show ty@(Pi t t1 t2)  
+  show ty@(Pi t t1 t2)
     | isArr ty
-      = paren (isApp t1 || isPi t1 || isAbs t1 || isArr t1) (show t1) 
+      = paren (isApp t1 || isPi t1 || isAbs t1 || isArr t1) (show t1)
           ++ "->" ++ show t2
-    | otherwise 
+    | otherwise
       = "\x3a0 " ++ t ++ ":" ++ show t1 ++ "." ++ show t2
-  show (App t1 t2)  
-    = paren (isAbs t1 || isPi t1) (show t1) 
+  show (App t1 t2)
+    = paren (isAbs t1 || isPi t1) (show t1)
         ++ ' ' : paren (isAbs t2 || isPi t2 || isApp t2) (show t2)
   show (Sort s)
     = show s
@@ -117,28 +117,28 @@ instance Eq CTerm where
 -- * if neither is bound, check literal equality 
 -- * if bound t1 XOR bound t2 == true then False 
 -- application recursively checks both the LHS and RHS.
-termEquality :: (CTerm, CTerm) 
-             -> (M.Map VarName Int, M.Map VarName Int) 
-             -> Int 
+termEquality :: (CTerm, CTerm)
+             -> (M.Map VarName Int, M.Map VarName Int)
+             -> Int
              -> Bool
-termEquality (Var x, Var y) (m1, m2) _ 
+termEquality (Var x, Var y) (m1, m2) _
   = let testEq = do a <- M.lookup x m1
                     b <- M.lookup y m2
                     return $ a == b
     in Maybe.fromMaybe (x == y) testEq
-termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s 
+termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s
   = let newm1 = M.insert x s m1
         newm2 = M.insert y s m2
-    in termEquality (t1, t2) (newm1, newm2) (s+1) 
+    in termEquality (t1, t2) (newm1, newm2) (s+1)
        && termEquality (l1, l2) (newm1, newm2) (s+1)
 termEquality (Pi "_" t1 l1, Pi "_" t2 l2) c s
   = termEquality (t1, t2) c s && termEquality (l1, l2) c s
-termEquality (Pi x t1 l1, Pi y t2 l2) (m1, m2) s 
+termEquality (Pi x t1 l1, Pi y t2 l2) (m1, m2) s
   = let newm1 = M.insert x s m1
         newm2 = M.insert y s m2
-    in termEquality (t1, t2) (newm1, newm2) (s+1) 
-       && termEquality (l1, l2) (newm1, newm2) (s+1) 
-termEquality (App a1 b1, App a2 b2) c s 
+    in termEquality (t1, t2) (newm1, newm2) (s+1)
+       && termEquality (l1, l2) (newm1, newm2) (s+1)
+termEquality (App a1 b1, App a2 b2) c s
   = termEquality (a1, a2) c s && termEquality (b1, b2) c s
 termEquality (Sort x, Sort y) _ _
   = x == y
@@ -156,9 +156,9 @@ type Context = M.Map String CTerm
 -- * Just T denotes successful type derivation 
 -- * Nothing denotes failure to type the term (not in C)
 typeof :: CTerm -> Context -> Maybe CTerm
-typeof (Sort SStar) _ 
+typeof (Sort SStar) _
   = return $ Sort SBox
-typeof (Var v) ctx 
+typeof (Var v) ctx
   = M.lookup v ctx
 typeof (Abs x ty1 l1) ctx
   = do typeof ty1 ctx
@@ -181,11 +181,11 @@ typeof' l = typeof l M.empty
 
 -- | Substitute one term into another
 substitute :: CTerm -> (CTerm, CTerm) -> CTerm
-substitute l1@(Var c1) (Var c2, l2) 
-  = if c1 == c2 
-      then l2 
-      else l1 
-substitute (App l1 l2) c 
+substitute l1@(Var c1) (Var c2, l2)
+  = if c1 == c2
+      then l2
+      else l1
+substitute (App l1 l2) c
   = App (substitute l1 c) (substitute l2 c)
 substitute (Abs y t l1) c@(Var x, l2)
   | y == x         = Abs y (substitute t c) l1 -- sub under the 'type'
@@ -213,7 +213,7 @@ free (Sort _)      = S.empty
 
 -- | Function determines if a variable is bound in a term.
 notfree :: VarName -> CTerm -> Bool
-notfree x = not . S.member x . free 
+notfree x = not . S.member x . free
 
 
 -- | Function returns a set of bound variables of a term.
@@ -252,12 +252,12 @@ vars (Sort _)        = S.empty
 
 -- | Function generates a fresh variable name for a term.
 newlabel :: CTerm -> VarName
-newlabel x = head . dropWhile (`elem` vars x) 
+newlabel x = head . dropWhile (`elem` vars x)
   $ iterate genVar $  S.foldr biggest "" $ vars x
 
 
 -- | Function generates fresh variable names from a given variable.
-genVar :: VarName -> VarName 
+genVar :: VarName -> VarName
 genVar []       = "a"
 genVar ('z':xs) = 'a':genVar xs
 genVar ( x :xs) = succ x:xs
@@ -265,9 +265,9 @@ genVar ( x :xs) = succ x:xs
 
 -- | Function is the length-observing maximum function 
 -- that falls back on lexicographic ordering
-biggest :: String -> String -> String 
-biggest xs ys = if length xs > length ys 
-                  then xs 
+biggest :: String -> String -> String
+biggest xs ys = if length xs > length ys
+                  then xs
                   else max xs ys
 
 
@@ -279,25 +279,25 @@ rename = substitute
 
 -- | One-step reduction relation on terms.
 -- Warning: may not terminate on untypable terms
-reduce1 :: CTerm -> Maybe CTerm 
+reduce1 :: CTerm -> Maybe CTerm
 reduce1 (Var _)  = Nothing
 reduce1 (Sort _) = Nothing
 reduce1 (Abs x t s)
-  = case reduce1 s of 
+  = case reduce1 s of
       Just s' -> Just $ Abs x t s'
       _       -> do t' <- reduce1 t
                     return $ Abs x t' s
 reduce1 (Pi x t s)
-  = case reduce1 s of 
+  = case reduce1 s of
       Just s' -> Just $ Pi x t s'
       _       -> do t' <- reduce1 t
                     return $ Pi x t' s
 reduce1 (App (Abs x _ l1) l2) --beta conversion
-  = Just $ substitute l1 (Var x, l2)  
+  = Just $ substitute l1 (Var x, l2)
 reduce1 (App (Pi x _ l1) l2) --beta conversion
-  = Just $ substitute l1 (Var x, l2)  
-reduce1 (App l1 l2) 
-  = case reduce1 l1 of 
+  = Just $ substitute l1 (Var x, l2)
+reduce1 (App l1 l2)
+  = case reduce1 l1 of
       Just l' -> Just $ App l' l2
       _       -> App l1 <$> reduce1 l2
 
@@ -305,9 +305,7 @@ reduce1 (App l1 l2)
 -- | Multi-step reduction relation.
 -- NOT GUARANTEED TO TERMINATE if typing fails
 reduce :: CTerm -> CTerm
-reduce t = case reduce1 t of 
-    Just t' -> reduce t'
-    Nothing -> t
+reduce t = maybe t reduce (reduce1 t)
 
 
 -- | Multi-step reduction relation that accumulates all reduction steps.

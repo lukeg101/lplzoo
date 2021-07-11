@@ -15,7 +15,7 @@ module LF where
 -- Tool Imports.
 import qualified Data.Map      as M
 import qualified Data.Set      as S
-import qualified Data.Maybe    as Maybe 
+import qualified Data.Maybe    as Maybe
 import qualified Control.Monad as C
 
 
@@ -29,8 +29,8 @@ data K
 -- | Simple show instance for kinds
 instance Show K where
   show KVar        = "*"
-  show (KPi v t k)  
-    = "\x3a0 " ++ v ++ ":" 
+  show (KPi v t k)
+    = "\x3a0 " ++ v ++ ":"
         ++ show t ++ "." ++ show k
 
 
@@ -41,7 +41,7 @@ iskpi _     = False
 
 
 -- |  Types for LF, of the form X, Pi x:T.T or T t where t is a term.
-data T 
+data T
   = TVar VarName
   | TNat
   | TVec
@@ -65,31 +65,31 @@ instance Eq T where
 -- * if neither is bound, check literal equality 
 -- * if bound t1 XOR bound t2 == true then False 
 -- application recursively checks both the LHS and RHS.
-typeEquality :: (T, T) 
-  -> (M.Map VarName Int, M.Map VarName Int) 
-  -> Int 
+typeEquality :: (T, T)
+  -> (M.Map VarName Int, M.Map VarName Int)
+  -> Int
   -> Bool
-typeEquality (TVar x, TVar y) (m1, m2) _ 
+typeEquality (TVar x, TVar y) (m1, m2) _
   = let testEq = do a <- M.lookup x m1
                     b <- M.lookup y m2
                     return $ a == b
     in Maybe.fromMaybe (x == y) testEq
 typeEquality (TNat, TNat) _ _
   = True
-typeEquality (TVec, TVec) _ _ 
+typeEquality (TVec, TVec) _ _
   = True
 typeEquality (TApp a1 a2, TApp b1 b2) c n
   = typeEquality (a1,b1) c n && typeEquality (a2, b2) c n
-typeEquality (TTerm t1, TTerm t2) _ _ 
+typeEquality (TTerm t1, TTerm t2) _ _
   = let typeTest t = Maybe.isJust (typeof' t)
     in typeTest t1 && typeTest t2
        && termEquality (reduce t1, reduce t2) (M.empty, M.empty) 0
-typeEquality (TPi x1 a1 a2, TPi x2 b1 b2) c@(m1, m2) s 
+typeEquality (TPi x1 a1 a2, TPi x2 b1 b2) c@(m1, m2) s
   = let newm1 = M.insert x1 s m1
         newm2 = M.insert x2 s m2
     in typeEquality (a1, b1) c s
        && typeEquality (a2, b2) (newm1, newm2) (s+1)
-typeEquality (TAbs x1 a1 a2, TAbs x2 b1 b2) c@(m1, m2) s 
+typeEquality (TAbs x1 a1 a2, TAbs x2 b1 b2) c@(m1, m2) s
   = let newm1 = M.insert x1 s m1
         newm2 = M.insert x2 s m2
     in typeEquality (a1, b1) c s
@@ -104,17 +104,17 @@ instance Show T where
   show (TVar x)        = x
   show TNat            = "Nat" -- added to make the calc useful
   show TVec            = "Vec"
-  show ty@(TPi t t1 t2)  
+  show ty@(TPi t t1 t2)
     | isArr ty
       = paren (isArr t1 || isTAbs t1) (show t1) ++ "->" ++ show t2
-    | otherwise 
+    | otherwise
       = "\x3a0 " ++ t ++ ":" ++ show t1 ++ "." ++ show t2
-  show (TAbs t t1 t2)  
+  show (TAbs t t1 t2)
     = "\x03bb" ++ t ++ ":" ++ show t1 ++ "." ++ show t2
   show (TApp ty1 t1)
     = paren (isPi ty1 || isTAbs ty1) (show ty1)
         ++ ' ' :show t1
-  show (TTerm t1)       
+  show (TTerm t1)
     = paren (isAbs t1 || isApp t1) (show t1)
   -- always on the RHS so we can put the test here 
 
@@ -165,7 +165,7 @@ type VarName = String
 
 -- | Simple show instance for LF/STLC
 instance Show LFTerm where
-  show (Var x)      
+  show (Var x)
     = x
   show (Nat n)
     = show n
@@ -175,11 +175,11 @@ instance Show LFTerm where
     = "nil"
   show Cons
     = "cons"
-  show (App t1 t2)  
-    = paren (isAbs t1) (show t1) 
+  show (App t1 t2)
+    = paren (isAbs t1) (show t1)
         ++ ' ' : paren (isAbs t2 || isApp t2) (show t2)
-  show (Abs x t1 l1) 
-    = "\x03bb" ++ x ++ ":" 
+  show (Abs x t1 l1)
+    = "\x03bb" ++ x ++ ":"
         ++ show t1
         ++ "." ++ show l1
 
@@ -208,24 +208,24 @@ instance Eq LFTerm where
 -- * if neither is bound, check literal equality 
 -- * if bound t1 XOR bound t2 == true then False 
 -- application recursively checks both the LHS and RHS.
-termEquality :: (LFTerm, LFTerm) 
-             -> (M.Map VarName Int, M.Map VarName Int) 
-             -> Int 
+termEquality :: (LFTerm, LFTerm)
+             -> (M.Map VarName Int, M.Map VarName Int)
+             -> Int
              -> Bool
 termEquality (Nat x, Nat y) _ _ = x == y
 termEquality (Succ, Succ) _ _   = True
 termEquality (Nil, Nil) _ _     = True
 termEquality (Cons, Cons) _ _   = True
-termEquality (Var x, Var y) (m1, m2) _ 
+termEquality (Var x, Var y) (m1, m2) _
   = let testEq = do a <- M.lookup x m1
                     b <- M.lookup y m2
                     return $ a == b
     in Maybe.fromMaybe (x == y) testEq
-termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s 
+termEquality (Abs x t1 l1, Abs y t2 l2) (m1, m2) s
   = let newm1 = M.insert x s m1
         newm2 = M.insert y s m2
-    in t1 == t2 && termEquality (l1, l2) (newm1, newm2) (s+1) 
-termEquality (App a1 b1, App a2 b2) c s 
+    in t1 == t2 && termEquality (l1, l2) (newm1, newm2) (s+1)
+termEquality (App a1 b1, App a2 b2) c s
   = termEquality (a1, a2) c s && termEquality (b1, b2) c s
 termEquality _ _ _ = False
 
@@ -245,7 +245,7 @@ typeof (Nat _) _
   = return TNat
 typeof Succ _
   = return $ TPi "_" TNat TNat
-typeof (Var v) ctx 
+typeof (Var v) ctx
   = do (Left t) <- M.lookup v ctx
        C.guard (kindof t ctx == Just KVar)
        return t
@@ -262,11 +262,11 @@ typeof (Abs x ty1 l1) ctx
 typeof (App Succ l2) ctx
   = do TNat <- typeof l2 ctx
        return TNat
-typeof (App l1 l2) ctx 
+typeof (App l1 l2) ctx
   = do t1 <- typeof l2 ctx
        case typeof l1 ctx of
-         Just (TPi x t2 t3) -> do C.guard $ t1 == t2 
-                                  return $ subTermInType t3 (Var x, l2)   
+         Just (TPi x t2 t3) -> do C.guard $ t1 == t2
+                                  return $ subTermInType t3 (Var x, l2)
          _                  -> Nothing
 
 
@@ -277,9 +277,9 @@ typeof' l = typeof l M.empty
 -- | Kinding derivation
 -- identical to typing but at the type level
 kindof :: T -> Context -> Maybe K
-kindof TNat _     
+kindof TNat _
   = Just KVar
-kindof (TVar v) ctx 
+kindof (TVar v) ctx
   = do (Left k) <- M.lookup v ctx
        kindof k ctx
 kindof TVec ctx
@@ -297,7 +297,7 @@ kindof (TApp ty1 ty2) ctx
                  _       -> return ty2
        C.guard (ty2' == ty3)
        kindof ty2' ctx
-       return $ subTypeInKind k1 (TVar x, ty2')   
+       return $ subTypeInKind k1 (TVar x, ty2')
 kindof (TTerm t1) ctx
   = do t <- typeof t1 ctx
        kindof t ctx
@@ -319,9 +319,9 @@ subTermInType l@(TPi x t1 t2) c@(Var y, _)
 subTermInType l@(TAbs x t1 t2) c@(Var y, _)
   | x /= y    = TAbs x (subTermInType t1 c) (subTermInType t2 c)
   | otherwise = l
-subTermInType (TApp ty1 t1) c 
+subTermInType (TApp ty1 t1) c
   = TApp (subTermInType ty1 c) (subTermInType t1 c)
-subTermInType (TTerm t1) c 
+subTermInType (TTerm t1) c
   = TTerm $ subTermInTerm t1 c
 subTermInType l _ = l
 
@@ -335,20 +335,20 @@ subTypeInTerm l@(Nat _) _ = l
 subTypeInTerm l@Succ    _ = l
 subTypeInTerm l@Nil     _ = l
 subTypeInTerm l@Cons    _ = l
-subTypeInTerm (Abs x t l2) c 
+subTypeInTerm (Abs x t l2) c
   = Abs x (subTypeInType t c) $ subTypeInTerm l2 c
-subTypeInTerm (App l1 l2) c  
+subTypeInTerm (App l1 l2) c
   = App (subTypeInTerm l1 c) (subTypeInTerm l2 c)
 
 
 -- | Term substitution in a term
 -- does capture avoiding substitution (Berendregt)
 subTermInTerm :: LFTerm -> (LFTerm, LFTerm) -> LFTerm
-subTermInTerm l1@(Var c1) (Var c2, l2) 
-  = if c1 == c2 
-      then l2 
-      else l1 
-subTermInTerm (App l1 l2) c 
+subTermInTerm l1@(Var c1) (Var c2, l2)
+  = if c1 == c2
+      then l2
+      else l1
+subTermInTerm (App l1 l2) c
   = App (subTermInTerm l1 c) (subTermInTerm l2 c)
 subTermInTerm (Abs y t l1) c@(Var x, l2)
   | y == x         = Abs y t l1
@@ -360,16 +360,16 @@ subTermInTerm s _  = s
 
 -- | Type substitution in a type
 subTypeInType :: T -> (T, T) -> T
-subTypeInType l@(TVar x) (TVar y, t) 
+subTypeInType l@(TVar x) (TVar y, t)
   | x == y             = t
   | otherwise          = l
 subTypeInType l@TNat _ = l
 subTypeInType l@TVec _ = l
-subTypeInType (TPi x t1 t2) c 
+subTypeInType (TPi x t1 t2) c
   = TPi x (subTypeInType t1 c) (subTypeInType t2 c)
-subTypeInType (TAbs x t1 t2) c 
+subTypeInType (TAbs x t1 t2) c
   = TAbs x (subTypeInType t1 c) (subTypeInType t2 c)
-subTypeInType (TApp t1 t2) c 
+subTypeInType (TApp t1 t2) c
   = TApp (subTypeInType t1 c) (subTypeInType t2 c)
 subTypeInType (TTerm t1) c
   = TTerm $ subTypeInTerm t1 c
@@ -431,7 +431,7 @@ sub l@(App l1 l2)  = S.insert l $ S.union (sub l1) (sub l2)
 
 -- | Function determines if a variable is bound in a term.
 notfree :: VarName -> LFTerm -> Bool
-notfree x = not . S.member x . free 
+notfree x = not . S.member x . free
 
 
 -- | Function returns the set of variables in a term.
@@ -469,12 +469,12 @@ typeVarsInTerm (App l1 l2)  = S.union (typeVarsInTerm l1) (typeVarsInTerm l2)
 
 -- | Function generates a fresh variable name for a term.
 newlabel :: LFTerm -> VarName
-newlabel x = head . dropWhile (`elem` vars x) 
+newlabel x = head . dropWhile (`elem` vars x)
   $ iterate genVar $  S.foldr biggest "" $ vars x
 
 
 -- | Function generates fresh variable names from a given variable.
-genVar :: VarName -> VarName 
+genVar :: VarName -> VarName
 genVar []       = "a"
 genVar ('z':xs) = 'a':genVar xs
 genVar ( x :xs) = succ x:xs
@@ -482,51 +482,51 @@ genVar ( x :xs) = succ x:xs
 
 -- | Function is the length-observing maximum function 
 -- that falls back on lexicographic ordering
-biggest :: String -> String -> String 
-biggest xs ys = if length xs > length ys 
-                  then xs 
+biggest :: String -> String -> String
+biggest xs ys = if length xs > length ys
+                  then xs
                   else max xs ys
 
 
 -- | Function renames a term.
 --rename t (x,y) renames free occurrences of x in t to y
 rename :: LFTerm -> (VarName, VarName) -> LFTerm
-rename (Var a) (x,y)        
-  = if a == x 
-      then Var y 
+rename (Var a) (x,y)
+  = if a == x
+      then Var y
       else Var a
-rename l@(Abs a t l1) (x,y) 
-  = if a == x 
-      then l 
+rename l@(Abs a t l1) (x,y)
+  = if a == x
+      then l
       else Abs a t $ rename l1 (x, y)
-rename (App l1 l2) (x,y)    
+rename (App l1 l2) (x,y)
   = App (rename l1 (x,y)) (rename l2 (x,y))
 rename l _ = l
 
 
 -- | One-step reduction relation on terms.
-reduce1 :: LFTerm -> Maybe LFTerm 
+reduce1 :: LFTerm -> Maybe LFTerm
 reduce1 (Nat _) = Nothing
 reduce1 Succ    = Nothing
 reduce1 (Var _) = Nothing
 reduce1 Nil     = Nothing
 reduce1 Cons    = Nothing
 reduce1 (Abs x t s)
-  = case reduce1 s of 
+  = case reduce1 s of
       Just s' -> Just $ Abs x t s'
       _       -> case reduce1T t of
                    Just t' -> Just $ Abs x t' s
                    _       -> Nothing
 reduce1 (App (Abs x _ l1) l2) --beta conversion
-  = Just $ subTermInTerm l1 (Var x, l2)  
-reduce1 (App Succ n) 
+  = Just $ subTermInTerm l1 (Var x, l2)
+reduce1 (App Succ n)
   = case reduce1 n of
     Just n' -> Just $ App Succ n'
-    _       -> case n of 
+    _       -> case n of
       (Nat x) -> Just (Nat (x+1))
       _       -> Nothing
-reduce1 (App l1 l2) 
-  = case reduce1 l1 of 
+reduce1 (App l1 l2)
+  = case reduce1 l1 of
       Just l' -> Just $ App l' l2
       _       -> App l1 <$> reduce1 l2
 
@@ -538,17 +538,17 @@ reduce1T TNat      = Nothing
 reduce1T (TVar _)  = Nothing
 reduce1T TVec      = Nothing
 reduce1T (TTerm t) = TTerm <$> reduce1 t
-reduce1T (TPi x t1 t2) 
+reduce1T (TPi x t1 t2)
   = case reduce1T t1 of
       Just t1' -> Just $ TPi x t1' t2
       _        -> TPi x t1 <$> reduce1T t2
 reduce1T (TApp (TAbs x _ l1) l2) --beta conversion
-  = Just $ subTypeInType l1 (TVar x, l2)  
-reduce1T (TAbs x t1 t2) 
+  = Just $ subTypeInType l1 (TVar x, l2)
+reduce1T (TAbs x t1 t2)
   = case reduce1T t1 of
       Just t1' -> Just $ TAbs x t1' t2
       _        -> TAbs x t1 <$> reduce1T t2
-reduce1T (TApp t1 t2) 
+reduce1T (TApp t1 t2)
   = case reduce1T t1 of
       Just t1' -> Just $ TApp t1' t2
       _        -> TApp t1 <$> reduce1T t2
@@ -557,17 +557,13 @@ reduce1T (TApp t1 t2)
 -- | Multi-step type reduction relation.
 -- NOT GUARANTEED TO TERMINATE if typing/kinding fails
 reduceT :: T -> T
-reduceT t = case reduce1T t of 
-    Just t' -> reduceT t'
-    Nothing -> t
+reduceT t = maybe t reduceT (reduce1T t)
 
 
 -- | Multi-step reduction relation.
 -- NOT GUARANTEED TO TERMINATE if typing fails
 reduce :: LFTerm -> LFTerm
-reduce t = case reduce1 t of 
-    Just t' -> reduce t'
-    Nothing -> t
+reduce t = maybe t reduce (reduce1 t)
 
 
 -- | Multi-step reduction relation that accumulates all reduction steps.

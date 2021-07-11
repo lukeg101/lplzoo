@@ -17,7 +17,6 @@ import qualified SOL as S
 
 
 -- Tool Imports.
-import qualified Control.Applicative as A (Applicative(..))
 import qualified Control.Monad       as M (liftM, ap)
 import qualified Data.Char           as C
 import qualified Data.List           as L
@@ -256,8 +255,7 @@ typAbs = do
   spaces $ identifier typeLambdas
   x <- strT
   spaces (symb ".")
-  t <- typTerm
-  return $ S.TForall x t
+  S.TForall x <$> typTerm
 
 
 -- | Parser for arrow types are "(X -> Y)" packaged up
@@ -265,8 +263,7 @@ typeArr :: Parser S.T
 typeArr = do
   x <- typExpr
   spaces (symb "->")
-  y <- typTerm
-  return $ S.TArr x y
+  S.TArr x <$> typTerm
 
 
 -- | Record types are simply tuples of types with  ":"
@@ -291,7 +288,7 @@ typRecField = do
   return (x, t)
 
 
--- | exists keywords 
+-- | exists keywords
 exists :: String
 exists = ['\x2203', 'E']
 
@@ -302,13 +299,12 @@ typExists = do
   identifier exists
   v <- strT
   spaces $ symb "."
-  ty <- typTerm
-  return $ S.TExists v ty
-  
+  S.TExists v <$> typTerm
+
 
 -- | Top level CFG for types are "(X -> Y)" packaged up
 typTerm :: Parser S.T
-typTerm = typAbs +++ typExists 
+typTerm = typAbs +++ typExists
     +++ typeArr +++ typExpr
 
 
@@ -354,11 +350,10 @@ termFalse = do spaces $ symb "false"
 termIf :: Parser S.SOLTerm
 termIf = do spaces $ symb "if"
             t1 <- expr
-            spaces $ symb "then" 
+            spaces $ symb "then"
             t2 <- expr
             spaces $ symb "else"
-            t3 <- expr
-            return $ S.App (S.App (S.App S.If t1) t2) t3
+            S.App (S.App (S.App S.If t1) t2) <$> expr
 
 
 -- | Parser for records
@@ -386,10 +381,9 @@ termRecField = do
 -- | Parser for record projection
 termProj :: Parser S.SOLTerm
 termProj = do
-  r <- termRec +++ termVar 
+  r <- termRec +++ termVar
   symb "."
-  x <- str
-  return $ S.App r (S.Proj x)
+  S.App r . S.Proj <$> str
 
 
 -- | Parser for sums
@@ -439,8 +433,8 @@ termPrj1 = string "fst"
 
 -- | Parser for snd projection
 termPrj2 :: Parser S.SOLTerm
-termPrj2 = string "snd" 
-  +++ string "π2" >> return S.Prj2  
+termPrj2 = string "snd"
+  +++ string "π2" >> return S.Prj2
 
 
 -- | Parser for term-level [TYPES]
@@ -453,30 +447,27 @@ termPack :: Parser S.SOLTerm
 termPack
   = let pair = do ty <- spaces typTerm
                   symb ","
-                  t <- spaces term 
+                  t <- spaces term
                   return (t,ty)
     in do spaces $ symb "pack"
           (t1,ty1) <- angbracket pair
           spaces $ symb "as"
-          ty2 <- typTerm
-          return $ S.Pack ty1 t1 ty2
+          S.Pack ty1 t1 <$> typTerm
 
 -- | Parser for unpack statements
 termUnpack :: Parser S.SOLTerm
 termUnpack
   = let pair = do ty <- spaces strT
                   symb ","
-                  t <- spaces str 
+                  t <- spaces str
                   return (t,ty)
     in do spaces $ symb "unpack"
           (ty1,t1) <- angbracket pair
           spaces $ symb "="
           t2 <- term
           spaces $ symb "in"
-          t3 <- term
-          return $ S.Unpack ty1 t1 t2 t3
+          S.Unpack ty1 t1 t2 <$> term
 
-  
 
 -- | Abstraction allows escaped backslash or lambda
 lambdas :: String

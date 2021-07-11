@@ -17,7 +17,6 @@ import qualified C
 
 
 -- Tool Imports.
-import qualified Control.Applicative as A (Applicative(..))
 import qualified Control.Monad       as M (liftM, ap)
 import qualified Data.Char           as C
 
@@ -64,7 +63,7 @@ item = let split cs = case cs of
 p +++ q = let apply cs = case parse p cs ++ parse q cs of
                           []    -> []
                           (x:_) -> [x]
-          in Parser apply 
+          in Parser apply
 
 
 -- | Failure parser.
@@ -73,10 +72,10 @@ zerop = Parser (const [])
 
 -- | Parses an element and returns if they satisfy a predicate.
 sat :: (Char -> Bool) -> Parser Char
-sat p = do 
+sat p = do
   c <- item
-  if p c 
-    then return c 
+  if p c
+    then return c
     else zerop
 
 
@@ -114,7 +113,7 @@ space1 = many1 (sat C.isSpace)
 
 
 -- | Trims whitespace between an expression.
-spaces :: Parser a -> Parser a 
+spaces :: Parser a -> Parser a
 spaces p = do
   space
   x <- p
@@ -136,15 +135,15 @@ apply = parse
 keywords :: [String]
 keywords = ["let", "=", ".", ":", "Pi",
   "(", ")", "\x3a0", "\x03bb", "\x25A1", "*"
-  , "assume", "_"] 
+  , "assume", "_"]
 
 
 -- | 1 or more chars
 str :: Parser String
-str = do 
+str = do
   s <- many1 $ sat C.isAlphaNum
-  if s `elem` keywords 
-     then zerop 
+  if s `elem` keywords
+     then zerop
      else return s
 
 
@@ -154,7 +153,7 @@ p `chainl1` op = let rest a = (do f <- op
                                   b <- p
                                   rest (f a b)) +++ return a
                  in do a <- p
-                       rest a 
+                       rest a
 
 
 -- | Parses away brackets as you'd expect.
@@ -202,8 +201,7 @@ pi = do
   spaces (symb ":")
   ty1 <- term
   spaces (symb ".")
-  ty2 <- term
-  return $ C.Pi x ty1 ty2
+  C.Pi x ty1 <$> term
 
 
 -- | arrow types are non-dependent pi types
@@ -211,19 +209,18 @@ termArr :: Parser C.CTerm
 termArr = do
   x <- expr
   spaces (symb "->")
-  y <- term
-  return $ C.Pi "_" x y -- show inst. prints ->
+  C.Pi "_" x <$> term -- show inst. prints ->
 
 
 -- | App parses application terms, with one or more spaces in between terms.
 app :: Parser C.CTerm
 app = chainl1 expr $ do
   space1
-  return C.App 
+  return C.App
 
 
 -- | Parsed expressions are either terms or terms in lets
-data PExpr 
+data PExpr
   = PTerm C.CTerm
   | PAssume C.CTerm
 
@@ -236,8 +233,8 @@ pLet = do
   space1
   v <- str
   spaces $ symb "="
-  t <- term 
-  return (v, PTerm t) 
+  t <- term
+  return (v, PTerm t)
 
 
 -- | Parser for adding things into the context
@@ -248,14 +245,14 @@ pAssume = do
   space1
   v <- str
   spaces $ symb ":"
-  t <- term 
-  return (v, PAssume t) 
+  t <- term
+  return (v, PAssume t)
 
 
 -- | Parser for regular terms.
 pTerm :: Parser (String, PExpr)
 pTerm = do
-  t <- spaces term 
+  t <- spaces term
   return ("", PTerm t)
 
 
@@ -267,11 +264,11 @@ expr = termVar +++ star
 
 -- | Top level of CFG Grammar
 term :: Parser C.CTerm
-term = lam +++ Parser.pi 
-  +++ termArr +++ app 
+term = lam +++ Parser.pi
+  +++ termArr +++ app
 
 
 -- | Identifies key words.
-identifier :: String -> Parser Char 
+identifier :: String -> Parser Char
 identifier xs = sat (`elem` xs)
 

@@ -3,7 +3,7 @@ Module      : SOL
 Description : Deep-embedding of SOL in Haskell.
 Copyright   : (c) Luke Geeson, 2019
 License     : GPL-3
-Maintainer  : mail@lukegeeson.com 
+Maintainer  : mail@lukegeeson.com
 Stability   : stable
 Portability : POSIX
 
@@ -20,11 +20,11 @@ import qualified Data.List     as L
 
 
 -- | SOL Types, both term and type variables are Strings
--- The forall type take types a type variable and type T. 
+-- The forall type take types a type variable and type T.
 -- existentials take a type and type var
 -- products and (disjoint) unions are what you'd expect
 -- Record types are added too to make the module/ADT types useful
-data T 
+data T
   = TVar VarName
   | TArr T T
   | TNat
@@ -100,8 +100,8 @@ instance Show T where
     ++ " \x00D7 " ++ paren (isArr b) (show b)
   show (TSum a b) = paren (isTProd a || isArr a) (show a)
     ++ " + " ++ paren (isTProd b || isArr b) (show b)
-  show (TRec xs) = wparen . concat $ 
-    L.intersperse ", " $ map (\(v,t)->v ++ ":" ++ show t) xs
+  show (TRec xs) = wparen
+    (L.intercalate ", " (map (\(v,t)->v ++ ":" ++ show t) xs))
 
 
 
@@ -257,13 +257,13 @@ instance Show SOLTerm where
   show (Forall t l1) 
     = "\x39b" ++ t ++ "." ++ show l1
   show (Pack t1 t t2)
-    = let pair = wparen . concat $ L.intersperse ", " [show t1, show t]
+    = let pair = wparen (L.intercalate ", " [show t1, show t])
       in "pack " ++ pair ++ " as " ++ show t2
-  show (Unpack t1 t t2 t3) 
-    = let pair = wparen . concat $ L.intersperse ", " [show t1, show t]
-      in  "unpack " ++ pair ++ " = " ++ show t2 ++ " in " ++ show t3 
-  show (Rec xs) = wparen . concat $ 
-    L.intersperse ", " $ map (\(v,t)->v ++ "=" ++ show t) xs
+  show (Unpack t1 t t2 t3)
+    = let pair = wparen (L.intercalate ", " [show t1, show t])
+      in  "unpack " ++ pair ++ " = " ++ show t2 ++ " in " ++ show t3
+  show (Rec xs) = wparen
+    (L.intercalate ", " (map (\(v,t)->v ++ "=" ++ show t) xs))
   show (Inl _)      = "inl" --above should handle this case
   show (Inr _)      = "inr" --above should handle this case
   show Prj1         = "\x03C0" ++ "1" --above should handle this case
@@ -725,16 +725,14 @@ tSubUnder (Pack ty1 t ty2) c@(TVar _, _)
   = Pack (typeSub ty1 c) (tSubUnder t c) (typeSub ty2 c)
 tSubUnder (Unpack x y t1 t2) c
   = Unpack x y (tSubUnder t1 c) (tSubUnder t2 c)
-tSubUnder l _ = l 
+tSubUnder l _ = l
 
 
 
 -- | Multi-step reduction relation.
 -- NOT GUARANTEED TO TERMINATE if it doesn't type check
 reduce :: SOLTerm -> SOLTerm
-reduce t = case reduce1 t of 
-  Just t' -> reduce t'
-  Nothing -> t
+reduce t = maybe t reduce (reduce1 t)
 
 
 -- | Multi-step reduction relation that accumulates all reduction steps.

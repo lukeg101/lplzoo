@@ -46,16 +46,16 @@ Submit a PR if there's something you want to add or fix! Bearing in mind a few t
 
 First make sure your cabal is up to date:
 ```
-cabal update
+make check-deps
 ```
 
 Each language in the zoo can be built using cabal, or just using ghc in each directory. You can build a language from this directory using e.g:
 ```
-cabal build ulc
+make build LANGUAGE=ULC
 ```
 and run it using:
 ```
-cabal run ulc
+make run LANGUAGE=ulc
 ```
 and you will see something like:
 ```
@@ -67,7 +67,7 @@ Type some terms or press Enter to leave.
 ```
 You can build all of the languages with:
 ```
-cabal build
+make build-all
 ```
 
 Alternatively you can build each language with vanilla GHC. First by navigating into a language directory, you can do e.g:
@@ -85,12 +85,13 @@ Type some terms or press Enter to leave.
 
 The languages in the zoo are tested using unit tests in the form of example terms, QuickCheck to test parsing of randomly generated terms. This is a work in progress but for the testsuites that exist you can use cabal to run the tests:
 ```
-⇒ cabal test test-ulc
+⇒ make test
 ... Build bits ...
 Test suite test-ulc: RUNNING...
 +++ OK, passed 20 tests.
 +++ OK, passed 20 tests.
 Test suite test-ulc: PASS
+... Rest of Tests ...
 Test suite logged to:
 ... Log dir ...
 ```

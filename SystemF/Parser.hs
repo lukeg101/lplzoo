@@ -15,7 +15,6 @@ module Parser where
 import qualified SystemF
 
 -- Tool Imports.
-import qualified Control.Applicative as A (Applicative(..))
 import qualified Control.Monad       as M (liftM, ap)
 import qualified Data.Char           as C 
 
@@ -193,8 +192,7 @@ typAbs = do
   spaces $ identifier ['\x3a0', 'P']
   x <- strT
   spaces (symb ".")
-  t <- typTerm
-  return $ SystemF.TPi x t
+  SystemF.TPi x <$> typTerm
 
 
 -- | Parser for arrows
@@ -202,8 +200,7 @@ typeArr :: Parser SystemF.T
 typeArr = (do
   x <- typExpr
   spaces (symb "->")
-  y <- typTerm
-  return $ SystemF.TArr x y) +++ typExpr
+  SystemF.TArr x <$> typTerm) +++ typExpr
 
 
 -- | Top level of CFG Grammar for types
@@ -251,8 +248,7 @@ lam2 = do
   spaces $ identifier ['\x39b','L']
   x <- strT
   spaces (symb ".")
-  e <- term
-  return $ SystemF.PiAbs x e
+  SystemF.PiAbs x <$> term
 
 
 -- | App parses application terms, with one or more spaces in between terms.

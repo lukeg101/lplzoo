@@ -15,7 +15,6 @@ module Parser where
 import qualified SystemT
 
 -- Tool Imports.
-import qualified Control.Applicative as A (Applicative(..))
 import qualified Control.Monad       as M (liftM, ap)
 import qualified Data.Char           as C
 
@@ -152,7 +151,7 @@ p `chainl1` op = let rest a = (do f <- op
                                   b <- p
                                   rest (f a b)) +++ return a
                  in do a <- p
-                       rest a 
+                       rest a
 
 
 -- | Parses away brackets as you'd expect.
@@ -169,11 +168,10 @@ typTerm :: Parser SystemT.T
 typTerm = (do
   x <- typExpr
   spaces (symb "->")
-  y <- typTerm
-  return $ SystemT.TArr x y) +++ typExpr
+  SystemT.TArr x <$> typTerm) +++ typExpr
 
 
--- | type vars are "Nat" packaged up 
+-- | type vars are "Nat" packaged up
 typVar :: Parser SystemT.T
 typVar = do
   symb "Nat"

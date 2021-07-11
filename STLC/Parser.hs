@@ -15,7 +15,6 @@ module Parser where
 import qualified STLC
 
 -- Tool Imports.
-import qualified Control.Applicative (Applicative(..))
 import qualified Control.Monad as M  (liftM, ap)
 import qualified Data.Char     as C
 
@@ -168,8 +167,7 @@ typTerm :: Parser STLC.T
 typTerm = (do
   x <- typExpr
   spaces (symb "->")
-  y <- typTerm
-  return $ STLC.TArr x y) +++ typExpr
+  STLC.TArr x <$> typTerm) +++ typExpr
 
 
 -- | Type vars are "O" packaged up 

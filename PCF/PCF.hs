@@ -362,9 +362,7 @@ reduce1 (App l1 l2)
 
 -- | Multi-step reduction relation.
 reduce :: PCFTerm -> PCFTerm
-reduce t = case reduce1 t of 
-  Just t' -> reduce t'
-  Nothing -> t
+reduce t = maybe t reduce (reduce1 t)
 
 
 -- | Multi-step reduction relation that accumulates all reduction steps.
